@@ -1,6 +1,6 @@
 # g3
 
-Rust crate for plane based projective geometric algebra of 3 dimensions aka the Clifford Algebra with signature $\mathbb{R}^{*}_{3,0,1}$.
+Rust crate for plane based projective geometric algebra for 3 dimensions aka the Clifford Algebra with signature ![formula](https://render.githubusercontent.com/render/math?math=\mathbb{R}^{*}_{3,0,1}).
 
 WIP, more info to follow.
 
