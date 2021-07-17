@@ -1,0 +1,72 @@
+#![allow(unused_imports)]
+#[allow(unused_variables)]
+
+#[cfg(test)]
+mod tests {
+  use g3::{Plane,Line,Point,plane,line};
+
+  #[test] fn line_constructor() {
+    let l = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+    assert_eq!(l,line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0));
+  }
+  #[test] fn line_eq() {
+    let l1 = line(1.,2.,3.,4.,5.,6.);
+    let l2 = line(6.,5.,4.,3.,2.,1.);
+    assert_eq!(l1,l1);
+    assert_ne!(l1,l2)
+  }
+  #[test] fn line_getters() {
+    let l1 = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+  }
+  #[test] fn line_add() {
+    todo!()
+  }
+  #[test] fn line_add_assign() {
+    todo!()
+  }
+  #[test] fn line_sub() {
+    todo!()
+  }
+  #[test] fn line_sub_assign() {
+    todo!()
+  }
+  #[test] fn line_mul_scalar() {
+    todo!()
+  }
+  #[test] fn line_mul_assign_scalar() {
+    todo!()
+  }
+  #[test] fn line_div_scalar() {
+    todo!()
+  }
+  #[test] fn line_div_assign_scalar() {
+    todo!()
+  }
+  #[test] fn line_inner_product_plane() {
+    todo!();
+  }
+  #[test] fn line_inner_product_line() {
+    todo!();
+  }
+  #[test] fn line_inner_product_point() {
+    todo!();
+  }
+  #[test] fn line_geometric_product_plane() {
+    todo!();
+  }
+  #[test] fn line_geometric_product_line() {
+    todo!();
+  }
+  #[test] fn line_geometric_product_point() {
+    todo!();
+  }
+  #[test] fn line_meet_plane() {
+    todo!();
+  }
+  #[test] fn line_meet_line() {
+    todo!();
+  }
+  #[test] fn line_join_point() {
+    todo!();
+  }
+}
