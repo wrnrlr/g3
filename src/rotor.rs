@@ -1,8 +1,8 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg}; // Fn
+use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,Mask32};
-use crate::{Motor,Translator}; // Point,Line,Plane,Direction,
+use crate::{Motor,Translator,Point,Line,Plane,Direction};
 use crate::sqrt::rsqrt_nr1;
-// use crate::sandwich::{sw012,swmm};
+use crate::sandwich::{sw012,swmm};
 use crate::util::{f32x4_flip_signs,hi_dp_bc,dp_bc,shuffle_scalar,f32x4_xor};
 use crate::geometric::{gp11,gp12,gprt};
 
@@ -95,45 +95,45 @@ impl From<EulerAngels> for Rotor {
   }
 }
 
-// impl FnMut<(Plane,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane {self.call(args)} }
-// impl FnOnce<(Plane,)> for Rotor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
-// impl Fn<(Plane,)> for Rotor {
-//   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-//     Plane{p0: sw012::<false,false>(args.0.p0, self.p1, )}
-//   }
-// }
+impl FnMut<(Plane,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane {self.call(args)} }
+impl FnOnce<(Plane,)> for Rotor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
+impl Fn<(Plane,)> for Rotor {
+  extern "rust-call" fn call(&self, args: (Plane,))->Plane {
+    Plane{p0: sw012::<false,false>(args.0.p0, self.p1, )}
+  }
+}
 
 // TODO operator()(plane* in, plane* out, size_t count) const noexcept
 // TODO operator()(branch const& b) const noexcept
 
-// impl FnMut<(Line,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Line,))->Line {self.call(args)} }
-// impl FnOnce<(Line,)> for Rotor { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
-// impl Fn<(Line,)> for Rotor {
-//   extern "rust-call" fn call(&self, args: (Line,))->Line {
-//     let (p1,_) = swmm::<false,false,true>(args.0.p1,self.p1,None); // TODO is correct
-//     Line{p1, p2: f32x4::from_array([0.0,0.0,0.0,0.0])}
-//   }
-// }
+impl FnMut<(Line,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Line,))->Line {self.call(args)} }
+impl FnOnce<(Line,)> for Rotor { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
+impl Fn<(Line,)> for Rotor {
+  extern "rust-call" fn call(&self, args: (Line,))->Line {
+    let (p1,_) = swmm::<false,false,true>(args.0.p1,self.p1,None); // TODO is correct
+    Line{p1, p2: f32x4::from_array([0.0,0.0,0.0,0.0])}
+  }
+}
 
 // TODO operator()(line* in, line* out, size_t count) const noexcept
 
-// impl FnMut<(Point,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point {self.call(args)} }
-// impl FnOnce<(Point,)> for Rotor { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
-// impl Fn<(Point,)> for Rotor {
-//   extern "rust-call" fn call(&self, _args: (Point,))->Point {
-//     todo!() // The c++ impl is strange...
-//   }
-// }
+impl FnMut<(Point,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point {self.call(args)} }
+impl FnOnce<(Point,)> for Rotor { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
+impl Fn<(Point,)> for Rotor {
+  extern "rust-call" fn call(&self, _args: (Point,))->Point {
+    todo!() // The c++ impl is strange...
+  }
+}
 
 // TODO operator()(point* in, point* out, size_t count) const noexcept
 
-// impl FnMut<(Direction,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Direction,))->Direction {self.call(args)} }
-// impl FnOnce<(Direction,)> for Rotor { type Output = Direction; extern "rust-call" fn call_once(self, args: (Direction,))->Direction { self.call(args) }}
-// impl Fn<(Direction,)> for Rotor {
-//   extern "rust-call" fn call(&self, _args: (Direction,))->Direction {
-//     todo!() // The c++ impl is strange...
-//   }
-// }
+impl FnMut<(Direction,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Direction,))->Direction {self.call(args)} }
+impl FnOnce<(Direction,)> for Rotor { type Output = Direction; extern "rust-call" fn call_once(self, args: (Direction,))->Direction { self.call(args) }}
+impl Fn<(Direction,)> for Rotor {
+  extern "rust-call" fn call(&self, _args: (Direction,))->Direction {
+    todo!() // The c++ impl is strange...
+  }
+}
 
 // TODO operator()(direction* in, direction* out, size_t count) const noexcept
 

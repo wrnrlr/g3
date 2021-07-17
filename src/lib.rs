@@ -1,5 +1,5 @@
-// #![feature(unboxed_closures)]
-// #![feature(fn_traits)]
+#![feature(unboxed_closures)]
+#![feature(fn_traits)]
 
 mod dual;
 mod point;

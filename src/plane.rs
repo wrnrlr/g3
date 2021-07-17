@@ -1,9 +1,9 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}; // Fn
+use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
 use crate::{Dual,Point,Line,Motor};
 use crate::sqrt::{sqrt_nr1};
 use crate::util::{f32x4_flip_signs,hi_dp};
-// use crate::sandwich::{sw00,sw30};
+use crate::sandwich::{sw00,sw30};
 use crate::exterior::{ext00,ext02,ext03,extpb};
 use crate::geometric::{gp00,gp03};
 use crate::inner::{dot00,dot03,dotpl};
@@ -56,21 +56,21 @@ impl Plane {
   }
 }
 
-// impl FnMut<(Plane,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
-// impl FnOnce<(Plane,)> for Plane { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane {self.call(args)} }
-// impl Fn<(Plane,)> for Plane {
-//   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-//     Plane{p0:sw00(self.p0, args.0.p0)}
-//   }
-// }
+impl FnMut<(Plane,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
+impl FnOnce<(Plane,)> for Plane { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane {self.call(args)} }
+impl Fn<(Plane,)> for Plane {
+  extern "rust-call" fn call(&self, args: (Plane,))->Plane {
+    Plane{p0:sw00(self.p0, args.0.p0)}
+  }
+}
 
-// impl FnMut<(Point,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point {self.call(args)} }
-// impl FnOnce<(Point,)> for Plane { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
-// impl Fn<(Point,)> for Plane {
-//   extern "rust-call" fn call(&self, args: (Point,))->Point {
-//     Point{p3:sw30(self.p0, args.0.p3)}
-//   }
-// }
+impl FnMut<(Point,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point {self.call(args)} }
+impl FnOnce<(Point,)> for Plane { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
+impl Fn<(Point,)> for Plane {
+  extern "rust-call" fn call(&self, args: (Point,))->Point {
+    Point{p3:sw30(self.p0, args.0.p3)}
+  }
+}
 
 // TODO
 // impl Fn<Line> for Plane {

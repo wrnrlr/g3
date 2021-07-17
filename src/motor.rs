@@ -1,8 +1,8 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg};
+use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
-use crate::{Rotor,Translator}; // Point,Line,Plane,
+use crate::{Rotor,Translator,Point,Line,Plane};
 use crate::util::{f32x4_flip_signs};
-// use crate::sandwich::{sw012,sw312,swmm};
+use crate::sandwich::{sw012,sw312,swmm};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 // use crate::define_call_fn;
 
@@ -41,36 +41,36 @@ impl Motor {
   pub fn as_mat4x4(&self) { todo!(); }
 }
 
-// impl FnMut<(Plane,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
-// impl FnOnce<(Plane,)> for Motor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
-// impl Fn<(Plane,)> for Motor {
-//   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-//     Plane{p0:sw012::<false,true>(args.0.p0, self.p1)}
-//   }
-// }
+impl FnMut<(Plane,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
+impl FnOnce<(Plane,)> for Motor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
+impl Fn<(Plane,)> for Motor {
+  extern "rust-call" fn call(&self, args: (Plane,))->Plane {
+    Plane{p0:sw012::<false,true>(args.0.p0, self.p1)}
+  }
+}
 
 // TODO operator()(plane* in, plane* out, size_t count)
 
-// impl FnMut<(Line,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Line,))->Line { self.call(args) }}
-// impl FnOnce<(Line,)> for Motor { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
-// impl Fn<(Line,)> for Motor {
-//   extern "rust-call" fn call(&self, args: (Line,))->Self::Output {
-//     let (p1,p2) = swmm::<false,true,true>(args.0.p1, self.p1, Some(self.p2));
-//     Line{p1:p1,p2:p2}
-//   }
-// }
+impl FnMut<(Line,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Line,))->Line { self.call(args) }}
+impl FnOnce<(Line,)> for Motor { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
+impl Fn<(Line,)> for Motor {
+  extern "rust-call" fn call(&self, args: (Line,))->Self::Output {
+    let (p1,p2) = swmm::<false,true,true>(args.0.p1, self.p1, Some(self.p2));
+    Line{p1:p1,p2:p2}
+  }
+}
 
 // TODO operator()(line* in, line* out, size_t count)
 
-// impl FnMut<(Point,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point { self.call(args) }}
-// impl FnOnce<(Point,)> for Motor { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
-// // Conjugates a point p with this motor and returns the result.
-// impl Fn<(Point,)> for Motor {
-//   extern "rust-call" fn call(&self, args: (Point,))->Self::Output {
-//     let p3 = sw312::<false, true>(args.0.p3, self.p1, self.p2);
-//     Point{p3: p3}
-//   }
-// }
+impl FnMut<(Point,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point { self.call(args) }}
+impl FnOnce<(Point,)> for Motor { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
+// Conjugates a point p with this motor and returns the result.
+impl Fn<(Point,)> for Motor {
+  extern "rust-call" fn call(&self, args: (Point,))->Self::Output {
+    let p3 = sw312::<false, true>(args.0.p3, self.p1, self.p2);
+    Point{p3: p3}
+  }
+}
 
 // TODO operator()(point* in, point* out, size_t count)
 
