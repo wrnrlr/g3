@@ -13,29 +13,24 @@ pub fn rcp_nr1(_a:f32x4)->f32x4 {
 
 // Equivalent to _mm_dp_ps(a, b, 0b11100001);
 
-pub fn hi_dp(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
+pub fn hi_dp(a:f32x4,b:f32x4)->f32x4 {
+  let mut out = a * b;
+  let hi = shuffle_odd(out);
+  
+  let sum  = hi + out;
+  out = sum + shuffle_low(out);
+  mask32x4::from_array([true, false, false, false]).select(out, zeros)
 }
 
 pub fn hi_dp_bc(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
+  let mut out = a * b;
+  let hi = shuffle_odd(out);
+  
+  let sum  = hi + out;
+  out = sum + shuffle_low(out);
+  mask32x4::from_array([true, false, false, false]).select(out, zeros)
 }
 
-pub fn dot_product(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
-  // a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
-}
-
-/* 
-let res: f64 = x
-        .par_chunks(8)
-        .map(f64x8::from_slice_unaligned)
-        .zip(y.par_chunks(8).map(f64x8::from_slice_unaligned))
-        .map(|(a, b)| a * b)
-        .sum::<f64x8>()
-        .sum();
-*/
-// a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
 pub fn dp(a:f32x4,b:f32x4)->f32x4 {
   let mut out = a * b;
   let hi = shuffle_odd(out);
@@ -43,11 +38,24 @@ pub fn dp(a:f32x4,b:f32x4)->f32x4 {
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
   out = hi + out;
-  out = out + b2b3a2a3(hi,out);
-  out
+  out[0] += b2b3a2a3(hi,out)[0];
+  let zeros = f32x4::splat(0.0);
+  mask32x4::from_array([true, false, false, false]).select(out, zeros)
 }
 
 pub fn dp_bc(_a:f32x4,_b:f32x4)->f32x4 {
+  let mut out = a * b;
+  let hi = shuffle_odd(out);
+
+  // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
+  // = (a1 b1 + a2 b2, _, a3 b3, 0)
+  out = hi + out;
+  out[0] += b2b3a2a3(hi,out)[0];
+  shuffle_first(out);
+  out
+}
+
+pub fn dot_product(_a:f32x4,_b:f32x4)->f32x4 {
   todo!()
 }
 
@@ -58,6 +66,9 @@ pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
 pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
   mask.select(-x, x)
 }
+
+#[inline] pub fn shuffle_first(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
+#[inline] pub fn shuffle_low(a:f32x4)->f32x4 { a.shuffle::<{[0,0,1,1]}>(a) }
 
 #[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { a.shuffle::<{[6,7,2,3]}>(b) } // b2b3a2a3
 
@@ -86,3 +97,17 @@ pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
 #[inline] pub fn shuffle_dddd(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
 
 #[inline] pub fn shuffle_scalar(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
+
+
+// a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
+/* 
+let res: f64 = x
+        .par_chunks(8)
+        .map(f64x8::from_slice_unaligned)
+        .zip(y.par_chunks(8).map(f64x8::from_slice_unaligned))
+        .map(|(a, b)| a * b)
+        .sum::<f64x8>()
+        .sum();
+*/
+// a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
+
