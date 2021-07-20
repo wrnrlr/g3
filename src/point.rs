@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
 use core_simd::{f32x4,Mask32};
-use crate::{Dual,Plane,Line,Motor};
+use crate::{Dual,Plane,Line,Motor,Translator};
 use crate::util::{f32x4_flip_signs,rcp_nr1,shuffle_wwww};
 use crate::geometric::{gp03,gp33};
 use crate::inner::{dotptl,dot33};
@@ -99,10 +99,10 @@ impl Not for Point {
 
 // Geometric Product *
 impl Mul<Point> for Point {
-  type Output = Motor;
-  fn mul(self, other: Point) -> Motor {
-    let (p1,p2) = gp33(self.p3, other.p3);
-    Motor{p1,p2}
+  type Output = Translator;
+  fn mul(self, other: Point) -> Translator {
+    let p2 = gp33(self.p3, other.p3);
+    Translator{p2}
   }
 }
 impl Mul<Plane> for Point {
@@ -114,8 +114,8 @@ impl Mul<Plane> for Point {
 }
 // Inverse Geometric Product
 impl Div<Point> for Point {
-  type Output = Motor;
-  fn div(self, other: Point) -> Motor {
+  type Output = Translator;
+  fn div(self, other: Point) -> Translator {
     self * other.inverse()
   }
 }
