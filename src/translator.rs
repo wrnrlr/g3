@@ -1,8 +1,8 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg};
+use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
-use crate::{Motor,Rotor};
+use crate::{Plane,Line,Point,Motor,Rotor};
 use crate::util::{f32x4_flip_signs};
-// use crate::sandwich::{sw02,sw32,swl2};
+use crate::sandwich::{sw02,sw32,swl2};
 use crate::geometric::{gprt};
 
 pub struct Translator {
@@ -34,33 +34,33 @@ impl Translator {
   }
 }
 
-// impl FnMut<(Plane,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
-// impl FnOnce<(Plane,)> for Translator { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane {self.call(args)} }
-// // Conjugates a plane $p$ with this translator and returns the result t*p*!t TODO check manual if this is right
-// impl Fn<(Plane,)> for Translator {
-//   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-//     let tmp:f32x4 = self.p2 + f32x4::from_array([1.0,1.0,1.0,1.0]);
-//     Plane{p0:sw02(args.0.p0, tmp)}
-//   }
-// }
+impl FnMut<(Plane,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
+impl FnOnce<(Plane,)> for Translator { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane {self.call(args)} }
+// Conjugates a plane $p$ with this translator and returns the result t*p*!t TODO check manual if this is right
+impl Fn<(Plane,)> for Translator {
+  extern "rust-call" fn call(&self, args: (Plane,))->Plane {
+    let tmp:f32x4 = self.p2 + f32x4::from_array([1.0,1.0,1.0,1.0]);
+    Plane{p0:sw02(args.0.p0, tmp)}
+  }
+}
 
-// impl FnMut<(Line,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Line,))->Line { self.call(args) }}
-// impl FnOnce<(Line,)> for Translator { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line {self.call(args)} }
-// impl Fn<(Line,)> for Translator {
-//   extern "rust-call" fn call(&self, args: (Line,))->Line {
-//     let p1 = swl2(args.0.p1, args.0.p2, self.p2); // p2 ??
-//     let p2 = f32x4::from_array([0.0,0.0,0.0,0.0]);
-//     Line{p1:p1,p2:p2}
-//   }
-// }
+impl FnMut<(Line,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Line,))->Line { self.call(args) }}
+impl FnOnce<(Line,)> for Translator { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line {self.call(args)} }
+impl Fn<(Line,)> for Translator {
+  extern "rust-call" fn call(&self, args: (Line,))->Line {
+    let p1 = swl2(args.0.p1, args.0.p2, self.p2); // p2 ??
+    let p2 = f32x4::from_array([0.0,0.0,0.0,0.0]);
+    Line{p1:p1,p2:p2}
+  }
+}
 
-// impl FnMut<(Point,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point { self.call(args) }}
-// impl FnOnce<(Point,)> for Translator { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point {self.call(args)} }
-// impl Fn<(Point,)> for Translator {
-//   extern "rust-call" fn call(&self, args: (Point,))->Point {
-//     Point{p3:sw32(args.0.p3, self.p2)}
-//   }
-// }
+impl FnMut<(Point,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point { self.call(args) }}
+impl FnOnce<(Point,)> for Translator { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point {self.call(args)} }
+impl Fn<(Point,)> for Translator {
+  extern "rust-call" fn call(&self, args: (Point,))->Point {
+    Point{p3:sw32(args.0.p3, self.p2)}
+  }
+}
 
 impl Add<Translator> for Translator {
   type Output = Translator;
