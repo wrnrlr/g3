@@ -1,5 +1,8 @@
 use core_simd::{f32x4,mask32x4,Mask32};
-use crate::util::{b2b3a2a3, dp, f32x4_flip_signs, rcp_nr1, shuffle_wwww, shuffle_wwyy, shuffle_wyzx, shuffle_wzxy, shuffle_xwww, shuffle_xxyz, shuffle_xyzx, shuffle_xzxy, shuffle_ywww, shuffle_yxyz, shuffle_yyzx, shuffle_yzxy, shuffle_zwww, shuffle_zyzx, shuffle_zzxy};
+use crate::util::{b2b3a2a3, dp, f32x4_flip_signs, rcp_nr1, shuffle_wwww,
+  shuffle_wwyy, shuffle_wyzx, shuffle_wzxy, shuffle_xwww, shuffle_xxyz,
+  shuffle_xyzx, shuffle_xzxy, shuffle_ywww, shuffle_yxyz, shuffle_yyzx,
+  shuffle_yzxy, shuffle_zwww, shuffle_zyzx, shuffle_zzxy, add_ss};
 
 // plane * plane
 pub fn gp00(a:f32x4,b:f32x4)->(f32x4,f32x4) {
@@ -133,7 +136,3 @@ pub fn gpmm(_a:f32x4,_b:f32x4)->(f32x4,f32x4) {
   todo!()
 }
 
-#[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 {
-  let tmp = a + b;
-  tmp.shuffle::<{[0,5,6,7]}>(a) 
-}
