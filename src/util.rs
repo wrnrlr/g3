@@ -71,6 +71,11 @@ pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
   tmp.shuffle::<{[0,5,6,7]}>(a) 
 }
 
+#[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 {
+  let tmp = a * b;
+  tmp.shuffle::<{[0,5,6,7]}>(a) 
+}
+
 #[inline] pub fn shuffle_first(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
 #[inline] pub fn shuffle_low(a:f32x4)->f32x4 { a.shuffle::<{[0,0,1,1]}>(a) }
 
