@@ -145,7 +145,7 @@ impl BitOr<Point> for Point {
   type Output = f32;
   fn bitor(self, a:Point) -> f32 {
     let out = dot33(self.p3,a.p3);
-    out
+    out[0]
   }
 }
 
