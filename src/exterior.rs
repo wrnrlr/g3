@@ -15,11 +15,16 @@ pub fn ext00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   p2_out = p2_out - a * shuffle_wwww(b);
   // For both outputs above, we don't zero the lowest component because
   // we've arranged a cancelation TODO wdym???
-  return (p1_out,p2_out)
+  return (p1_out,p2_out);
 }
 
-pub fn ext02(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
+// p0 ^ p2 = p2 ^ p0
+pub fn ext02(a:f32x4, b:f32x4)->f32x4 {
+  // (a1 b2 - a2 b1) e021
+  // (a2 b3 - a3 b2) e032 +
+  // (a3 b1 - a1 b3) e013 +
+  let p3_out = a * shuffle_wyzx(b);
+  shuffle_wyzx(p3_out - shuffle_wyzx(a) * b)
 }
 
 // p0 ^ p3 = -p3 ^ p0
