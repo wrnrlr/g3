@@ -37,6 +37,14 @@ impl Motor {
   pub fn normalize(&self)->Motor { todo!(); }
   pub fn constrained(&self)->Motor { todo!(); }
 
+  // Takes the principal branch of the logarithm of the motor, returning a
+  // bivector. Exponentiation of that bivector without any changes produces
+  // this motor again. Scaling that bivector by $\frac{1}{n}$,
+  // re-exponentiating, and taking the result to the $n$th power will also
+  // produce this motor again. The logarithm presumes that the motor is
+  // normalized.
+  pub fn log()->Line { todo!(); }
+
   pub fn as_mat3x4(&self) { todo!(); }
   pub fn as_mat4x4(&self) { todo!(); }
 }
