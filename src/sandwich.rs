@@ -111,8 +111,19 @@ pub fn sw02(a:f32x4, b:f32x4)->f32x4 {
   a * tmp
 }
 
-pub fn sw32(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
+// Apply a translator to a point.
+// Assumes e0123 component of p2 is exactly 0
+// p2: (e0123, e01, e02, e03)
+// p3: (e123, e032, e013, e021)
+// b * a * ~b
+pub fn sw32(a:f32x4, b:f32x4)->f32x4 {
+  // a0 e123 +
+  // (a1 - 2 a0 b1) e032 +
+  // (a2 - 2 a0 b2) e013 +
+  // (a3 - 2 a0 b3) e021
+  let mut tmp = shuffle_wwww(a) * b;
+  tmp *= f32x4::from_array([0.0, -2.0, -2.0, -2.0]);
+  a + tmp
 }
 
 pub fn sw33(_a:f32x4,_b:f32x4)->f32x4 {
