@@ -126,10 +126,6 @@ pub fn sw32(a:f32x4, b:f32x4)->f32x4 {
   a + tmp
 }
 
-pub fn sw33(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
-}
-
 // Apply a translator to a line
 // a := p1 input
 // d := p2 input
