@@ -11,6 +11,10 @@ pub fn rcp_nr1(_a:f32x4)->f32x4 {
   todo!()
 }
 
+pub fn rcp_rc1(_a:f32x4)->f32x4 {
+  todo!()
+}
+
 // Equivalent to _mm_dp_ps(a, b, 0b11100001);
 
 pub fn hi_dp(a:f32x4, b:f32x4)->f32x4 {

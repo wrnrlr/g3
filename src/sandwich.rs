@@ -1,5 +1,5 @@
-use core_simd::{f32x4};
-use crate::util::{f32x4_xor,shuffle_wwww,shuffle_zzwy,shuffle_wwyz,shuffle_yyzz,shuffle_zwyz,shuffle_yzwy,shuffle_wyzw,shuffle_dddd,shuffle_zwyx,shuffle_yyzw};
+use core_simd::{f32x4,mask32x4};
+use crate::util::{add_ss, f32x4_flip_signs, f32x4_xor, hi_dp, rcp_rc1, shuffle_dddd, shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw, shuffle_yyzz, shuffle_yzwy, shuffle_zwyx, shuffle_zwyz, shuffle_zzwy};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -74,8 +74,41 @@ pub fn swmm<const N:bool,const F:bool,const P:bool>(_a:f32x4,_b:f32x4,_c:Option<
   todo!()
 }
 
-pub fn sw02(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
+// Apply a translator to a plane.
+// Assumes e0123 component of p2 is exactly 0
+// p0: (e0, e1, e2, e3)
+// p2: (e0123, e01, e02, e03)
+// b * a * ~b
+// The low component of p2 is expected to be the scalar component instead
+pub fn sw02(a:f32x4, b:f32x4)->f32x4 {
+  // (a0 b0^2 + 2a1 b0 b1 + 2a2 b0 b2 + 2a3 b0 b3) e0 +
+  // (a1 b0^2) e1 +
+  // (a2 b0^2) e2 +
+  // (a3 b0^2) e3
+  //
+  // Because the plane is projectively equivalent on multiplication by a
+  // scalar, we can divide the result through by b0^2
+  //
+  // (a0 + 2a1 b1 / b0 + 2a2 b2 / b0 + 2a3 b3 / b0) e0 +
+  // a1 e1 +
+  // a2 e2 +
+  // a3 e3
+  //
+  // The additive term clearly contains a dot product between the plane's
+  // normal and the translation axis, demonstrating that the plane
+  // "doesn't care" about translations along its span. More precisely, the
+  // plane translates by the projection of the translator on the plane's
+  // normal.
+
+  // a1*b1 + a2*b2 + a3*b3 stored in the low component of tmp
+  let mut tmp = hi_dp(a, b);
+  let mut inv_b = rcp_rc1(b);
+  // 2 / b0
+  inv_b = add_ss(inv_b, inv_b);
+  // p1_out = _mm_and_ps(p1_out, _mm_castsi128_ps(_mm_set_epi32(-1, -1, -1, 0)));
+  inv_b = mask32x4::from_array([true, false, false, false]).select(inv_b, f32x4::splat(0.0));
+  tmp = tmp * inv_b;
+  a * tmp
 }
 
 pub fn sw32(_a:f32x4,_b:f32x4)->f32x4 {
@@ -86,8 +119,23 @@ pub fn sw33(_a:f32x4,_b:f32x4)->f32x4 {
   todo!()
 }
 
-pub fn swl2(_a:f32x4,_b:f32x4,_c:f32x4)->f32x4 {
-  todo!()
+// Apply a translator to a line
+// a := p1 input
+// d := p2 input
+// c := p2 translator
+// out points to the start address of a line (p1, p2)
+pub fn swl2(a:f32x4, d:f32x4, c:f32x4)->(f32x4, f32x4) {
+  // a0 + a1 e23 + a2 e31 + a3 e12 +
+  //
+  // (2a0 c0 + d0) e0123 +
+  // (2(a2 c3 - a3 c2 - a1 c0) + d1) e01 +
+  // (2(a3 c1 - a1 c3 - a2 c0) + d2) e02 +
+  // (2(a1 c2 - a2 c1 - a3 c0) + d3) e03
+  let mut p2_out = shuffle_wyzx(a) * shuffle_wzxy(c);
+  // Add and subtract the same quantity in the low component to produce a cancellation
+  p2_out -= shuffle_wzxy(a) * shuffle_wyzx(c);
+  p2_out -= f32x4_flip_signs(a * shuffle_wwww(c), mask32x4::from_array([true, false, false, false]));
+  (a, p2_out + p2_out + d)
 }
 
 pub fn sw312<const N:bool,const F:bool>(_a:f32x4,_b:f32x4,_c:f32x4)->f32x4 { // todo count param

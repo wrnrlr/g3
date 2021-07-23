@@ -48,8 +48,7 @@ impl FnMut<(Line,)> for Translator { extern "rust-call" fn call_mut(&mut self, a
 impl FnOnce<(Line,)> for Translator { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line {self.call(args)} }
 impl Fn<(Line,)> for Translator {
   extern "rust-call" fn call(&self, args: (Line,))->Line {
-    let p1 = swl2(args.0.p1, args.0.p2, self.p2); // p2 ??
-    let p2 = f32x4::from_array([0.0,0.0,0.0,0.0]);
+    let (p1,p2) = swl2(args.0.p1, args.0.p2, self.p2); // TODO p1 is just a, isn't this unnecessary
     Line{p1:p1,p2:p2}
   }
 }
