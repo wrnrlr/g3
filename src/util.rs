@@ -5,12 +5,15 @@ pub fn refined_reciprocal(s:f32)->f32x4 {
   rcp_nr1(f32x4::splat(s))
 }
 
-pub fn rcp_nr1(_a:f32x4)->f32x4 {
-  todo!()
-}
-
-pub fn rcp_rc1(_a:f32x4)->f32x4 {
-  todo!()
+// Reciprocal with an additional single Newton-Raphson refinement
+pub fn rcp_nr1(a:f32x4)->f32x4 {
+  // f(x) = 1/x - a
+  // f'(x) = -1/x^2
+  // x_{n+1} = x_n - f(x)/f'(x)
+  //         = 2x_n - a x_n^2 = x_n (2 - a x_n)
+  let xn = f32x4::splat(1.0) / a; // TODO fast reciprocal?
+  let axn = a * xn;
+  xn * (f32x4::splat(1.0) - axn)
 }
 
 // a := p1

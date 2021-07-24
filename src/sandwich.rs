@@ -1,5 +1,5 @@
 use core_simd::{f32x4,mask32x4};
-use crate::util::{add_ss, f32x4_flip_signs, f32x4_xor, hi_dp, rcp_rc1, shuffle_dddd, shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw, shuffle_yyzz, shuffle_yzwy, shuffle_zwyx, shuffle_zwyz, shuffle_zzwy};
+use crate::util::{add_ss, f32x4_flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_dddd, shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw, shuffle_yyzz, shuffle_yzwy, shuffle_zwyx, shuffle_zwyz, shuffle_zzwy};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -102,7 +102,7 @@ pub fn sw02(a:f32x4, b:f32x4)->f32x4 {
 
   // a1*b1 + a2*b2 + a3*b3 stored in the low component of tmp
   let mut tmp = hi_dp(a, b);
-  let mut inv_b = rcp_rc1(b);
+  let mut inv_b = rcp_nr1(b);
   // 2 / b0
   inv_b = add_ss(inv_b, inv_b);
   // p1_out = _mm_and_ps(p1_out, _mm_castsi128_ps(_mm_set_epi32(-1, -1, -1, 0)));
