@@ -32,6 +32,16 @@ impl Translator {
   pub fn inverse(&self)->Translator {
     Translator{p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))}
   }
+
+  // Compute the logarithm of the translator, producing an ideal line axis.
+  // In practice, the logarithm of a translator is simply the ideal partition
+  // (without the scalar $1$).
+  // pub fn log(&self)->IdealLine { IdealLine{p2: self.p2} } TODO
+
+  // Compute the square root of the provided translator $t$.
+  pub fn sqrt(self)->Translator {
+    self * 0.5
+  }
 }
 
 impl FnMut<(Plane,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}

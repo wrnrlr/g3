@@ -1,7 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
 use crate::{Rotor,Translator,Point,Line,Plane};
-use crate::util::{f32x4_flip_signs};
+use crate::util::{f32x4_flip_signs,log};
 use crate::sandwich::{sw012,sw312,swmm};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 // use crate::define_call_fn;
@@ -43,7 +43,15 @@ impl Motor {
   // re-exponentiating, and taking the result to the $n$th power will also
   // produce this motor again. The logarithm presumes that the motor is
   // normalized.
-  pub fn log()->Line { todo!(); }
+  pub fn log(&self)->Line {
+    let (p1,p2) = log(self.p1,self.p2);
+    Line{p1,p2}
+  }
+
+  pub fn sqrt(self)->Motor {
+    let p1 = self.p1 * f32x4::splat(1.0);
+    Motor{p1:p1, p2:f32x4::splat(0.0)}.normalize() // TODO avoid extra copy of Motor 
+  }
 
   pub fn as_mat3x4(&self) { todo!(); }
   pub fn as_mat4x4(&self) { todo!(); }

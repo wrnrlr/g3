@@ -3,7 +3,7 @@ use core_simd::{f32x4,Mask32};
 use crate::{Motor,Translator,Point,Line,Plane,Direction};
 use crate::sqrt::rsqrt_nr1;
 use crate::sandwich::{sw012,swmm};
-use crate::util::{f32x4_flip_signs,hi_dp_bc,dp_bc,shuffle_scalar,f32x4_xor};
+use crate::util::{add_ss, dp_bc, f32x4_flip_signs, f32x4_xor, hi_dp_bc, shuffle_scalar};
 use crate::geometric::{gp11,gp12,gprt};
 
 #[derive(Default,Debug,Clone,PartialEq)]
@@ -82,6 +82,14 @@ impl Rotor {
   }
 
   pub fn approx_eq(&self, _other:Rotor,_epsilon:f32) { todo!() }
+
+  // pub fn log(&self)->Branch { todo!() }
+
+  // Compute the square root of the provided rotor $r$.
+  pub fn sqrt(&self)->Rotor {
+    let p1 = add_ss(self.p1, f32x4::splat(1.0));
+    Rotor{p1:p1}.normalized() // TODO avoid extra by normalize...
+  }
 
   pub fn as_mat3x4() { todo!() }
   pub fn as_mat4x4() { todo!() }

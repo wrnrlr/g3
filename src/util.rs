@@ -221,10 +221,6 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
   out
 }
 
-pub fn dot_product(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
-}
-
 pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
   f32x4::from_bits(a.to_bits() ^ b.to_bits())
 }

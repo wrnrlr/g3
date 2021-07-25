@@ -1,6 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg};
 use core_simd::{f32x4,Mask32};
-use crate::util::{f32x4_flip_signs};
+use crate::{Motor};
+use crate::util::{f32x4_flip_signs,exp};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
@@ -28,13 +29,23 @@ impl Line {
     Line{p1:f32x4::from_array([0.0,d,e,f]), p2:f32x4::from_array([0.0,a,b,c])}
   }
 
-  // pub fn norm(&self)->f32 { self.squared_norm().sqrt() }
+  // pub fn norm(&self)->f32 { self.squared_norm().sqrt() } TODO
 
-  // pub fn squared_norm(&self)->f32 { dot_product(self.p1, self.p2) }
+  // pub fn squared_norm(&self)->f32 { todo!() } TODO
 
   pub fn normalized()->Line { todo!() }
 
   pub fn inverse()->Line { todo!() }
+
+  // Exponentiate a line to produce a motor that posesses this line
+  // as its axis. This routine will be used most often when this line is
+  // produced as the logarithm of an existing rotor, then scaled to subdivide
+  // or accelerate the motor's action. The line need not be a _simple bivector_
+  // for the operation to be well-defined.
+  pub fn exp(&self)->Motor {
+    let (p1,p2) = exp(self.p1, self.p1);
+    Motor{p1,p2}
+  }
 }
 
 impl Add<Line> for Line {
@@ -112,3 +123,10 @@ impl Not for Line {
     }
   }
 }
+
+// TODO Branch
+// inline rotor KLN_VEC_CALL exp(branch b) noexcept
+// inline rotor KLN_VEC_CALL sqrt(branch b) noexcept
+
+// TODO IdealLine
+// inline translator KLN_VEC_CALL exp(ideal_line il) noexcept
