@@ -1,7 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg};
 use core_simd::{f32x4,Mask32};
 use crate::{Motor};
-use crate::util::{f32x4_flip_signs,exp};
+use crate::util::{f32x4_flip_signs,exp,hi_dp};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
@@ -85,7 +85,8 @@ impl Mul<f32> for Line {
 
 impl MulAssign<f32> for Line {
   fn mul_assign(&mut self, s: f32) {
-    self.p1 *= s
+    self.p1 *= s;
+    self.p2 *= s;
   }
 }
 
@@ -98,7 +99,8 @@ impl Div<f32> for Line {
 
 impl DivAssign<f32> for Line {
   fn div_assign(&mut self, s: f32) {
-    self.p1 /= s
+    self.p1 /= s;
+    self.p2 /= s;
   }
 }
 
@@ -124,9 +126,99 @@ impl Not for Line {
   }
 }
 
+// An ideal line represents a line at infinity and corresponds to the multivector:
+//
+// $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
+pub struct IdealLine {
+  pub p2:f32x4
+}
+
+impl IdealLine {
+  #[inline] pub fn e01(&self)->f32 { self.p2[1] }
+  #[inline] pub fn e10(&self)->f32 { -self.e01() }
+  #[inline] pub fn e02(&self)->f32 { self.p2[2] }
+  #[inline] pub fn e20(&self)->f32 { -self.e02() }
+  #[inline] pub fn e03(&self)->f32 { self.p2[3] }
+  #[inline] pub fn e30(&self)->f32 { -self.e03() }
+
+  pub fn squared_ideal_norm(self)->f32 {
+    let dp = hi_dp(self.p2, self.p2);
+    dp[0]
+  }
+
+  pub fn ideal_norm(self)->f32 {
+    self.squared_ideal_norm().sqrt()
+  }
+}
+
+impl Add<IdealLine> for IdealLine {
+  type Output = IdealLine;
+  fn add(self, other: IdealLine) -> IdealLine {
+    IdealLine { p2: self.p2+other.p2 }
+  }
+}
+
+impl AddAssign for IdealLine {
+  fn add_assign(&mut self, other: Self) {
+    self.p2 += other.p2;
+  }
+}
+
+impl Sub<IdealLine> for IdealLine {
+  type Output = IdealLine;
+  fn sub(self, other: IdealLine) -> IdealLine {
+    IdealLine { p2: self.p2-other.p2 }
+  }
+}
+
+impl SubAssign for IdealLine {
+  fn sub_assign(&mut self, other: Self) {
+    self.p2 -= other.p2;
+  }
+}
+
+impl Mul<f32> for IdealLine {
+  type Output = IdealLine;
+  fn mul(self, s: f32) -> IdealLine {
+    IdealLine { p2:self.p2*s }
+  }
+}
+
+impl MulAssign<f32> for IdealLine {
+  fn mul_assign(&mut self, s: f32) {
+    self.p2 *= s
+  }
+}
+
+impl Div<f32> for IdealLine {
+  type Output = IdealLine;
+  fn div(self, s: f32) -> IdealLine {
+    IdealLine { p2:self.p2/s }
+  }
+}
+
+impl DivAssign<f32> for IdealLine {
+  fn div_assign(&mut self, s: f32) {
+    self.p2 /= s
+  }
+}
+
+// Unary minus
+impl Neg for IdealLine {
+  type Output = Self;
+  fn neg(self)->Self::Output {
+    IdealLine { p2: -self.p2 }
+  }
+}
+
+// TODO Reversion operator
+
+// inline translator KLN_VEC_CALL exp(ideal_line il) noexcept
+
+
 // TODO Branch
+
+
+
 // inline rotor KLN_VEC_CALL exp(branch b) noexcept
 // inline rotor KLN_VEC_CALL sqrt(branch b) noexcept
-
-// TODO IdealLine
-// inline translator KLN_VEC_CALL exp(ideal_line il) noexcept
