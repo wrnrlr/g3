@@ -1,9 +1,9 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,Mask32};
-use crate::{Motor,Translator,Point,Line,Plane,Direction};
+use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
 use crate::sqrt::rsqrt_nr1;
 use crate::sandwich::{sw012,swmm};
-use crate::util::{add_ss, dp_bc, f32x4_flip_signs, f32x4_xor, hi_dp_bc, shuffle_scalar};
+use crate::util::{add_ss, dp_bc, f32x4_flip_signs, f32x4_xor, hi_dp_bc, rcp_nr1, shuffle_scalar};
 use crate::geometric::{gp11,gp12,gprt};
 
 #[derive(Default,Debug,Clone,PartialEq)]
@@ -83,7 +83,24 @@ impl Rotor {
 
   pub fn approx_eq(&self, _other:Rotor,_epsilon:f32) { todo!() }
 
-  // pub fn log(&self)->Branch { todo!() }
+  // Returns the principal branch of this rotor's logarithm. Invoking
+  // `exp` on the returned `Branch` maps back to this rotor.
+  //
+  // Given a rotor $\cos\alpha + \sin\alpha\left[a\ee_{23} + b\ee_{31} +\
+  // c\ee_{23}\right]$, the log is computed as simply
+  // $\alpha\left[a\ee_{23} + b\ee_{31} + c\ee_{23}\right]$.
+  // This map is only well-defined if the
+  // rotor is normalized such that $a^2 + b^2 + c^2 = 1$.
+  pub fn log(&self)->Branch {
+    let cos_ang = self.p1[0];
+    let ang = cos_ang.acos();
+    let sin_ang = ang.sin();
+
+    let mut p1  = self.p1 * rcp_nr1(f32x4::splat(sin_ang));
+    p1 = p1 * f32x4::splat(ang);
+    p1 = Mask32::from_array([false, true, true, true]).select(p1, f32x4::splat(0.0));
+    Branch{p1}
+  }
 
   // Compute the square root of the provided rotor $r$.
   pub fn sqrt(&self)->Rotor {
