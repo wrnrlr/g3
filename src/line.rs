@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg};
 use core_simd::{f32x4,Mask32};
-use crate::{Motor};
+use crate::{Motor, Translator};
 use crate::util::{f32x4_flip_signs,exp,hi_dp};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
@@ -149,6 +149,15 @@ impl IdealLine {
   pub fn ideal_norm(self)->f32 {
     self.squared_ideal_norm().sqrt()
   }
+
+  // Exponentiate an ideal line to produce a translation.
+  //
+  // The exponential of an ideal line
+  // $a \mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$ is given as:
+  //
+  // $$\exp{\left[a\ee_{01} + b\ee_{02} + c\ee_{03}\right]} = 1 +\
+  // a\ee_{01} + b\ee_{02} + c\ee_{03}$$
+  pub fn exp(self)->Translator { Translator{p2: self.p2} }
 }
 
 impl Add<IdealLine> for IdealLine {
@@ -212,9 +221,6 @@ impl Neg for IdealLine {
 }
 
 // TODO Reversion operator
-
-// inline translator KLN_VEC_CALL exp(ideal_line il) noexcept
-
 
 // TODO Branch
 

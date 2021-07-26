@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
-use crate::{Plane,Line,Point,Motor,Rotor};
+use crate::{Plane,Line,Point,Motor,Rotor,IdealLine};
 use crate::util::{f32x4_flip_signs};
 use crate::sandwich::{sw02,sw32,swl2};
 use crate::geometric::{gprt};
@@ -39,9 +39,12 @@ impl Translator {
   // pub fn log(&self)->IdealLine { IdealLine{p2: self.p2} } TODO
 
   // Compute the square root of the provided translator $t$.
-  pub fn sqrt(self)->Translator {
-    self * 0.5
-  }
+  pub fn sqrt(self)->Translator { self * 0.5 }
+
+  // Compute the logarithm of the translator, producing an ideal line axis.
+  // In practice, the logarithm of a translator is simply the ideal partition
+  // (without the scalar $1$).
+  pub fn log(self)->IdealLine { IdealLine{p2: self.p2} }
 }
 
 impl FnMut<(Plane,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
