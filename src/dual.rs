@@ -54,5 +54,5 @@ impl DivAssign<f32> for Dual {
 
 impl Not for Dual {
   type Output = Dual;
-  fn not(self)->Dual { todo!() }
+  fn not(self)->Dual { Dual::new(self.e0123(), self.scalar()) }
 }

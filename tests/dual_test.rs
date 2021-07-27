@@ -45,4 +45,8 @@ mod tests {
     d /= 2.0;
     assert_eq!(d, dual(1.0, 2.0))
   }
+
+  #[test] fn dual_dual() {
+    assert_eq!(!dual(1.0, 2.0), dual(2.0, 1.0))
+  }
 }
