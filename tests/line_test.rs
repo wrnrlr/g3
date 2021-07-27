@@ -69,4 +69,10 @@ mod tests {
   #[test] fn line_join_point() {
     todo!();
   }
+  #[test] fn line_dual() {
+    assert_eq!(!line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0), line(4.0, 5.0, 6.0, 1.0, 2.0, 3.0));
+  }
+  #[test] fn line_reverse() {
+    assert_eq!(line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0).reverse(), line(-1.0, -2.0, -3.0, -4.0, -5.0, -6.0))
+  }
 }

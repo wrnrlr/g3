@@ -47,6 +47,13 @@ impl Line {
     let (p1,p2) = exp(self.p1, self.p1);
     Motor{p1,p2}
   }
+
+  pub fn reverse(self)->Line {
+    Line {
+      p1: f32x4_flip_signs(self.p1, Mask32::from_array([false,true,true,true])),
+      p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
+    }
+  }
 }
 
 impl Add<Line> for Line {
@@ -116,15 +123,10 @@ impl Neg for Line {
   }
 }
 
-//  Reversion operator
+// Dual operator
 impl Not for Line {
   type Output = Self;
-  fn not(self)->Self::Output {
-    Line {
-      p1: f32x4_flip_signs(self.p1, Mask32::from_array([false,true,true,true])),
-      p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
-    }
-  }
+  fn not(self)->Self::Output { Line {p1: self.p2, p2: self.p1} }
 }
 
 // An ideal line represents a line at infinity and corresponds to the multivector:
@@ -144,8 +146,7 @@ impl IdealLine {
   #[inline] pub fn e30(&self)->f32 { -self.e03() }
 
   pub fn squared_ideal_norm(self)->f32 {
-    let dp = hi_dp(self.p2, self.p2);
-    dp[0]
+    hi_dp(self.p2, self.p2)[0]
   }
 
   pub fn ideal_norm(self)->f32 {
@@ -160,6 +161,10 @@ impl IdealLine {
   // $$\exp{\left[a\ee_{01} + b\ee_{02} + c\ee_{03}\right]} = 1 +\
   // a\ee_{01} + b\ee_{02} + c\ee_{03}$$
   pub fn exp(self)->Translator { Translator{p2: self.p2} }
+
+  pub fn reverse(self)->IdealLine {
+    IdealLine{p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))}
+  }
 }
 
 impl Add<IdealLine> for IdealLine {
@@ -222,7 +227,11 @@ impl Neg for IdealLine {
   }
 }
 
-// TODO Reversion operator
+// Dual operator
+impl Not for IdealLine {
+  type Output = Branch;
+  fn not(self)->Branch { Branch {p1: self.p2} }
+}
 
 
 // The `Branch` both a line through the origin and also the principal branch of
@@ -312,8 +321,12 @@ impl Branch {
     let p1 = self.p1 + f32x4::from_array([1.0, 0.0, 0.0, 0.0]);
     Rotor{p1}.normalized()
   }
-}
 
+  // Reversion
+  pub fn reverse(self)->Branch {
+    Branch{p1: f32x4_flip_signs(self.p1, Mask32::from_array([false,true,true,true]))}
+  }
+}
 
 impl Add<Branch> for Branch {
   type Output = Branch;
@@ -375,4 +388,7 @@ impl Neg for Branch {
   }
 }
 
-// TODO Reversion operator
+impl Not for Branch {
+  type Output = IdealLine;
+  fn not(self)->IdealLine { IdealLine{p2: self.p1} }
+}
