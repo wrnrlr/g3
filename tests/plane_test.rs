@@ -71,48 +71,8 @@ mod tests {
   }
   #[test] fn plane_normalized() { todo!(); }
   #[test] fn plane_invserse() { todo!(); }
-
-  #[test] fn plane_inner_product_plane() {
-    // p1 | p2
-    todo!();
-  }
-  #[test] fn plane_inner_product_line() {
-    // p1 | l1
-    todo!();
-  }
-  #[test] fn plane_inner_product_point() {
-    // p1 | a
-    todo!();
-  }
-  #[test] fn plane_geometric_product_plane() {
-    // p1 * p2
-    todo!();
-  }
-  #[test] fn plane_geometric_product_line() {
-    // p1 * l1
-    todo!();
-  }
-  #[test] fn plane_geometric_product_point() {
-    // p1 * a
-    todo!();
-  }
-  #[test] fn plane_meet_plane() {
-    // p1 ^ p2
-    todo!();
-  }
-  #[test] fn plane_meet_line() {
-    // p1 ^ l
-    todo!();
-  }
-  #[test] fn plane_meet_point() {
-    // p1 ^ a
-    todo!();
-  }
-  #[test] fn plane_join_point() {
-    let p1 = plane(1.0, 2.0, 3.0, 4.0);
-    let a = point(1.0, 2.0, 3.0);
-    let p2 = p1 & a;
-    todo!();
+  #[test] fn plane_not() {
+    assert_eq!(!plane(4.0, 3.0, 2.0, 1.0), point(1.0, 2.0, 3.0));
   }
   fn assert_plane(p:Plane,x:f32,y:f32,z:f32,d:f32) {
     assert_eq!(p.x(), x);

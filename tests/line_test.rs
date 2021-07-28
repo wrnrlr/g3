@@ -42,33 +42,6 @@ mod tests {
   #[test] fn line_div_assign_scalar() {
     todo!()
   }
-  #[test] fn line_inner_product_plane() {
-    todo!();
-  }
-  #[test] fn line_inner_product_line() {
-    todo!();
-  }
-  #[test] fn line_inner_product_point() {
-    todo!();
-  }
-  #[test] fn line_geometric_product_plane() {
-    todo!();
-  }
-  #[test] fn line_geometric_product_line() {
-    todo!();
-  }
-  #[test] fn line_geometric_product_point() {
-    todo!();
-  }
-  #[test] fn line_meet_plane() {
-    todo!();
-  }
-  #[test] fn line_meet_line() {
-    todo!();
-  }
-  #[test] fn line_join_point() {
-    todo!();
-  }
   #[test] fn line_dual() {
     assert_eq!(!line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0), line(4.0, 5.0, 6.0, 1.0, 2.0, 3.0));
   }

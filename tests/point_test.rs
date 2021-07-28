@@ -3,7 +3,7 @@
 
 #[cfg(test)]
 mod tests {
-  use g3::{Point,point,line,plane};
+  use g3::{Point,point};
 
   #[test] fn point_constructor() {
     assert_eq!(Point::new(1.0,2.0,3.0), point(1.0, 2.0, 3.0))
@@ -66,40 +66,6 @@ mod tests {
   // }
   #[test] #[ignore] fn point_normalized() {}
   #[test] #[ignore] fn point_invserse() {}
-  #[test] fn point_inner_product_plane() {
-    point(1.0, 2.0, 3.0) | plane(1.0, 2.0, 3.0, 4.0);
-    todo!();
-  }
-  #[test] fn point_inner_product_line() {
-    point(1.0, 2.0, 3.0) | line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-    todo!();
-  }
-  #[test] fn point_inner_product_point() {
-    point(1.0, 2.0, 3.0) | point(1.0, 2.0, 3.0);
-    todo!();
-  }
-  #[test] fn point_geometric_product_plane() {
-    
-    todo!();
-  }
-  // #[test] fn point_geometric_product_line() {
-  //   todo!(); Does not exist
-  // }
-  #[test] fn point_geometric_product_point() {
-    todo!();
-  }
-  #[test] fn point_inverse_geometric_product_point() {
-    todo!();
-  }
-  #[test] fn point_meet_plane() {
-    todo!();
-  }
-  #[test] fn point_meet_line() {
-    todo!();
-  }
-  #[test] fn point_join_point() {
-    todo!();
-  }
 
   fn assert_point(p:Point,x:f32,y:f32,z:f32,w:f32) {
     assert_eq!(p.x(),x);
