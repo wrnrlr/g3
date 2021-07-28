@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
 use core_simd::{f32x4,Mask32};
-use crate::{Dual,Plane,Line,Motor,Translator};
+use crate::{Dual,Plane,Line,IdealLine,Branch,Motor,Translator};
 use crate::util::{f32x4_flip_signs,rcp_nr1,shuffle_wwww};
 use crate::geometric::{gp03,gp33};
 use crate::inner::{dotptl,dot33};
@@ -167,23 +167,24 @@ impl BitXor<Plane> for Point {
 //   fn bitxor(self, a:Point) -> Dual { todo!() }
 // }
   
-// Join Operator &
+// Join Operation, Regressive Product, &
 impl BitAnd<Point> for Point {
   type Output = Line;
   fn bitand(self, other: Point) -> Line { !(!self ^ !other) }
 }
 impl BitAnd<Line> for Point {
   type Output = Plane;
-  fn bitand(self, l: Line) -> Plane { !((!self) ^ (!l)) }
+  fn bitand(self, l: Line) -> Plane { !(!self ^ !l) }
+}
+impl BitAnd<IdealLine> for Point {
+  type Output = Plane;
+  fn bitand(self, l: IdealLine) -> Plane { !(!self ^ !l) }
+}
+impl BitAnd<Branch> for Point {
+  type Output = Plane;
+  fn bitand(self, b: Branch) -> Plane { !(!self ^ !b) }
 }
 impl BitAnd<Plane> for Point {
   type Output = Dual;
   fn bitand(self, p: Plane)->Dual { !(!self ^ !p) }
 }
-
-// impl BitAndAssign<Branch> for Plane {
-//   fn bitand_assign(&mut self, a: Point) { todo!() }
-// }
-// impl BitAndAssign<IdealLine> for Plane {
-//   fn bitand_assign(&mut self, a: Point) { todo!() }
-// }

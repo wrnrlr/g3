@@ -1,4 +1,4 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor};
+use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd};
 use core_simd::{f32x4,Mask32};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
 use crate::util::{f32x4_flip_signs,exp,hi_dp,hi_dp_bc,hi_dp_ss};
@@ -130,12 +130,10 @@ impl Not for Line {
 }
 
 // Exterior Product
-
 impl BitXor<Plane> for Line {
   type Output = Point;
   fn bitxor(self, p:Plane)->Point{ p ^ self }
 }
-
 impl BitXor<Line> for Line {
   type Output = Dual;
   fn bitxor(self, other:Line)->Dual{
@@ -144,15 +142,19 @@ impl BitXor<Line> for Line {
     Dual::new(0.0, dp1[0] + dp2[0])
   }
 }
-
 impl BitXor<IdealLine> for Line {
   type Output = Dual;
   fn bitxor(self, b:IdealLine)->Dual{ Branch{p1: self.p1} ^ b }
 }
-
 impl BitXor<Branch> for Line {
   type Output = Dual;
   fn bitxor(self, b:Branch)->Dual{ IdealLine{p2: self.p2} ^ b }
+}
+
+// Join Operation, Regressive Product, &
+impl BitAnd<Point> for Line {
+  type Output = Plane;
+  fn bitand(self, a:Point)->Plane{ a & self }
 }
 
 // An ideal line represents a line at infinity and corresponds to the multivector:
@@ -259,19 +261,24 @@ impl Not for IdealLine {
   fn not(self)->Branch { Branch {p1: self.p2} }
 }
 
+// Meet Operation, Exterior Product, ^
 impl BitXor<Plane> for IdealLine {
   type Output = Point;
   fn bitxor(self, p:Plane)->Point { p ^ self }
 }
-
 impl BitXor<Line> for IdealLine {
   type Output = Dual;
   fn bitxor(self, l:Line)->Dual { l ^ self }
 }
-
 impl BitXor<Branch> for IdealLine {
   type Output = Dual;
   fn bitxor(self, b:Branch)->Dual { b ^ self }
+}
+
+// Join Operation, Regressive Product, &
+impl BitAnd<Point> for IdealLine {
+  type Output = Plane;
+  fn bitand(self, a:Point)->Plane{ a & self }
 }
 
 
@@ -434,19 +441,24 @@ impl Not for Branch {
   fn not(self)->IdealLine { IdealLine{p2: self.p1} }
 }
 
+// Meet Operation, Exterior Product, ^
 impl BitXor<Plane> for Branch {
   type Output = Point;
   fn bitxor(self, p:Plane)->Point { p ^ self }
 }
-
 impl BitXor<Line> for Branch {
   type Output = Dual;
   fn bitxor(self, l:Line)->Dual { l ^ self }
 }
-
 impl BitXor<IdealLine> for Branch {
   type Output = Dual;
   fn bitxor(self, l:IdealLine)->Dual {
     Dual::new(0.0, hi_dp_ss(self.p1, l.p2)[0])
   }
+}
+
+// Join Operation, Regressive Product, &
+impl BitAnd<Point> for Branch {
+  type Output = Plane;
+  fn bitand(self, a:Point)->Plane{ a & self }
 }
