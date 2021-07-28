@@ -198,6 +198,14 @@ pub fn hi_dp_bc(a:f32x4, b:f32x4)->f32x4 {
   mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
 }
 
+pub fn hi_dp_ss(a:f32x4, b:f32x4)->f32x4 {
+  let mut out = a * b;
+  let hi = shuffle_xxzz(a);
+  let sum = hi + out;
+  out = sum + shuffle_wwxx(out);
+  shuffle_yzyz(out)
+}
+
 pub fn dp(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
   let hi = shuffle_odd(out);
@@ -253,7 +261,7 @@ pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
 #[inline] pub fn shuffle_wwyz(a:f32x4)->f32x4 { a.shuffle::<{[0,0,2,3]}>(a) }
 // #[inline] fn shuffle_wwyz(a:f32x4)->f32x4 { a.shuffle::<{[0,0,2,3]}>(a) }
 
-#[inline] pub fn shuffle_yyzz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) } // ???
+#[inline] pub fn shuffle_yyzz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) } // ??? Yea this should be xxzz...
 
 #[inline] pub fn shuffle_yyzw(a:f32x4)->f32x4 { a.shuffle::<{[2,2,3,0]}>(a) }
 
@@ -284,6 +292,9 @@ pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
 #[inline] pub fn shuffle_ywww(a:f32x4)->f32x4 { a.shuffle::<{[2,0,0,0]}>(a) }
 #[inline] pub fn shuffle_xwww(a:f32x4)->f32x4 { a.shuffle::<{[1,0,0,0]}>(a) }
 #[inline] pub fn shuffle_xxyz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,2,3]}>(a) }
+#[inline] pub fn shuffle_xxzz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) }
+#[inline] pub fn shuffle_wwxx(a:f32x4)->f32x4 { a.shuffle::<{[0,0,1,1]}>(a) }
+#[inline] pub fn shuffle_yzyz(a:f32x4)->f32x4 { a.shuffle::<{[2,3,2,3]}>(a) }
 
 // a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
 /* 
