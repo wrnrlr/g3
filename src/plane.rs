@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
-use crate::{Dual,Point,Line,Motor};
+use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
 use crate::sqrt::{sqrt_nr1};
 use crate::util::{f32x4_flip_signs,hi_dp};
 use crate::sandwich::{sw00,sw30};
@@ -175,7 +175,7 @@ impl BitOr<Point> for Plane {
   }
 }
 
-// Meet Operator ^
+// Meet Operator, Exterior Product, ^
 impl BitXor<Plane> for Plane {
   type Output = Line;
   fn bitxor(self, other:Plane) -> Line {
@@ -189,6 +189,18 @@ impl BitXor<Line> for Plane {
     let tmp1 = extpb(self.p0,l.p1);
     let tmp2 = ext02(self.p0,l.p2);
     Point{p3: tmp1+tmp2}
+  }
+}
+impl BitXor<IdealLine> for Plane {
+  type Output = Point;
+  fn bitxor(self, l:IdealLine) -> Point {
+    Point{p3: ext02(self.p0, l.p2)}
+  }
+}
+impl BitXor<Branch> for Plane {
+  type Output = Point;
+  fn bitxor(self, b:Branch) -> Point {
+    Point{p3:extpb(self.p0, b.p1)}
   }
 }
 impl BitXor<Point> for Plane {
