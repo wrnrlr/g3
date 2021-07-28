@@ -9,8 +9,6 @@ mod motor;
 mod rotor;
 mod direction;
 mod translator;
-mod macroutil;
-mod macros;
 
 pub mod util;
 pub mod sqrt;
