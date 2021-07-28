@@ -1,6 +1,3 @@
-#[allow(unused_variables)]
-#[allow(unused_must_use)]
-
 #[cfg(test)]
 mod tests {
   use g3::{Point,point};

@@ -43,7 +43,7 @@ mod tests {
     unsafe { assert_m128(a,b) };
     let c = unsafe { _mm_mul_ps(a,b) };
     let d = unsafe { _mm_set_ps(1.0,4.0,9.0,16.0) };
-    unsafe { assert_m128(a,b) };
+    unsafe { assert_m128(c,d) };
   }
 
   // https://stackoverflow.com/questions/27485959/sse-intrinsics-masking-a-float-and-using-bitwise-and

@@ -1,9 +1,6 @@
-#![allow(unused_imports)]
-#[allow(unused_variables)]
-
 #[cfg(test)]
 mod tests {
-  use g3::{Plane,Line,Point,plane,line};
+  use g3::{line};
 
   #[test] fn line_constructor() {
     let l = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
@@ -16,7 +13,7 @@ mod tests {
     assert_ne!(l1,l2)
   }
   #[test] fn line_getters() {
-    let l1 = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+    let _l1 = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
   }
   #[test] fn line_add() {
     todo!()
