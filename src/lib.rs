@@ -19,7 +19,7 @@ pub mod sandwich;
 
 pub use dual::{Dual,dual};
 pub use point::{Point,point};
-pub use line::{Line,line,IdealLine,Branch};
+pub use line::{Line,line,IdealLine,ideal_line,Branch,branch};
 pub use plane::{Plane,plane};
 pub use motor::{Motor};
 pub use rotor::{Rotor};

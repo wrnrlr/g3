@@ -5,6 +5,8 @@ use crate::util::{f32x4_flip_signs,exp,hi_dp,hi_dp_bc,hi_dp_ss};
 use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
+pub fn ideal_line(a:f32,b:f32,c:f32)->IdealLine { IdealLine::new(a,b,c) }
+pub fn branch(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Branch { Branch::new(a,b,c) }
 
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Line {
@@ -172,6 +174,8 @@ impl IdealLine {
   #[inline] pub fn e20(&self)->f32 { -self.e02() }
   #[inline] pub fn e03(&self)->f32 { self.p2[3] }
   #[inline] pub fn e30(&self)->f32 { -self.e03() }
+
+  pub fn new(a:f32,b:f32,c:f32)->IdealLine { IdealLine{p2: f32x4::from_array([0.0, a, b, c])} }
 
   pub fn squared_ideal_norm(self)->f32 {
     hi_dp(self.p2, self.p2)[0]
