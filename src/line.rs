@@ -63,7 +63,7 @@ impl Line {
   pub fn project_point(self, a:Point)->Line { (self | a) | a }
 
   // Project a line onto a plane
-  pub fn project_pane(self, p:Plane)->Line { (self | p) ^ p }
+  pub fn project_plane(self, p:Plane)->Line { (self | p) ^ p }
 }
 
 impl Add<Line> for Line {
