@@ -44,6 +44,12 @@ impl Point {
         let p3 = inv_norm * self.p3;
         Point{p3:inv_norm * p3}
     }
+
+    // Project a point onto a line
+    pub fn project_line(self, l:Line)->Point { (self | l) ^ l }
+
+    // Project a point onto a plane
+    pub fn project_plane(self, p:Plane)->Point { (self | p) ^ p }
 }
 
 impl Add<Point> for Point {
