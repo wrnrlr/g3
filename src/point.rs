@@ -16,7 +16,7 @@ pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 // implementation detail.
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
-#[derive(Default,Debug,Clone,PartialEq)]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Point {
     pub p3:f32x4
 }

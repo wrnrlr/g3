@@ -10,7 +10,7 @@ use crate::inner::{dot00,dot03,dotpl};
 
 pub fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
-#[derive(Default,Debug,Clone,PartialEq)]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Plane {
   // p0: (e0, e1, e2, e3)
   // d, a, b, c

@@ -6,7 +6,7 @@ use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
-#[derive(Default,Debug,Clone,PartialEq)]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Line {
   pub p1:f32x4,
   pub p2:f32x4
@@ -160,7 +160,7 @@ impl BitAnd<Point> for Line {
 // An ideal line represents a line at infinity and corresponds to the multivector:
 //
 // $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
-#[derive(Default,Debug,Clone,PartialEq)]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct IdealLine {
   pub p2:f32x4
 }
@@ -306,7 +306,7 @@ impl BitAnd<Point> for IdealLine {
 //     The branch of a rotor is technically a `Line`, but because there are
 //     no translational components, the branch is given its own type for
 //     efficiency.
-#[derive(Default,Debug,Clone,PartialEq)]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Branch {
   pub p1:f32x4
 }
