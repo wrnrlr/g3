@@ -6,7 +6,7 @@ use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 pub fn ideal_line(a:f32,b:f32,c:f32)->IdealLine { IdealLine::new(a,b,c) }
-pub fn branch(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Branch { Branch::new(a,b,c) }
+pub fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Line {
