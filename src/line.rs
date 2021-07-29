@@ -138,7 +138,7 @@ impl BitXor<Plane> for Line {
 }
 impl BitXor<Line> for Line {
   type Output = Dual;
-  fn bitxor(self, other:Line)->Dual{
+  fn bitxor(self, other:Line)->Dual {
     let dp1 = hi_dp_ss(self.p1, other.p2);
     let dp2 = hi_dp_ss(other.p1, self.p2);
     Dual::new(0.0, dp1[0] + dp2[0])
@@ -146,11 +146,11 @@ impl BitXor<Line> for Line {
 }
 impl BitXor<IdealLine> for Line {
   type Output = Dual;
-  fn bitxor(self, b:IdealLine)->Dual{ Branch{p1: self.p1} ^ b }
+  fn bitxor(self, b:IdealLine)->Dual { Branch{p1: self.p1} ^ b }
 }
 impl BitXor<Branch> for Line {
   type Output = Dual;
-  fn bitxor(self, b:Branch)->Dual{ IdealLine{p2: self.p2} ^ b }
+  fn bitxor(self, b:Branch)->Dual { IdealLine{p2: self.p2} ^ b }
 }
 
 // Join Operation, Regressive Product, &
