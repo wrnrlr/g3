@@ -57,6 +57,13 @@ impl Line {
       p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
     }
   }
+
+  // Project a line onto a point. Given a line $\ell$ and point $P$, produces the
+  // line through $P$ that is parallel to $\ell$.
+  pub fn project_point(self, a:Point)->Line { (self | a) | a }
+
+  // Project a line onto a plane
+  pub fn project_pane(self, p:Plane)->Line { (self | p) ^ p }
 }
 
 impl Add<Line> for Line {
