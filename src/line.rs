@@ -1,8 +1,9 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd};
+use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
 use core_simd::{f32x4,Mask32};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
 use crate::util::{f32x4_flip_signs,exp,hi_dp,hi_dp_bc,hi_dp_ss};
 use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
+use crate::inner::{dot11,dotpl,dotpil};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 pub fn ideal_line(a:f32,b:f32,c:f32)->IdealLine { IdealLine::new(a,b,c) }
@@ -159,6 +160,22 @@ impl BitAnd<Point> for Line {
   fn bitand(self, a:Point)->Plane{ a & self }
 }
 
+// Inner Product, |
+impl BitOr<Point> for Line {
+  type Output = Plane;
+  fn bitor(self, a:Point)->Plane { a | self }
+}
+
+impl BitOr<Line> for Line {
+  type Output = f32;
+  fn bitor(self, other:Line)->f32 { dot11(self.p1, other.p1)[0] }
+}
+
+impl BitOr<Plane> for Line {
+  type Output = Plane;
+  fn bitor(self, p:Plane)->Plane { Plane{p0: dotpl::<true>(p.p0, self.p1, self.p2)} }
+}
+
 // An ideal line represents a line at infinity and corresponds to the multivector:
 //
 // $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
@@ -285,6 +302,11 @@ impl BitAnd<Point> for IdealLine {
   fn bitand(self, a:Point)->Plane{ a & self }
 }
 
+// Inner Product, |
+impl BitOr<Plane> for IdealLine {
+  type Output = Plane;
+  fn bitor(self, p:Plane)->Plane { Plane{p0: dotpil::<true>(p.p0, self.p2)} }
+}
 
 // The `Branch` both a line through the origin and also the principal branch of
 // the logarithm of a rotor.

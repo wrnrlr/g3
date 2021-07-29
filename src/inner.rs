@@ -37,3 +37,7 @@ pub fn dotptl(_a:f32x4,_b:f32x4)->f32x4 {
 pub fn dotpl<const F:bool>(_p0:f32x4,_p1:f32x4,_p2:f32x4)->f32x4 {
   todo!()
 }
+
+pub fn dotpil<const F:bool>(_p0:f32x4,_p2:f32x4)->f32x4 {
+  todo!()
+}
