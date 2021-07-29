@@ -54,6 +54,24 @@ impl Plane {
   pub fn approx_eq(_other:Plane,_epsilon:f32)->bool {
     todo!();
   }
+
+  // Project a plane onto a point. Given a plane $p$ and point $P$, produces the
+  // plane through $P$ that is parallel to $p$.
+  //
+  // Intuitively, the point is represented dually in terms of a _pencil of
+  // planes_ that converge on the point itself. When we compute $p | P$, this
+  // selects the line perpendicular to $p$ through $P$. Subsequently, taking the
+  // inner product with $P$ again selects the plane from the plane pencil of $P$
+  // _least like_ that line.
+  pub fn project_point(self, a:Point)->Plane { (self | a) | a }
+
+  // Project a plane onto a line. Given a plane $p$ and line $\ell$, produces the
+  // plane through $\ell$ that is parallel to $p$ if $p \parallel \ell$.
+  //
+  // If $p \nparallel \ell$, the result will be the plane $p'$ containing $\ell$
+  // that maximizes $p \cdot p'$ (that is, $p'$ is as parallel to $p$ as
+  // possible).
+  pub fn project_line(self, l:Line)->Plane {  (self | l) | l }
 }
 
 impl FnMut<(Plane,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
