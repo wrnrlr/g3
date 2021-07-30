@@ -1,8 +1,8 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
 use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
-use crate::sqrt::{sqrt_nr1};
-use crate::util::{f32x4_flip_signs,hi_dp};
+use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
+use crate::util::{f32x4_flip_signs,hi_dp,hi_dp_bc};
 use crate::sandwich::{sw00,sw30};
 use crate::exterior::{ext00,ext02,ext03,extpb};
 use crate::geometric::{gp00,gp03};
@@ -37,7 +37,11 @@ impl Plane {
   // inner product operator `|`, the planes must be normalized. Producing a
   // normalized rotor between two planes with the geometric product `*` also
   // requires that the planes are normalized.
-  pub fn normalized() { todo!() }
+  pub fn normalized(&self)->Plane {
+    let mut inv_norm  = rsqrt_nr1(hi_dp_bc(self.p0, self.p0));
+    inv_norm = inv_norm + f32x4::from_array([1.0, 0.0, 0.0, 0.0]);
+    Plane{p0: inv_norm * self.p0}
+  }
 
   // Compute the plane norm, which is often used to compute distances
   // between points and lines.
