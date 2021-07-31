@@ -3,7 +3,7 @@ use core_simd::{f32x4,Mask32};
 use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
 use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
 use crate::util::{f32x4_flip_signs, f32x4_abs, hi_dp, hi_dp_bc};
-use crate::sandwich::{sw00,sw30};
+use crate::sandwich::{sw00,sw10,sw20,sw30};
 use crate::exterior::{ext00,ext02,ext03,extpb};
 use crate::geometric::{gp00,gp03};
 use crate::inner::{dot00,dot03,dotpl};
@@ -81,6 +81,9 @@ impl Plane {
   pub fn project_line(self, l:Line)->Plane {  (self | l) | l }
 }
 
+// Reflect another plane $p_2$ through this plane $p_1$. The operation
+// performed via this call operator is an optimized routine equivalent to
+// the expression $p_1 p_2 p_1$.
 impl FnMut<(Plane,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
 impl FnOnce<(Plane,)> for Plane { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane {self.call(args)} }
 impl Fn<(Plane,)> for Plane {
@@ -89,6 +92,9 @@ impl Fn<(Plane,)> for Plane {
   }
 }
 
+// Reflect the point $P$ through this plane $p$. The operation
+// performed via this call operator is an optimized routine equivalent to
+// the expression $p P p$.
 impl FnMut<(Point,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point {self.call(args)} }
 impl FnOnce<(Point,)> for Plane { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
 impl Fn<(Point,)> for Plane {
@@ -97,11 +103,20 @@ impl Fn<(Point,)> for Plane {
   }
 }
 
-// TODO
-// impl Fn<Line> for Plane {
-//   type Output = Line;
-//   fn call(self, l: Line) -> Line { Line { p0:self.p0+other.p0 } }
-// }
+// Reflect line $\ell$ through this plane $p$. The operation
+// performed via this call operator is an optimized routine equivalent to
+// the expression $p \ell p$.
+impl FnMut<(Line,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: (Line,))->Line {self.call(args)} }
+impl FnOnce<(Line,)> for Plane { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
+impl Fn<(Line,)> for Plane {
+  extern "rust-call" fn call(&self, args: (Line,)) -> Line {
+    let l = args.0;
+    let (p1,p2_tmp1) = sw10(self.p0, l.p1);
+    let p2_tmp2 = sw20(self.p0, l.p2);
+    let p2 = p2_tmp1 + p2_tmp2;
+    Line{p1,p2}
+  }
+}
 
 impl Add<Plane> for Plane {
   type Output = Plane;
