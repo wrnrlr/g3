@@ -125,12 +125,7 @@ impl DivAssign<f32> for Line {
 // Unary minus
 impl Neg for Line {
   type Output = Self;
-  fn neg(self)->Self::Output {
-    Line {
-      p1: -self.p1,
-      p2: -self.p2
-    }
-  }
+  fn neg(self)->Self::Output { Line{p1: -self.p1, p2: -self.p2} }
 }
 
 // Dual operator
@@ -277,10 +272,8 @@ impl DivAssign<f32> for IdealLine {
 
 // Unary minus
 impl Neg for IdealLine {
-  type Output = Self;
-  fn neg(self)->Self::Output {
-    IdealLine { p2: -self.p2 }
-  }
+  type Output = IdealLine;
+  fn neg(self)->IdealLine { IdealLine {p2: -self.p2} }
 }
 
 // Dual operator
@@ -463,10 +456,8 @@ impl DivAssign<f32> for Branch {
 
 // Unary minus
 impl Neg for Branch {
-  type Output = Self;
-  fn neg(self)->Self::Output {
-    Branch { p1: -self.p1 }
-  }
+  type Output = Branch;
+  fn neg(self)->Branch { Branch{p1: -self.p1} }
 }
 
 impl Not for Branch {
