@@ -233,6 +233,10 @@ pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
   f32x4::from_bits(a.to_bits() ^ b.to_bits())
 }
 
+pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 {
+  f32x4::from_bits(!a.to_bits() & b.to_bits())
+}
+
 pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
   mask.select(-x, x)
 }
