@@ -45,6 +45,10 @@ impl Point {
         Point{p3:inv_norm * p3}
     }
 
+    pub fn reverse(&self)->Point {
+      Point{p3: f32x4_flip_signs(self.p3, Mask32::from_array([false,true,true,true]))}
+    }
+
     // Project a point onto a line
     pub fn project_line(self, l:Line)->Point { (self | l) ^ l }
 
@@ -90,17 +94,13 @@ impl DivAssign<f32> for Point {
 
 // Reversion
 impl Neg for Point {
-    type Output = Self;
-    fn neg(self)->Self::Output {
-        Point { p3:f32x4_flip_signs(self.p3, Mask32::from_array([false,true,true,true])) }
-    }
+  type Output = Point;
+  fn neg(self)->Point { Point{ p3: -self.p3 } }
 }
 
-// TODO ~ flip all sign, the ~ is not available in rust ...
-
 impl Not for Point {
-    type Output = Plane;
-    fn not(self)->Plane { Plane { p0: self.p3 }}
+  type Output = Plane;
+  fn not(self)->Plane { Plane { p0: self.p3 }}
 }
 
 // Geometric Product *
