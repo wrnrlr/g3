@@ -2,7 +2,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,Bi
 use core_simd::{f32x4,Mask32};
 use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
 use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
-use crate::util::{f32x4_flip_signs, f32x4_xor, f32x4_andnot, hi_dp, hi_dp_bc};
+use crate::util::{f32x4_flip_signs, f32x4_abs, hi_dp, hi_dp_bc};
 use crate::sandwich::{sw00,sw30};
 use crate::exterior::{ext00,ext02,ext03,extpb};
 use crate::geometric::{gp00,gp03};
@@ -59,7 +59,7 @@ impl Plane {
   }
 
   pub fn approx_eq(&self, other:Plane, epsilon:f32)->bool {
-    f32x4_andnot(f32x4::splat(-0.0), self.p0 - other.p0) < f32x4::splat(epsilon)
+    f32x4_abs(self.p0 - other.p0) < f32x4::splat(epsilon)
   }
 
   // Project a plane onto a point. Given a plane $p$ and point $P$, produces the

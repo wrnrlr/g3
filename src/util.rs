@@ -233,8 +233,13 @@ pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
   f32x4::from_bits(a.to_bits() ^ b.to_bits())
 }
 
-pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 {
+#[inline] pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 {
   f32x4::from_bits(!a.to_bits() & b.to_bits())
+}
+
+// Is this faster tgen f32x4::abs, which is implemented in rust?
+#[inline] pub fn f32x4_abs(a:f32x4)->f32x4 {
+  f32x4_andnot(f32x4::splat(-0.0), a)
 }
 
 pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
