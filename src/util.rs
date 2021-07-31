@@ -304,6 +304,10 @@ pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
 #[inline] pub fn shuffle_xxzz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) }
 #[inline] pub fn shuffle_wwxx(a:f32x4)->f32x4 { a.shuffle::<{[0,0,1,1]}>(a) }
 #[inline] pub fn shuffle_yzyz(a:f32x4)->f32x4 { a.shuffle::<{[2,3,2,3]}>(a) }
+#[inline] pub fn shuffle_zyzw(a:f32x4)->f32x4 { a.shuffle::<{[3,2,3,0]}>(a) }
+#[inline] pub fn shuffle_ywyz(a:f32x4)->f32x4 { a.shuffle::<{[2,0,2,3]}>(a) }
+#[inline] pub fn shuffle_wzwy(a:f32x4)->f32x4 { a.shuffle::<{[0,3,0,2]}>(a) }
+#[inline] pub fn shuffle_xzwy(a:f32x4)->f32x4 { a.shuffle::<{[1,3,0,2]}>(a) }
 
 // a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
 /* 

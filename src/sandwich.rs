@@ -1,5 +1,8 @@
 use core_simd::{f32x4,mask32x4};
-use crate::util::{add_ss, f32x4_flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_dddd, shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw, shuffle_yyzz, shuffle_yzwy, shuffle_zwyx, shuffle_zwyz, shuffle_zzwy};
+use crate::util::{add_ss, f32x4_flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_dddd,
+  shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw,
+  shuffle_yyzz, shuffle_yzwy, shuffle_zwyx, shuffle_zwyz, shuffle_zzwy, shuffle_zyzw,
+  shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_yyzx, shuffle_zzxy, shuffle_xxyz};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -41,6 +44,63 @@ pub fn sw00(a:f32x4,b:f32x4)->f32x4 {
   tmp2 = tmp2 * b;
 
   return tmp + tmp2
+}
+
+pub fn sw10(a:f32x4,b:f32x4)->(f32x4,f32x4) {
+  //                       b0(a1^2 + a2^2 + a3^2) +
+  // (2a3(a1 b1 + a2 b2) + b3(a3^2 - a1^2 - a2^2)) e12 +
+  // (2a1(a2 b2 + a3 b3) + b1(a1^2 - a2^2 - a3^2)) e23 +
+  // (2a2(a3 b3 + a1 b1) + b2(a2^2 - a3^2 - a1^2)) e31 +
+  //
+  // 2a0(a1 b2 - a2 b1) e03
+  // 2a0(a2 b3 - a3 b2) e01 +
+  // 2a0(a3 b1 - a1 b3) e02
+
+  let a_zyzw = shuffle_zyzw(a);
+  let a_ywyz = shuffle_ywyz(a);
+  let a_wzwy = shuffle_wzwy(a);
+
+  let b_xzwy = shuffle_xzwy(b);
+
+  let two_zero = f32x4::from_array([0.0, 2.0, 2.0, 2.0]);
+  let mut p1 = a * b;
+  p1 = p1 + a_wzwy * b_xzwy;
+  p1 = a_ywyz *  two_zero * p1;
+
+  let mut tmp = a_zyzw * a_zyzw;
+  tmp = tmp + a_wzwy * a_wzwy;
+  tmp = -tmp;
+  tmp = (a_ywyz * a_ywyz) - tmp;
+  tmp = shuffle_wzxy(b) * tmp;
+
+  let p1 = shuffle_wyzx(p1 + tmp);
+
+  let mut p2 = a_zyzw * b_xzwy;
+  p2 = p2 - a_wzwy * b;
+  p2 = p2 * shuffle_wwww(a) * two_zero;
+  p2 = shuffle_wyzx(p2);
+
+  (p1,p2)
+}
+
+pub fn sw20(a:f32x4,b:f32x4)->f32x4 {
+  //                       -b0(a1^2 + a2^2 + a3^2) e0123 +
+  // (-2a3(a1 b1 + a2 b2) + b3(a1^2 + a2^2 - a3^2)) e03
+  // (-2a1(a2 b2 + a3 b3) + b1(a2^2 + a3^2 - a1^2)) e01 +
+  // (-2a2(a3 b3 + a1 b1) + b2(a3^2 + a1^2 - a2^2)) e02 +
+  let a_zzwy = shuffle_yyzx(a);
+  let a_wwyz = shuffle_zzxy(a);
+
+  let mut p2 = a * b;
+  p2 = p2 + a_zzwy * shuffle_wyzx(b);
+  p2 = p2 * (a_wwyz * f32x4::from_array([0.0, -2.0, -2.0, -2.0]));
+
+  let a_yyzw = shuffle_xxyz(a);
+  let mut tmp = a_yyzw * a_yyzw;
+  tmp = -(tmp + (a_zzwy * a_zzwy));
+  tmp = tmp - (a_wwyz * a_wwyz);
+  p2 = p2 + tmp * shuffle_wzxy(b);
+  shuffle_wyzx(p2)
 }
 
 // reflect point through plane
