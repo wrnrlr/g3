@@ -1,7 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
 use core_simd::{f32x4,Mask32};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
-use crate::util::{f32x4_flip_signs,rcp_nr1,exp,hi_dp,hi_dp_bc,hi_dp_ss};
+use crate::util::{exp, f32x4_abs, f32x4_flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1};
 use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
 use crate::inner::{dot11,dotpl,dotpil};
 
@@ -82,6 +82,13 @@ impl Line {
     let p2 = f32x4_flip_signs(self.p2 * b2_inv - (st + st), Mask32::from_array([true, false, false, false]));
     let p1 = f32x4_flip_signs(self.p1 * b2_inv, Mask32::from_array([true, false, false, false]));
     Line{p1,p2}
+  }
+
+  pub fn approx_eq(&self, other:Line, epsilon:f32)->bool {
+    let esp = f32x4::splat(epsilon);
+    let cmp1 = f32x4_abs(self.p1 - other.p1) < esp;
+    let cmp2 = f32x4_abs(self.p2 - other.p2) < esp;
+    cmp1 && cmp2
   }
 
   // Exponentiate a line to produce a motor that posesses this line
