@@ -33,6 +33,10 @@ impl Line {
     Line{p1:f32x4::from_array([0.0,d,e,f]), p2:f32x4::from_array([0.0,a,b,c])}
   }
 
+  pub fn from_branch(b:Branch)->Line { Line{p1: b.p1, p2: f32x4::splat(0.0)} }
+  
+  pub fn from_ideal_line(l:IdealLine)->Line { Line{p1: f32x4::splat(0.0), p2: l.p2} }
+
   // pub fn norm(&self)->f32 { self.squared_norm().sqrt() } TODO
 
   // pub fn squared_norm(&self)->f32 { todo!() } TODO
