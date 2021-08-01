@@ -1,7 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
 use core_simd::{f32x4,Mask32};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
-use crate::util::{f32x4_flip_signs,exp,hi_dp,hi_dp_bc,hi_dp_ss};
+use crate::util::{f32x4_flip_signs,rcp_nr1,exp,hi_dp,hi_dp_bc,hi_dp_ss};
 use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
 use crate::inner::{dot11,dotpl,dotpil};
 
@@ -37,11 +37,33 @@ impl Line {
   
   pub fn from_ideal_line(l:IdealLine)->Line { Line{p1: f32x4::splat(0.0), p2: l.p2} }
 
+  // Returns the square root of the quantity produced by `squared_norm`.
   pub fn norm(&self)->f32 { self.squared_norm().sqrt() }
 
+  // If a line is constructed as the regressive product (join) of
+  // two points, the squared norm provided here is the squared
+  // distance between the two points (provided the points are
+  // normalized). Returns $d^2 + e^2 + f^2$.
   pub fn squared_norm(&self)->f32 { hi_dp(self.p1, self.p1)[0] }
 
-  pub fn normalized()->Line { todo!() }
+  // Normalize a line such that $\ell^2 = -1$.
+  pub fn normalized(&self)->Line {
+    // l = b + c where b is p1 and c is p2
+    // l * ~l = |b|^2 - 2(b1 c1 + b2 c2 + b3 c3)e0123
+    //
+    // sqrt(l*~l) = |b| - (b1 c1 + b2 c2 + b3 c3)/|b| e0123
+    //
+    // 1/sqrt(l*~l) = 1/|b| + (b1 c1 + b2 c2 + b3 c3)/|b|^3 e0123
+    //              = s + t e0123
+    let b2 = hi_dp_bc(self.p1, self.p1);
+    let s = rsqrt_nr1(b2);
+    let bc = hi_dp_bc(self.p1, self.p2);
+    let t = bc * rcp_nr1(b2) * s;
+
+    // p1 * (s + t e0123) = s * p1 - t p1_perp
+    let tmp = self.p2 * s;
+    Line{p1: self.p1 * s, p2: tmp - self.p1 * t}
+  }
 
   pub fn inverse()->Line { todo!() }
 
