@@ -37,9 +37,9 @@ impl Line {
   
   pub fn from_ideal_line(l:IdealLine)->Line { Line{p1: f32x4::splat(0.0), p2: l.p2} }
 
-  // pub fn norm(&self)->f32 { self.squared_norm().sqrt() } TODO
+  pub fn norm(&self)->f32 { self.squared_norm().sqrt() }
 
-  // pub fn squared_norm(&self)->f32 { todo!() } TODO
+  pub fn squared_norm(&self)->f32 { hi_dp(self.p1, self.p1)[0] }
 
   pub fn normalized()->Line { todo!() }
 
