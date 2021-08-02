@@ -1,7 +1,8 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
+use crate::sqrt::rsqrt_nr1;
 use crate::{Rotor,Translator,Point,Line,Plane};
-use crate::util::{f32x4_flip_signs,log};
+use crate::util::{f32x4_flip_signs, log, rcp_nr1, dp_bc};
 use crate::sandwich::{sw012,sw312,swmm};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 // use crate::define_call_fn;
@@ -32,7 +33,26 @@ impl Motor {
   pub fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor {
     Motor{p1:f32x4::from_array([a,b,c,d]), p2:f32x4::from_array([h,e,f,g])}}
 
-  pub fn inverse(&self)->Motor { todo!(); }
+  pub fn inverse(&self)->Motor {
+    // s, t computed as in the normalization
+    let b2 = dp_bc(self.p1, self.p1);
+    let s = rsqrt_nr1(b2);
+    let bc = dp_bc(f32x4_flip_signs(self.p1, Mask32::from_array([true,false,false,false])), self.p2);
+    let b2_inv = rcp_nr1(b2);
+    let t = bc * b2_inv * s;
+    let neg = Mask32::from_array([true,false,false,false]);
+
+    // p1 * (s + t e0123)^2 = (s * p1 - t p1_perp) * (s + t e0123)
+    // = s^2 p1 - s t p1_perp - s t p1_perp
+    // = s^2 p1 - 2 s t p1_perp
+    // (the scalar component above needs to be negated)
+    // p2 * (s + t e0123)^2 = s^2 p2 NOTE: s^2 = b2_inv
+    let st = s * t * self.p1;
+    let mut p2 = self.p2 * b2_inv - (f32x4_flip_signs(st*st, Mask32::from_array([true,false,false,false])));
+    p2 = f32x4_flip_signs(p2, neg);
+    let p1 = f32x4_flip_signs(self.p1 * b2_inv, neg);
+    Motor{p1,p2}
+  }
 
   pub fn normalize(&self)->Motor { todo!(); }
   pub fn constrained(&self)->Motor { todo!(); }
