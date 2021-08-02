@@ -53,6 +53,13 @@ impl Motor {
     Motor{p1:p1, p2:f32x4::splat(0.0)}.normalize() // TODO avoid extra copy of Motor 
   }
 
+  pub fn reverse(self)->Motor {
+    Motor {
+      p1: f32x4_flip_signs(self.p1, Mask32::from_array([false,true,true,true])),
+      p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
+    }
+  }
+
   pub fn as_mat3x4(&self) { todo!(); }
   pub fn as_mat4x4(&self) { todo!(); }
 }
@@ -158,17 +165,6 @@ impl Neg for Motor {
   type Output = Self;
   fn neg(self)->Self::Output {
     Motor { p1: -self.p1, p2: -self.p2 }
-  }
-}
-
-//  Reversion operator
-impl Not for Motor {
-  type Output = Self;
-  fn not(self)->Self::Output {
-    Motor {
-      p1: f32x4_flip_signs(self.p1, Mask32::from_array([false,true,true,true])),
-      p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
-    }
   }
 }
 
