@@ -72,6 +72,7 @@ impl Line {
     let bc = hi_dp_bc(self.p1, self.p2);
     let b2_inv = rcp_nr1(b2);
     let t = bc * b2_inv * s;
+    let neg  = Mask32::from_array([true, false, false, false]);
 
     // p1 * (s + t e0123)^2 = (s * p1 - t p1_perp) * (s + t e0123)
     // = s^2 p1 - s t p1_perp - s t p1_perp
@@ -79,8 +80,8 @@ impl Line {
     // p2 * (s + t e0123)^2 = s^2 p2
     // NOTE: s^2 = b2_inv
     let st = s * t * self.p1;
-    let p2 = f32x4_flip_signs(self.p2 * b2_inv - (st + st), Mask32::from_array([true, false, false, false]));
-    let p1 = f32x4_flip_signs(self.p1 * b2_inv, Mask32::from_array([true, false, false, false]));
+    let p2 = f32x4_flip_signs(self.p2 * b2_inv - (st + st), neg);
+    let p1 = f32x4_flip_signs(self.p1 * b2_inv, neg);
     Line{p1,p2}
   }
 
