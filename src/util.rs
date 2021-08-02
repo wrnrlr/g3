@@ -242,7 +242,7 @@ pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
   f32x4_andnot(f32x4::splat(-0.0), a)
 }
 
-pub fn f32x4_flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
+pub fn flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
   mask.select(-x, x)
 }
 

@@ -2,7 +2,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,Mask32};
 use crate::sqrt::rsqrt_nr1;
 use crate::{Rotor,Translator,Point,Line,Plane};
-use crate::util::{f32x4_flip_signs, log, rcp_nr1, dp_bc};
+use crate::util::{flip_signs, log, rcp_nr1, dp_bc};
 use crate::sandwich::{sw012,sw312,swmm};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 // use crate::define_call_fn;
@@ -37,7 +37,7 @@ impl Motor {
     // s, t computed as in the normalization
     let b2 = dp_bc(self.p1, self.p1);
     let s = rsqrt_nr1(b2);
-    let bc = dp_bc(f32x4_flip_signs(self.p1, Mask32::from_array([true,false,false,false])), self.p2);
+    let bc = dp_bc(flip_signs(self.p1, Mask32::from_array([true,false,false,false])), self.p2);
     let b2_inv = rcp_nr1(b2);
     let t = bc * b2_inv * s;
     let neg = Mask32::from_array([true,false,false,false]);
@@ -48,9 +48,9 @@ impl Motor {
     // (the scalar component above needs to be negated)
     // p2 * (s + t e0123)^2 = s^2 p2 NOTE: s^2 = b2_inv
     let st = s * t * self.p1;
-    let mut p2 = self.p2 * b2_inv - (f32x4_flip_signs(st*st, Mask32::from_array([true,false,false,false])));
-    p2 = f32x4_flip_signs(p2, neg);
-    let p1 = f32x4_flip_signs(self.p1 * b2_inv, neg);
+    let mut p2 = self.p2 * b2_inv - (flip_signs(st*st, Mask32::from_array([true,false,false,false])));
+    p2 = flip_signs(p2, neg);
+    let p1 = flip_signs(self.p1 * b2_inv, neg);
     Motor{p1,p2}
   }
 
@@ -75,8 +75,8 @@ impl Motor {
 
   pub fn reverse(self)->Motor {
     Motor {
-      p1: f32x4_flip_signs(self.p1, Mask32::from_array([false,true,true,true])),
-      p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
+      p1: flip_signs(self.p1, Mask32::from_array([false,true,true,true])),
+      p2: flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
     }
   }
 

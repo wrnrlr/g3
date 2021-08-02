@@ -1,5 +1,5 @@
 use core_simd::{f32x4,mask32x4};
-use crate::util::{add_ss, f32x4_flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_dddd,
+use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_dddd,
   shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw,
   shuffle_yyzz, shuffle_yzwy, shuffle_zwyx, shuffle_zwyz, shuffle_zzwy, shuffle_zyzw,
   shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_yyzx, shuffle_zzxy, shuffle_xxyz};
@@ -201,7 +201,7 @@ pub fn swl2(a:f32x4, d:f32x4, c:f32x4)->(f32x4, f32x4) {
   let mut p2_out = shuffle_wyzx(a) * shuffle_wzxy(c);
   // Add and subtract the same quantity in the low component to produce a cancellation
   p2_out -= shuffle_wzxy(a) * shuffle_wyzx(c);
-  p2_out -= f32x4_flip_signs(a * shuffle_wwww(c), mask32x4::from_array([true, false, false, false]));
+  p2_out -= flip_signs(a * shuffle_wwww(c), mask32x4::from_array([true, false, false, false]));
   (a, p2_out + p2_out + d)
 }
 

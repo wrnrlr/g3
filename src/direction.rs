@@ -1,7 +1,6 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg};
-use core_simd::{f32x4,Mask32};
-use crate::Plane;
-use crate::util::{f32x4_flip_signs,refined_reciprocal,hi_dp_bc};
+use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg};
+use core_simd::{f32x4,SimdU32};
+use crate::util::{refined_reciprocal,hi_dp_bc};
 use crate::sqrt::{rsqrt_nr1};
 
 // Directions in are represented using points at infinity (homogeneous coordinate 0).
@@ -19,6 +18,12 @@ impl Direction {
   // Create a normalized direction
   pub fn new(x:f32,y:f32,z:f32)->Direction {
     Direction{p3:f32x4::from_array([0.0,x,y,z])}.normalized()
+  }
+
+  // Data should point to four floats with memory layout `(0.f, x, y, z)`
+  // where the zero occupies the lowest address in memory.
+  pub fn from_bits(bits:SimdU32::<4>)->Direction {
+    Direction{p3: f32x4::from_bits(bits)}
   }
 
   /// Normalize this direction by dividing all components by the
@@ -66,18 +71,8 @@ impl DivAssign<f32> for Direction {
   fn div_assign(&mut self, s: f32) { self.p3 = self.p3*refined_reciprocal(s) }
 }
 
-// Reversion
+// Unary minus
 impl Neg for Direction {
-  type Output = Self;
-  fn neg(self)->Self::Output {
-      Direction { p3:f32x4_flip_signs(self.p3, Mask32::from_array([false,true,true,true])) }
-  }
-}
-
-// TODO ~ flip all sign, the ~ is not available in rust ...
-
-
-impl Not for Direction {
-  type Output = Plane;
-  fn not(self)->Plane { Plane { p0: self.p3 }}
+  type Output = Direction;
+  fn neg(self)->Direction { Direction{ p3: -self.p3 } }
 }

@@ -1,7 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,Fn};
 use core_simd::{f32x4,Mask32};
 use crate::{Plane,Line,Point,Motor,Rotor,IdealLine};
-use crate::util::{f32x4_flip_signs};
+use crate::util::{flip_signs};
 use crate::sandwich::{sw02,sw32,swl2};
 use crate::geometric::{gprt};
 
@@ -30,7 +30,7 @@ impl Translator {
   // TODO pub load_normalized() {}
 
   pub fn inverse(&self)->Translator {
-    Translator{p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true]))}
+    Translator{p2: flip_signs(self.p2, Mask32::from_array([false,true,true,true]))}
   }
 
   // Compute the logarithm of the translator, producing an ideal line axis.
@@ -138,7 +138,7 @@ impl Neg for Translator {
 impl Not for Translator {
   type Output = Self;
   fn not(self)->Self::Output {
-    Translator { p2: f32x4_flip_signs(self.p2, Mask32::from_array([false,true,true,true])) }
+    Translator { p2: flip_signs(self.p2, Mask32::from_array([false,true,true,true])) }
   }
 }
 
