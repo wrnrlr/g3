@@ -1,4 +1,4 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,Fn};
+use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,Mask32};
 use crate::sqrt::rsqrt_nr1;
 use crate::{Rotor,Translator,Point,Line,Plane};
