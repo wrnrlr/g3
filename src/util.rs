@@ -1,4 +1,4 @@
-use core_simd::{f32x4,Mask32,mask32x4};
+use core_simd::{f32x4,Mask32,mask32x4,u32x4};
 use crate::sqrt::{rsqrt_nr1};
 
 pub fn refined_reciprocal(s:f32)->f32x4 {
@@ -233,6 +233,10 @@ pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
   f32x4::from_bits(a.to_bits() ^ b.to_bits())
 }
 
+#[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 {
+  f32x4::from_bits(a.to_bits() & b.to_bits())
+}
+
 #[inline] pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 {
   f32x4::from_bits(!a.to_bits() & b.to_bits())
 }
@@ -308,6 +312,8 @@ pub fn flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
 #[inline] pub fn shuffle_ywyz(a:f32x4)->f32x4 { a.shuffle::<{[2,0,2,3]}>(a) }
 #[inline] pub fn shuffle_wzwy(a:f32x4)->f32x4 { a.shuffle::<{[0,3,0,2]}>(a) }
 #[inline] pub fn shuffle_xzwy(a:f32x4)->f32x4 { a.shuffle::<{[1,3,0,2]}>(a) }
+
+#[inline] pub fn bits_wwww(a:u32x4)->u32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
 
 // a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
 /* 
