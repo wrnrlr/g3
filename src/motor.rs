@@ -92,8 +92,8 @@ impl Motor {
   // Constrains the motor to traverse the shortest arc
   pub fn constrained(&self)->Motor {
     let mask = self.p1.to_bits() & f32x4::from_array([-0.0, 0.0, 0.0, 0.0]).to_bits();
-    let p1 = mask ^ self.p1.to_bits();
-    let p2 = mask ^ self.p2.to_bits();
+    let p1 = f32x4::from_bits(mask ^ self.p1.to_bits());
+    let p2 = f32x4::from_bits(mask ^ self.p2.to_bits());
     Motor{p1,p2}
   }
 
