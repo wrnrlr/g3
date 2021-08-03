@@ -1,8 +1,8 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
-use core_simd::{f32x4,Mask32};
+use core_simd::{f32x4,Mask32,i32x4};
 use crate::sqrt::rsqrt_nr1;
 use crate::{Rotor,Translator,Point,Line,Plane};
-use crate::util::{flip_signs, log, rcp_nr1, dp_bc};
+use crate::util::{flip_signs, log, rcp_nr1, dp_bc, shuffle_wwww, f32x4_and};
 use crate::sandwich::{sw012,sw312,swmm};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 // use crate::define_call_fn;
@@ -89,7 +89,13 @@ impl Motor {
     Motor{p1,p2}
   }
 
-  pub fn constrained(&self)->Motor { todo!(); }
+  // Constrains the motor to traverse the shortest arc
+  pub fn constrained(&self)->Motor {
+    let mask = self.p1.to_bits() & f32x4::from_array([-0.0, 0.0, 0.0, 0.0]).to_bits();
+    let p1 = mask ^ self.p1.to_bits();
+    let p2 = mask ^ self.p2.to_bits();
+    Motor{p1,p2}
+  }
 
   // Takes the principal branch of the logarithm of the motor, returning a
   // bivector. Exponentiation of that bivector without any changes produces
