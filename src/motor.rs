@@ -54,7 +54,41 @@ impl Motor {
     Motor{p1,p2}
   }
 
-  pub fn normalize(&self)->Motor { todo!(); }
+  pub fn normalize(&self)->Motor {
+    // m = b + c where b is p1 and c is p2
+    //
+    // m * ~m = |b|^2 + 2(b0 c0 - b1 c1 - b2 c2 - b3 c3)e0123
+    //
+    // The square root is given as:
+    // |b| + (b0 c0 - b1 c1 - b2 c2 - b3 c3)/|b| e0123
+    //
+    // The inverse of this is given by:
+    // 1/|b| + (-b0 c0 + b1 c1 + b2 c2 + b3 c3)/|b|^3 e0123 = s + t e0123
+    //
+    // Multiplying our original motor by this inverse will give us a
+    // normalized motor.
+    let b2 = dp_bc(self.p1, self.p1);
+    let s = rsqrt_nr1(b2);
+    let neg = Mask32::from_array([true,false,false,false]);
+    let bc = dp_bc(flip_signs(self.p1, neg), self.p2);
+    let t = bc * rcp_nr1(b2) * s;
+
+    // (s + t e0123) * motor =
+    //
+    // s b0 +
+    // s b1 e23 +
+    // s b2 e31 +
+    // s b3 e12 +
+    // (s c0 + t b0) e0123 +
+    // (s c1 - t b1) e01 +
+    // (s c2 - t b2) e02 +
+    // (s c3 - t b3) e03
+    let tmp = self.p2 * s;
+    let p2 = tmp - (flip_signs(self.p1, neg)); // Why not just +????
+    let p1 = self.p1 * t;
+    Motor{p1,p2}
+  }
+
   pub fn constrained(&self)->Motor { todo!(); }
 
   // Takes the principal branch of the logarithm of the motor, returning a
