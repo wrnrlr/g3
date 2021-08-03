@@ -2,7 +2,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,Mask32};
 use crate::sqrt::rsqrt_nr1;
 use crate::{Rotor,Translator,Point,Line,Plane};
-use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww};
+use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs};
 use crate::sandwich::{sw012,sw312,swmm};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 
@@ -117,6 +117,13 @@ impl Motor {
       p1: flip_signs(self.p1, Mask32::from_array([false,true,true,true])),
       p2: flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
     }
+  }
+
+  pub fn approx_eq(&self, other:Motor, epsilon:f32)->bool {
+    let esp = f32x4::splat(epsilon);
+    let cmp1 = f32x4_abs(self.p1 - other.p1) < esp;
+    let cmp2 = f32x4_abs(self.p2 - other.p2) < esp;
+    cmp1 && cmp2
   }
 
   pub fn as_mat3x4(&self) { todo!(); }
