@@ -3,7 +3,7 @@ use core_simd::{f32x4,Mask32};
 use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
 use crate::sqrt::rsqrt_nr1;
 use crate::sandwich::{sw012,swmm};
-use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, hi_dp_bc, rcp_nr1, shuffle_scalar};
+use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, shuffle_scalar};
 use crate::geometric::{gp11,gp12,gprt};
 
 #[derive(Default,Debug,Clone,PartialEq)]
@@ -81,7 +81,10 @@ impl Rotor {
     Rotor{p1}
   }
 
-  pub fn approx_eq(&self, _other:Rotor,_epsilon:f32) { todo!() }
+  pub fn approx_eq(&self, other:Rotor, epsilon:f32)->bool {
+    let eps = f32x4::splat(epsilon);
+    f32x4_abs(self.p1 - other.p1) < eps
+  }
 
   // Returns the principal branch of this rotor's logarithm. Invoking
   // `exp` on the returned `Branch` maps back to this rotor.
