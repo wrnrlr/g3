@@ -120,9 +120,9 @@ impl Motor {
   }
 
   pub fn approx_eq(&self, other:Motor, epsilon:f32)->bool {
-    let esp = f32x4::splat(epsilon);
-    let cmp1 = f32x4_abs(self.p1 - other.p1) < esp;
-    let cmp2 = f32x4_abs(self.p2 - other.p2) < esp;
+    let eps = f32x4::splat(epsilon);
+    let cmp1 = f32x4_abs(self.p1 - other.p1) < eps;
+    let cmp2 = f32x4_abs(self.p2 - other.p2) < eps;
     cmp1 && cmp2
   }
 
