@@ -1,4 +1,5 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
+use std::convert::{From};
 use core_simd::{f32x4,Mask32};
 use crate::sqrt::rsqrt_nr1;
 use crate::{Rotor,Translator,Point,Line,Plane};
@@ -137,6 +138,10 @@ impl Fn<(Plane,)> for Motor {
     Plane{p0:sw012::<false,true>(args.0.p0, self.p1)}
   }
 }
+
+impl From<Rotor> for Motor { fn from(r:Rotor)->Motor { Motor{p1: r.p1, p2: f32x4::splat(0.0)} } }
+
+impl From<Translator> for Motor { fn from(t:Translator)->Motor { Motor{p1: f32x4::splat(0.0), p2: t.p2} } }
 
 // TODO operator()(plane* in, plane* out, size_t count)
 
