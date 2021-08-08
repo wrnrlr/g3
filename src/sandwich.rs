@@ -208,3 +208,7 @@ pub fn swl2(a:f32x4, d:f32x4, c:f32x4)->(f32x4, f32x4) {
 pub fn sw312<const N:bool,const F:bool>(_a:f32x4,_b:f32x4,_c:f32x4)->f32x4 { // todo count param
   todo!()
 }
+
+pub fn swo12(_a:f32x4, _b:f32x4)->f32x4 {
+  todo!()
+}

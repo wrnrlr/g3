@@ -2,9 +2,9 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use std::convert::{From};
 use core_simd::{f32x4,Mask32};
 use crate::sqrt::rsqrt_nr1;
-use crate::{Rotor,Translator,Point,Line,Plane};
+use crate::{Rotor,Translator,Point,Line,Plane,Origin};
 use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs};
-use crate::sandwich::{sw012,sw312,swmm};
+use crate::sandwich::{sw012,sw312,swmm,swo12};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 
 #[derive(Default,Debug,Clone,PartialEq)]
@@ -169,6 +169,11 @@ impl Fn<(Point,)> for Motor {
 // TODO operator()(point* in, point* out, size_t count)
 
 // TODO operator()(origin)
+impl FnMut<(Origin,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Origin,))->Point { self.call(args) }}
+impl FnOnce<(Origin,)> for Motor { type Output = Point; extern "rust-call" fn call_once(self, args: (Origin,))->Point { self.call(args) }}
+impl Fn<(Origin,)> for Motor {
+  extern "rust-call" fn call(&self, args: (Origin,))->Point { Point{p3: swo12(self.p1, self.p2)} }
+}
 
 // The cost of this operation is the same as the application of a rotor due
 // to the translational invariance of directions (points at infinity).

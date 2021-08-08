@@ -6,6 +6,12 @@ use crate::geometric::{gp03,gp33};
 use crate::inner::{dotptl,dot33};
 use crate::exterior::{ext03};
 
+pub struct Origin {}
+
+impl Origin {
+  pub fn to_point()->Point { Point::new(0.0,0.0,0.0) }
+}
+
 pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 
 // A point is represented as the multivector
