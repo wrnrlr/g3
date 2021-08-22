@@ -21,6 +21,7 @@ parser! {
     rule atom() -> Expression
         = symbol()
         / number()
+        / list()
         / "(" _ v:sum() _ ")" { v }
     
     rule number() -> Expression
@@ -28,6 +29,9 @@ parser! {
     
     rule symbol() -> Expression
         = s:$(['a'..='z' | 'A'..='Z']['a'..='z' | 'A'..='Z' | '0'..='9']*) { Expression::Symbol(s.parse().unwrap()) }
+    
+    rule list() -> Expression
+        = "{" l:expression() ** "," "}" { Expression::List(Box::new(l)) }
   }
 }
 
@@ -35,10 +39,11 @@ parser! {
 pub enum Expression {
   Number(f32),
   Symbol(String),
+  List(Box<Vec<Expression>>),
   Sum(Box<Expression>,Box<Expression>),
   Product(Box<Expression>,Box<Expression>),
 }
-
+// https://corywalker.me/2018/06/03/introduction-to-computer-algebra.html
 fn main() {
   println!("g3 repl");
   assert_eq!(algebra::expression("4"), Ok(Expression::Number(4.0)));
@@ -66,4 +71,9 @@ fn main() {
           Box::new(Expression::Number(2.0)),
           Box::new(Expression::Number(3.0)))),
       Box::new(Expression::Number(4.0)))));
+  assert_eq!(algebra::expression("{}"), Ok(Expression::List(Box::new(vec![]))));
+  assert_eq!(algebra::expression("{1,a,b+2}"), Ok(Expression::List(
+    Box::new(vec!(Expression::Number(1.0), Expression::Symbol("a".to_string()), Expression::Sum(
+      Box::new(Expression::Symbol("b".to_string())),
+      Box::new(Expression::Number(2.0))))))));
 }
