@@ -26,7 +26,7 @@ parser! {
         = n:$((['0'..='9']+".")?['0'..='9']+) { Expression::Number(n.parse().unwrap()) }
     
     rule symbol() -> Expression
-        = s:$(['a'..='z' | 'A'..='Z']+) { Expression::Symbol(s.parse().unwrap()) }
+        = s:$(['a'..='z' | 'A'..='Z']['a'..='z' | 'A'..='Z' | '0'..='9']*) { Expression::Symbol(s.parse().unwrap()) }
   }
 }
 
@@ -45,6 +45,7 @@ fn main() {
   assert_eq!(algebra::expression("1.2"), Ok(Expression::Number(1.2)));
   assert_eq!(algebra::expression("a"), Ok(Expression::Symbol("a".to_string())));
   assert_eq!(algebra::expression("Abc"), Ok(Expression::Symbol("Abc".to_string())));
+  assert_eq!(algebra::expression("e01"), Ok(Expression::Symbol("e01".to_string())));
   assert_eq!(algebra::expression("1+1"), Ok(Expression::Sum(
       Box::new(Expression::Number(1.0)),
       Box::new(Expression::Number(1.0)))));
