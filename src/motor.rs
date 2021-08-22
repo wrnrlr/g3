@@ -168,11 +168,10 @@ impl Fn<(Point,)> for Motor {
 
 // TODO operator()(point* in, point* out, size_t count)
 
-// TODO operator()(origin)
 impl FnMut<(Origin,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Origin,))->Point { self.call(args) }}
 impl FnOnce<(Origin,)> for Motor { type Output = Point; extern "rust-call" fn call_once(self, args: (Origin,))->Point { self.call(args) }}
 impl Fn<(Origin,)> for Motor {
-  extern "rust-call" fn call(&self, args: (Origin,))->Point { Point{p3: swo12(self.p1, self.p2)} }
+  extern "rust-call" fn call(&self, _args: (Origin,))->Point { Point{p3: swo12(self.p1, self.p2)} }
 }
 
 // The cost of this operation is the same as the application of a rotor due
