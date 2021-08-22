@@ -54,22 +54,16 @@ fn main() {
     Box::new(Expression::Symbol("a2".to_string())), Box::new(Expression::Symbol("b3".to_string())))));
   assert_eq!(algebra::expression("1+1"), Ok(Expression::Sum(
     Box::new(Expression::Number(1.0)), Box::new(Expression::Number(1.0)))));
-  // assert_eq!(algebra::expression("5*5"), Ok(Expression::Product(
-  //     Box::new(Expression::Number(5.0)),
-  //     Box::new(Expression::Number(5.0)))));
-  // assert_eq!(algebra::expression("2+3*4"), Ok(Expression::Sum(
-  //     Box::new(Expression::Number(2.0)),
-  //     Box::new(Expression::Product(
-  //         Box::new(Expression::Number(3.0)),
-  //         Box::new(Expression::Number(4.0)))))));
-  // assert_eq!(algebra::expression("(2+3) * 4"), Ok(Expression::Product(
-  //     Box::new(Expression::Sum(
-  //         Box::new(Expression::Number(2.0)),
-  //         Box::new(Expression::Number(3.0)))),  
-  //     Box::new(Expression::Number(4.0)))));
-  // assert_eq!(algebra::expression("a"), Ok(Expression::Symbol("a".to_string())));
-  // assert_eq!(algebra::expression("4.1"), Ok(Expression::Number(4.1)));
-  // assert_eq!(algebra::expression("4e0"), Ok(Expression::Number(4.1)));
-  // assert_eq!(algebra::expression("4.2e123"), Ok(Expression::Number(4.1)));
-
+  assert_eq!(algebra::expression("5*5"), Ok(Expression::Product(
+      Box::new(Expression::Number(5.0)), Box::new(Expression::Number(5.0)))));
+  assert_eq!(algebra::expression("2+3*4"), Ok(Expression::Sum(
+      Box::new(Expression::Number(2.0)),
+      Box::new(Expression::Product(
+          Box::new(Expression::Number(3.0)),
+          Box::new(Expression::Number(4.0)))))));
+  assert_eq!(algebra::expression("(2+3) * 4"), Ok(Expression::Product(
+      Box::new(Expression::Sum(
+          Box::new(Expression::Number(2.0)),
+          Box::new(Expression::Number(3.0)))),
+      Box::new(Expression::Number(4.0)))));
 }
