@@ -18,9 +18,13 @@ parser! {
         / atom()
 
     rule atom() -> Expression
-        = symbol()
+        = coefficiant()
+        / symbol()
         / number()
         / "(" _ v:sum() _ ")" { v }
+    
+    rule coefficiant() ->Expression
+        = n:number() s:symbol() { Expression::Coefficiant(Box::new(n), Box::new(s)) }
 
     rule number() -> Expression
         = n:$((['0'..='9']+".")?['0'..='9']+) { Expression::Number(n.parse().unwrap()) }
@@ -46,6 +50,9 @@ fn main() {
   assert_eq!(algebra::expression("a"), Ok(Expression::Symbol("a".to_string())));
   assert_eq!(algebra::expression("Abc"), Ok(Expression::Symbol("Abc".to_string())));
   assert_eq!(algebra::expression("e01"), Ok(Expression::Symbol("e01".to_string())));
+  assert_eq!(algebra::expression("3e01"), Ok(Expression::Coefficiant(
+    Box::new(Expression::Number(3.0)),
+    Box::new(Expression::Symbol("e01".to_string())))));
   assert_eq!(algebra::expression("1+1"), Ok(Expression::Sum(
       Box::new(Expression::Number(1.0)),
       Box::new(Expression::Number(1.0)))));
