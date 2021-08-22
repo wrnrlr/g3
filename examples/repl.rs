@@ -14,18 +14,15 @@ parser! {
         / product()
 
     rule product() -> Expression
-        = l:atom() _ "*" _ r:atom() { Expression::Product(Box::new(l), Box::new(r)) }
+        = l:number() r:atom() { Expression::Product(Box::new(l), Box::new(r)) }
+        / l:atom() _ "*"? _ r:atom() { Expression::Product(Box::new(l), Box::new(r)) }
         / atom()
 
     rule atom() -> Expression
-        = coefficiant()
-        / symbol()
+        = symbol()
         / number()
         / "(" _ v:sum() _ ")" { v }
     
-    rule coefficiant() ->Expression
-        = n:number() s:symbol() { Expression::Coefficiant(Box::new(n), Box::new(s)) }
-
     rule number() -> Expression
         = n:$((['0'..='9']+".")?['0'..='9']+) { Expression::Number(n.parse().unwrap()) }
     
@@ -38,7 +35,6 @@ parser! {
 pub enum Expression {
   Number(f32),
   Symbol(String),
-  Coefficiant(Box<Expression>,Box<Expression>),
   Sum(Box<Expression>,Box<Expression>),
   Product(Box<Expression>,Box<Expression>),
 }
@@ -50,12 +46,14 @@ fn main() {
   assert_eq!(algebra::expression("a"), Ok(Expression::Symbol("a".to_string())));
   assert_eq!(algebra::expression("Abc"), Ok(Expression::Symbol("Abc".to_string())));
   assert_eq!(algebra::expression("e01"), Ok(Expression::Symbol("e01".to_string())));
-  assert_eq!(algebra::expression("3e01"), Ok(Expression::Coefficiant(
-    Box::new(Expression::Number(3.0)),
-    Box::new(Expression::Symbol("e01".to_string())))));
+  assert_eq!(algebra::expression("3e01"), Ok(Expression::Product(
+    Box::new(Expression::Number(3.0)), Box::new(Expression::Symbol("e01".to_string())))));
+  assert_eq!(algebra::expression("4.0 e01"), Ok(Expression::Product(
+    Box::new(Expression::Number(4.0)), Box::new(Expression::Symbol("e01".to_string())))));
+  assert_eq!(algebra::expression("a2 b3"), Ok(Expression::Product(
+    Box::new(Expression::Symbol("a2".to_string())), Box::new(Expression::Symbol("b3".to_string())))));
   assert_eq!(algebra::expression("1+1"), Ok(Expression::Sum(
-      Box::new(Expression::Number(1.0)),
-      Box::new(Expression::Number(1.0)))));
+    Box::new(Expression::Number(1.0)), Box::new(Expression::Number(1.0)))));
   // assert_eq!(algebra::expression("5*5"), Ok(Expression::Product(
   //     Box::new(Expression::Number(5.0)),
   //     Box::new(Expression::Number(5.0)))));
