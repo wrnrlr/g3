@@ -23,7 +23,7 @@ parser! {
         / "(" _ v:sum() _ ")" { v }
 
     rule number() -> Expression
-        = n:$(['0'..='9']+) { Expression::Number(n.parse().unwrap()) }
+        = n:$((['0'..='9']+".")?['0'..='9']+) { Expression::Number(n.parse().unwrap()) }
     
     rule symbol() -> Expression
         = s:$(['a'..='z' | 'A'..='Z']+) { Expression::Symbol(s.parse().unwrap()) }
@@ -42,7 +42,9 @@ pub enum Expression {
 fn main() {
   println!("g3 repl");
   assert_eq!(algebra::expression("4"), Ok(Expression::Number(4.0)));
+  assert_eq!(algebra::expression("1.2"), Ok(Expression::Number(1.2)));
   assert_eq!(algebra::expression("a"), Ok(Expression::Symbol("a".to_string())));
+  assert_eq!(algebra::expression("Abc"), Ok(Expression::Symbol("Abc".to_string())));
   assert_eq!(algebra::expression("1+1"), Ok(Expression::Sum(
       Box::new(Expression::Number(1.0)),
       Box::new(Expression::Number(1.0)))));
