@@ -25,7 +25,7 @@ parser! {
         / "(" _ v:sum() _ ")" { v }
     
     rule number() -> Expression
-        = n:$((['0'..='9']+".")?['0'..='9']+) { Expression::Number(n.parse().unwrap()) }
+        = n:$(['0'..='9']+("."['0'..='9']+)?) { Expression::Number(n.parse().unwrap()) }
     
     rule symbol() -> Expression
         = s:$(['a'..='z' | 'A'..='Z']['a'..='z' | 'A'..='Z' | '0'..='9']*) { Expression::Symbol(s.parse().unwrap()) }
@@ -72,7 +72,7 @@ fn main() {
           Box::new(Expression::Number(3.0)))),
       Box::new(Expression::Number(4.0)))));
   assert_eq!(algebra::expression("{}"), Ok(Expression::List(Box::new(vec![]))));
-  assert_eq!(algebra::expression("{1,a,b+2}"), Ok(Expression::List(
+  assert_eq!(algebra::expression("{1,a,b+2.0}"), Ok(Expression::List(
     Box::new(vec!(Expression::Number(1.0), Expression::Symbol("a".to_string()), Expression::Sum(
       Box::new(Expression::Symbol("b".to_string())),
       Box::new(Expression::Number(2.0))))))));
