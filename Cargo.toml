@@ -6,3 +6,6 @@ edition = "2018"
 
 [dependencies]
 core_simd = { git = "https://github.com/rust-lang/stdsimd" }
+
+[dev-dependencies]
+peg = "0.7.0"
