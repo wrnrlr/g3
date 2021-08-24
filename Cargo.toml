@@ -5,7 +5,7 @@ authors = ["Werner Laurensse <werner@alman.ax>"]
 edition = "2018"
 
 [dependencies]
-core_simd = { git = "https://github.com/rust-lang/stdsimd" }
+core_simd = { git = "https://github.com/rust-lang/stdsimd", version = "*" }
 
 [dev-dependencies]
 peg = "0.7.0"
