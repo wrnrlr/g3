@@ -18,9 +18,7 @@ mod tests {
     let p1 = plane(1.0,2.0,3.0,4.0);
     let a1 = point(1.0, 2.0, 3.0);
     let _ = p1 * a1;
-    todo!();
-  }
-  #[test] fn geometric_product_point_plane() {
+    let _ = a1 * p1;
     todo!();
   }
   // #[test] fn geometric_product_point_line() {
