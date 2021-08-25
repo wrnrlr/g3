@@ -1,4 +1,4 @@
-use core_simd::{f32x4,Mask32,mask32x4,u32x4};
+use core_simd::{f32x4,mask32x4,u32x4};
 use crate::sqrt::{rsqrt_nr1};
 
 pub fn refined_reciprocal(s:f32)->f32x4 {
@@ -246,7 +246,7 @@ pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
   f32x4_andnot(f32x4::splat(-0.0), a)
 }
 
-pub fn flip_signs(x:f32x4, mask:Mask32<4>)->f32x4 {
+pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
   mask.select(-x, x)
 }
 

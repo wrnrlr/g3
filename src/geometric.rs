@@ -1,4 +1,4 @@
-use core_simd::{f32x4,mask32x4,Mask32};
+use core_simd::{f32x4,mask32x4};
 use crate::util::{b2b3a2a3, dp, flip_signs, rcp_nr1, shuffle_wwww,
   shuffle_wwyy, shuffle_wyzx, shuffle_wzxy, shuffle_xwww, shuffle_xxyz,
   shuffle_xyzx, shuffle_xzxy, shuffle_ywww, shuffle_yxyz, shuffle_yyzx,
@@ -115,13 +115,13 @@ pub fn gprt<const F:bool>(a:f32x4, b:f32x4)->f32x4 {
   let mut p2 = shuffle_xwww(a) * shuffle_xxyz(b);
   p2 = p2 + shuffle_yyzx(a) * shuffle_yzxy(b);
   let tmp = if F { shuffle_zzxy(a) * shuffle_zyzx(b)} else { shuffle_zyzx(a) * shuffle_zzxy(b) };
-  p2 - flip_signs(tmp, Mask32::from_array([true,false,false,false])) // Correct?
+  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false])) // TODO Correct?
 }
 
 pub fn gp12<const F:bool>(a:f32x4, b:f32x4)->f32x4 {
   let p2 = gprt::<F>(a,b);
   let tmp = a * shuffle_wwww(b);
-  p2 - flip_signs(tmp, Mask32::from_array([true,false,false,false]))
+  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
 }
 
 pub fn gpmm(_a:f32x4,_b:f32x4)->(f32x4,f32x4) {

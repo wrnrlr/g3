@@ -1,4 +1,4 @@
-use core_simd::{f32x4,Mask32};
+use core_simd::{f32x4,mask32x4};
 
 use crate::util::{dp, flip_signs, shuffle_wwww, shuffle_wyzx, shuffle_xwww, add_ss, hi_dp};
 
@@ -41,7 +41,7 @@ pub fn extpb(a:f32x4, b:f32x4)->f32x4 {
   // (-a0 b2) e013 +
   // (-a0 b3) e021
 
-  let mut p3_out = flip_signs(shuffle_xwww(a) * b, Mask32::from_array([false,true,true,true]));
+  let mut p3_out = flip_signs(shuffle_xwww(a) * b, mask32x4::from_array([false,true,true,true]));
   p3_out = add_ss(p3_out, hi_dp(a,b));
   return p3_out;
 }

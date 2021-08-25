@@ -1,3 +1,4 @@
+#![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
 

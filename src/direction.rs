@@ -1,5 +1,5 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg};
-use core_simd::{f32x4,SimdU32};
+use core_simd::{f32x4,u32x4};
 use crate::util::{refined_reciprocal,hi_dp_bc};
 use crate::sqrt::{rsqrt_nr1};
 
@@ -22,7 +22,7 @@ impl Direction {
 
   // Data should point to four floats with memory layout `(0.f, x, y, z)`
   // where the zero occupies the lowest address in memory.
-  pub fn from_bits(bits:SimdU32::<4>)->Direction {
+  pub fn from_bits(bits:u32x4)->Direction {
     Direction{p3: f32x4::from_bits(bits)}
   }
 

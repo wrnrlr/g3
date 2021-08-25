@@ -1,5 +1,5 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn};
-use core_simd::{f32x4,Mask32};
+use core_simd::{f32x4,mask32x4};
 use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
 use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
 use crate::util::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc};
@@ -158,7 +158,7 @@ impl DivAssign<f32> for Plane {
 impl Neg for Plane {
   type Output = Self;
   fn neg(self)->Self::Output {
-      Plane { p0:flip_signs(self.p0, Mask32::from_array([false,true,true,true])) }
+      Plane { p0:flip_signs(self.p0, mask32x4::from_array([false,true,true,true])) }
   }
 }
 

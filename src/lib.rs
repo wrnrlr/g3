@@ -1,5 +1,6 @@
 #![feature(unboxed_closures)]
 #![feature(fn_traits)]
+#![feature(portable_simd)]
 
 mod dual;
 mod point;

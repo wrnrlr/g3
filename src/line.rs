@@ -1,5 +1,5 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
-use core_simd::{f32x4,Mask32};
+use core_simd::{f32x4,mask32x4};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
 use crate::util::{exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1};
 use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
@@ -72,7 +72,7 @@ impl Line {
     let bc = hi_dp_bc(self.p1, self.p2);
     let b2_inv = rcp_nr1(b2);
     let t = bc * b2_inv * s;
-    let neg  = Mask32::from_array([true, false, false, false]);
+    let neg  = mask32x4::from_array([true, false, false, false]);
 
     // p1 * (s + t e0123)^2 = (s * p1 - t p1_perp) * (s + t e0123)
     // = s^2 p1 - s t p1_perp - s t p1_perp
@@ -104,8 +104,8 @@ impl Line {
 
   pub fn reverse(self)->Line {
     Line {
-      p1: flip_signs(self.p1, Mask32::from_array([false,true,true,true])),
-      p2: flip_signs(self.p2, Mask32::from_array([false,true,true,true]))
+      p1: flip_signs(self.p1, mask32x4::from_array([false,true,true,true])),
+      p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))
     }
   }
 
@@ -265,7 +265,7 @@ impl IdealLine {
   pub fn exp(self)->Translator { Translator{p2: self.p2} }
 
   pub fn reverse(self)->IdealLine {
-    IdealLine{p2: flip_signs(self.p2, Mask32::from_array([false,true,true,true]))}
+    IdealLine{p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))}
   }
 }
 
@@ -428,7 +428,7 @@ impl Branch {
   pub fn inverse(self)->Branch {
     let inv_norm = rsqrt_nr1(hi_dp_bc(self.p1, self.p1));
     let mut p1 = self.p1 * inv_norm * inv_norm;
-    p1 = flip_signs(p1, Mask32::from_array([false, true, true, true]));
+    p1 = flip_signs(p1, mask32x4::from_array([false, true, true, true]));
     Branch{p1}
   }
 
@@ -449,7 +449,7 @@ impl Branch {
 
   // Reversion
   pub fn reverse(self)->Branch {
-    Branch{p1: flip_signs(self.p1, Mask32::from_array([false,true,true,true]))}
+    Branch{p1: flip_signs(self.p1, mask32x4::from_array([false,true,true,true]))}
   }
 }
 

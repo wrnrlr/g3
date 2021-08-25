@@ -1,5 +1,5 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
-use core_simd::{f32x4,Mask32};
+use core_simd::{f32x4,mask32x4};
 use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
 use crate::sqrt::rsqrt_nr1;
 use crate::sandwich::{sw012,swmm};
@@ -70,7 +70,7 @@ impl Rotor {
     let inv_norm = rsqrt_nr1(hi_dp_bc(self.p1, self.p1));
     let mut p1 = self.p1 * inv_norm;
     p1 = p1 * inv_norm;
-    p1 = flip_signs(p1, Mask32::from_array([false,true,true,true]));
+    p1 = flip_signs(p1, mask32x4::from_array([false,true,true,true]));
     Rotor{p1}
   }
 
@@ -101,7 +101,7 @@ impl Rotor {
 
     let mut p1  = self.p1 * rcp_nr1(f32x4::splat(sin_ang));
     p1 = p1 * f32x4::splat(ang);
-    p1 = Mask32::from_array([false, true, true, true]).select(p1, f32x4::splat(0.0));
+    p1 = mask32x4::from_array([false, true, true, true]).select(p1, f32x4::splat(0.0));
     Branch{p1}
   }
 
@@ -205,7 +205,7 @@ impl DivAssign<f32> for Rotor {
 impl Neg for Rotor {
   type Output = Self;
   fn neg(self)->Self::Output {
-    Rotor { p1:flip_signs(self.p1, Mask32::from_array([false,true,true,true])) }
+    Rotor { p1:flip_signs(self.p1, mask32x4::from_array([false,true,true,true])) }
   }
 }
 

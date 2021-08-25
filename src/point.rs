@@ -1,5 +1,5 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
-use core_simd::{f32x4,Mask32};
+use core_simd::{f32x4,mask32x4};
 use crate::{Dual,Plane,Line,IdealLine,Branch,Motor,Translator};
 use crate::util::{flip_signs,rcp_nr1,shuffle_wwww};
 use crate::geometric::{gp03,gp33};
@@ -52,7 +52,7 @@ impl Point {
     }
 
     pub fn reverse(&self)->Point {
-      Point{p3: flip_signs(self.p3, Mask32::from_array([false,true,true,true]))}
+      Point{p3: flip_signs(self.p3, mask32x4::from_array([false,true,true,true]))}
     }
 
     // Project a point onto a line

@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "core_simd"
 version = "0.1.0"
-source = "git+https://github.com/rust-lang/stdsimd#715f9ac4e36ee303c3d464121ebb65df8f92416e"
+source = "git+https://github.com/rust-lang/stdsimd#d42875302dd9e924f8d667b32e88989388989b79"
 
 [[package]]
 name = "g3"
