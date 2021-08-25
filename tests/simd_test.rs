@@ -1,6 +1,11 @@
 #![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
+  use core_simd::{f32x4,mask32x4};
+  use core::arch::x86_64::{_mm_mul_ps, __m128, _mm_set_ps, _mm_extract_ps, _mm_movelh_ps,
+    _mm_xor_ps, _mm_set_ss, _mm_movehdup_ps, _mm_unpacklo_ps, _mm_movehl_ps, _mm_sub_ps,
+    _mm_and_ps};
+  use g3::util::{f32x4_xor,flip_signs, f32x4_andnot, f32x4_abs, f32x4_and};
 
   unsafe fn m128(a:f32,b:f32,c:f32,d:f32)->__m128 {
     _mm_set_ps(d,c,b,a)
@@ -25,17 +30,11 @@ mod tests {
     println!("{} {} {} {}", v[0], v[1], v[2], v[3]);
   }
 
-  use core_simd::{f32x4,mask32x4,Mask32};
-  use core::arch::x86_64::{_mm_mul_ps, __m128, _mm_set_ps, _mm_extract_ps, _mm_movelh_ps,
-    _mm_xor_ps, _mm_set_ss, _mm_movehdup_ps, _mm_unpacklo_ps, _mm_movehl_ps, _mm_sub_ps,
-    _mm_and_ps};
-  use g3::util::{f32x4_xor,flip_signs, f32x4_andnot, f32x4_abs, f32x4_and};
-
   #[test] fn test_f32_sign_flipping() {
     let v1 = f32x4::from_array([1.0,2.0,3.0,4.0]);
     let expected = f32x4::from_array([-1.0,-2.0,-3.0,4.0]);
     assert_eq!(f32x4_xor(v1, f32x4::from_array([-0.0,-0.0,-0.0,0.0])), expected);
-    assert_eq!(flip_signs(v1, Mask32::from_array([true,true,true,false])), expected);
+    assert_eq!(flip_signs(v1, mask32x4::from_array([true,true,true,false])), expected);
   }
 
   #[test] fn test_swizzle() {
