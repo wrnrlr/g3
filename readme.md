@@ -16,3 +16,9 @@ rustup update -- nightly
 * [Bivector](https://bivector.net/), community site with more info on geometric algebra including videos, software and a discrord server.
 * [Klein](https://www.jeremyong.com/klein/), simular project in C++.
 * [ganja.js](https://github.com/enkimute/ganja.js), JavaScript library for geometric algebra of arbitrary signature.
+
+## Status
+
+* Todo 
+  * Rename `reverse` methods to `conjugate` for Clifford Conjugate, see [section 1.5](https://observablehq.com/@enkimute/glu-lookat-in-3d-pga)
+  * 
