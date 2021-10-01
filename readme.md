@@ -7,7 +7,7 @@ Rust crate for plane-based projective geometric-algebra for 3D aka the Clifford 
 This software uses some of Rust experimental feautures like `std_simd` and `fn_traits` so make sure to compile using the nightly release.
 
 ```bash
-rustup update -- nightly
+rustup default nightly-2021-08-28˝
 ```
 
 ## Awesome Links
