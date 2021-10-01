@@ -7,6 +7,8 @@ use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs};
 use crate::sandwich::{sw012,sw312,swmm,swo12};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 
+// A motor is a combination of an even number of reflections, i.e. a combination of rotations and translations.
+// These elements are classically called dual quaternions or screws.
 #[derive(Default,Debug,Clone,PartialEq)]
 pub struct Motor {
   pub p1:f32x4,
