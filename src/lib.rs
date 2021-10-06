@@ -2,27 +2,27 @@
 #![feature(fn_traits)]
 #![feature(portable_simd)]
 
-mod dual;
-mod point;
-mod line;
-mod plane;
-mod motor;
-mod rotor;
 mod direction;
+mod dual;
+mod line;
+mod motor;
+mod plane;
+mod point;
+mod rotor;
 mod translator;
 
-pub mod util;
-pub mod sqrt;
-pub mod inner;
-pub mod geometric;
 pub mod exterior;
+pub mod geometric;
+pub mod inner;
 pub mod sandwich;
+pub mod sqrt;
+pub mod util;
 
-pub use dual::{Dual,dual};
-pub use point::{Point,point,Origin};
-pub use line::{Line,line,IdealLine,ideal_line,Branch,branch};
-pub use plane::{Plane,plane};
-pub use motor::{Motor};
-pub use rotor::{Rotor};
-pub use direction::{Direction};
-pub use translator::{Translator};
+pub use direction::Direction;
+pub use dual::{dual, Dual};
+pub use line::{branch, ideal_line, line, Branch, IdealLine, Line};
+pub use motor::Motor;
+pub use plane::{plane, Plane};
+pub use point::{point, Origin, Point};
+pub use rotor::Rotor;
+pub use translator::Translator;
