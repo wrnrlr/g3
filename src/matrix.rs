@@ -1,7 +1,7 @@
 use std::ops::{Fn};
 use core_simd::{f32x4,Mask32};
 use crate::{Point};
-use crate::util::{shuffle_dddd, shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw, shuffle_yyzz, shuffle_yzwy, shuffle_zwyx, shuffle_zwyz, shuffle_zzwy};
+use crate::util::{shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw, shuffle_yyzz, shuffle_yzwy, shuffle_zwyx, shuffle_zwyz, shuffle_zzwy};
 
 
 #[derive(Default,Debug,Clone,PartialEq)]
