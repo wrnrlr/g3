@@ -260,6 +260,8 @@ pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
   tmp.shuffle::<{[0,5,6,7]}>(a) 
 }
 
+pub fn swizzle<const IDX: [u32; 4]>(a:f32x4)->f32x4 { a.shuffle::<{IDX}>(a) }
+
 #[inline] pub fn shuffle_first(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
 #[inline] pub fn shuffle_low(a:f32x4)->f32x4 { a.shuffle::<{[0,0,1,1]}>(a) }
 
@@ -268,11 +270,8 @@ pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
 #[inline] pub fn shuffle_odd(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) }
 #[inline] pub fn shuffle_even(a:f32x4)->f32x4 { a.shuffle::<{[0,0,2,2]}>(a) }
 
-// #[inline] fn shuffle_odd(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) }
-
 #[inline] pub fn shuffle_zzwy(a:f32x4)->f32x4 { a.shuffle::<{[3,3,0,1]}>(a) }
 #[inline] pub fn shuffle_wwyz(a:f32x4)->f32x4 { a.shuffle::<{[0,0,2,3]}>(a) }
-// #[inline] fn shuffle_wwyz(a:f32x4)->f32x4 { a.shuffle::<{[0,0,2,3]}>(a) }
 
 #[inline] pub fn shuffle_yyzz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) } // ??? Yea this should be xxzz...
 
@@ -288,9 +287,9 @@ pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
 
 #[inline] pub fn shuffle_wwww(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
 #[inline] pub fn shuffle_dddd(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
+#[inline] pub fn shuffle_xxxx(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
 
-#[inline] pub fn shuffle_scalar(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
-
+#[inline] pub fn shuffle_zxxx(a:f32x4)->f32x4 { a.shuffle::<{[3,1,1,1]}>(a) }
 #[inline] pub fn shuffle_yzxy(a:f32x4)->f32x4 { a.shuffle::<{[2,3,1,2]}>(a) }
 #[inline] pub fn shuffle_yyzx(a:f32x4)->f32x4 { a.shuffle::<{[2,2,3,1]}>(a) }
 #[inline] pub fn shuffle_xyzx(a:f32x4)->f32x4 { a.shuffle::<{[1,2,3,1]}>(a) }
