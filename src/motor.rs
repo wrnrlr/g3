@@ -281,15 +281,15 @@ impl MulAssign<Translator> for Motor {
 impl Mul<Motor> for Motor {
   type Output = Motor;
   fn mul(self, other:Motor)->Motor {
-    let (p1,p2) = gpmm(self.p1,other.p1);
+    let (p1,p2) = gpmm(self.p1, self.p2, other.p1, other.p2);
     Motor{p1:p1, p2:p2}
   }
 }
 
 impl MulAssign<Motor> for Motor {
   fn mul_assign(&mut self, other:Motor) {
-    let (p1,p2) = gpmm(self.p1,other.p1);
-    self.p1 = p1; self.p2 = p2
+    let (p1,p2) = gpmm(self.p1, self.p2, other.p1, other.p2);
+    self.p1 = p1; self.p2 = p2;
   }
 }
 

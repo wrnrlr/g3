@@ -2,10 +2,10 @@ use core_simd::{f32x4,mask32x4};
 use crate::util::{b2b3a2a3, dp, flip_signs, rcp_nr1, shuffle_wwww,
   shuffle_wwyy, shuffle_wyzx, shuffle_wzxy, shuffle_xwww, shuffle_xxyz,
   shuffle_xyzx, shuffle_xzxy, shuffle_ywww, shuffle_yxyz, shuffle_yyzx,
-  shuffle_yzxy, shuffle_zwww, shuffle_zyzx, shuffle_zzxy, add_ss};
+  shuffle_yzxy, shuffle_zwww, shuffle_zyzx, shuffle_zzxy, swizzle, add_ss};
 
 // plane * plane
-pub fn gp00(a:f32x4,b:f32x4)->(f32x4,f32x4) {
+pub fn gp00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // (a1 b1 + a2 b2 + a3 b3) +
   //
   // (a2 b3 - a3 b2) e23 +
@@ -124,7 +124,7 @@ pub fn gp12<const F:bool>(a:f32x4, b:f32x4)->f32x4 {
   p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
 }
 
-pub fn gpmm(_a:f32x4,_b:f32x4)->(f32x4,f32x4) {
+pub fn gpmm(a:f32x4, b:f32x4, c:f32x4, d:f32x4)->(f32x4,f32x4) {
   // (a0 c0 - a1 c1 - a2 c2 - a3 c3) +
   // (a0 c1 + a3 c2 + a1 c0 - a2 c3) e23 +
   // (a0 c2 + a1 c3 + a2 c0 - a3 c1) e31 +
@@ -134,6 +134,36 @@ pub fn gpmm(_a:f32x4,_b:f32x4)->(f32x4,f32x4) {
   // (a0 d1 + b1 c0 + a3 d2 + b3 c2 - a1 d0 - a2 d3 - b0 c1 - b2 c3) e01 +
   // (a0 d2 + b2 c0 + a1 d3 + b1 c3 - a2 d0 - a3 d1 - b0 c2 - b3 c1) e02 +
   // (a0 d3 + b3 c0 + a2 d1 + b2 c1 - a3 d0 - a1 d2 - b0 c3 - b1 c2) e03
-  todo!()
-}
 
+  let a_xxxx = swizzle::<{[0,0,0,0]}>(a);
+  let a_zyzw = swizzle::<{[2,1,2,3]}>(a);
+  let a_ywyz = swizzle::<{[1,3,1,2]}>(a);
+  let a_wzwy = swizzle::<{[3,2,3,1]}>(a);
+  let c_wwyz = swizzle::<{[3,3,1,2]}>(c);
+  let c_yzwy = swizzle::<{[1,2,3,1]}>(c);
+  let s_flip = mask32x4::from_array([false, false, false, true]);
+
+  let mut e = a_xxxx * c;
+  let mut t = a_ywyz * c_yzwy;
+
+  t = t + (a_zyzw * swizzle::<{[2,0,0,0]}>(c));
+  t = flip_signs(t, s_flip);
+
+  e = e + t;
+  e = e - a_wzwy * c_wwyz;
+
+  let mut f = a_xxxx * d;
+  f = f + b * swizzle::<{[0,0,0,0]}>(c);
+  f = f + a_ywyz * swizzle::<{[1,2,3,1]}>(d);
+  f = f + swizzle::<{[1,2,1,2]}>(b) + c_yzwy;
+
+  t = a_zyzw * swizzle::<{[2,0,0,0]}>(d);
+  t = t + a_wzwy * swizzle::<{[3,3,1,2]}>(d);
+  t = t + swizzle::<{[2,0,0,0]}>(b) * swizzle::<{[2,1,2,3]}>(c);
+  t = t + swizzle::<{[3,2,3,1]}>(b) * c_wwyz;
+  t = flip_signs(t, s_flip);
+
+  f = f - t;
+
+  return (e, f);
+}
