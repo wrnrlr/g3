@@ -10,6 +10,10 @@ This software uses some of Rust experimental feautures like `std_simd` and `fn_t
 rustup update -- nightly
 ```
 
+```bash
+cargo +nightly build
+```
+
 ## Awesome Links
 
 * [Siggraph2019 Geometric Algebra](https://www.youtube.com/watch?v=tX4H_ctggYo), Talk explaining the why and a bit of the how of GA.
