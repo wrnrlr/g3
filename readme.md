@@ -18,7 +18,7 @@ cargo +nightly build
 
 * [Siggraph2019 Geometric Algebra](https://www.youtube.com/watch?v=tX4H_ctggYo), Talk explaining the why and a bit of the how of GA.
 * [Bivector](https://bivector.net/), community site with more info on geometric algebra including videos, software and a discrord server.
-* [Klein](https://www.jeremyong.com/klein/), simular project in C++, the `g3` library models PGA3D in the same way as `Klein.
+* [Klein](https://www.jeremyong.com/klein/), simular project in C++, the `g3` library models PGA3D in the same way as `Klein`.
 * [ganja.js](https://github.com/enkimute/ganja.js), JavaScript library for geometric algebra of arbitrary signature.
 * [Geometric Algebra - Duality and the Cross Product](https://www.youtube.com/watch?v=RAcyVrMNV5s)
 
