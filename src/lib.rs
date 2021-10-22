@@ -2,6 +2,7 @@
 #![feature(fn_traits)]
 #![feature(portable_simd)]
 #![feature(adt_const_params)]
+#![allow(incomplete_features)]
 
 mod dual;
 mod point;

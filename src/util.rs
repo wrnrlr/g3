@@ -1,5 +1,6 @@
-use core_simd::{f32x4,mask32x4,u32x4};
+use core_simd::{f32x4,mask32x4,u32x4,simd_swizzle};
 use crate::sqrt::{rsqrt_nr1};
+use core_simd::simd::Which::{First,Second};
 
 pub fn refined_reciprocal(s:f32)->f32x4 {
   rcp_nr1(f32x4::splat(s))
@@ -252,67 +253,68 @@ pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
 
 #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 {
   let tmp = a + b;
-  tmp.shuffle::<{[0,5,6,7]}>(a) 
+  simd_swizzle!(tmp, a, [First(0), Second(1), Second(2), Second(3)])
 }
 
 #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 {
   let tmp = a * b;
-  tmp.shuffle::<{[0,5,6,7]}>(a) 
+  simd_swizzle!(tmp, a, [First(0), Second(1), Second(2), Second(3)])
 }
 
-#[inline] pub fn swizzle<const IDX: [u32; 4]>(a:f32x4)->f32x4 { a.shuffle::<{IDX}>(a) }
 
-#[inline] pub fn shuffle_first(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
-#[inline] pub fn shuffle_low(a:f32x4)->f32x4 { a.shuffle::<{[0,0,1,1]}>(a) }
+// #[inline] pub fn swizzle<const IDX: [u32; 4]>(a:f32x4)->f32x4 { simd_swizzle!() }
 
-#[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { a.shuffle::<{[6,7,2,3]}>(b) } // b2b3a2a3
+#[inline] pub fn shuffle_first(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,0,0]) }
+#[inline] pub fn shuffle_low(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,1,1]) }
 
-#[inline] pub fn shuffle_odd(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) }
-#[inline] pub fn shuffle_even(a:f32x4)->f32x4 { a.shuffle::<{[0,0,2,2]}>(a) }
+#[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { simd_swizzle!(a, b, [Second(2),Second(3),First(2),First(3),]) } // b2b3a2a3
 
-#[inline] pub fn shuffle_zzwy(a:f32x4)->f32x4 { a.shuffle::<{[3,3,0,1]}>(a) }
-#[inline] pub fn shuffle_wwyz(a:f32x4)->f32x4 { a.shuffle::<{[0,0,2,3]}>(a) }
+#[inline] pub fn shuffle_odd(a:f32x4)->f32x4 { simd_swizzle!(a, [1,1,3,3]) }
+#[inline] pub fn shuffle_even(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,2,2]) }
 
-#[inline] pub fn shuffle_yyzz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) } // ??? Yea this should be xxzz...
+#[inline] pub fn shuffle_zzwy(a:f32x4)->f32x4 { simd_swizzle!(a, [3,3,0,1]) }
+#[inline] pub fn shuffle_wwyz(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,2,3]) }
 
-#[inline] pub fn shuffle_yyzw(a:f32x4)->f32x4 { a.shuffle::<{[2,2,3,0]}>(a) }
+#[inline] pub fn shuffle_yyzz(a:f32x4)->f32x4 { simd_swizzle!(a, [1,1,3,3]) } // ??? Yea this should be xxzz...
 
-#[inline] pub fn shuffle_zwyz(a:f32x4)->f32x4 { a.shuffle::<{[3,0,2,3]}>(a) }
-#[inline] pub fn shuffle_yzwy(a:f32x4)->f32x4 { a.shuffle::<{[2,3,0,2]}>(a) }
+#[inline] pub fn shuffle_yyzw(a:f32x4)->f32x4 { simd_swizzle!(a, [2,2,3,0]) }
 
-#[inline] pub fn shuffle_zwyx(a:f32x4)->f32x4 { a.shuffle::<{[3,0,2,1]}>(a) }
-#[inline] pub fn shuffle_yzwx(a:f32x4)->f32x4 { a.shuffle::<{[2,3,0,1]}>(a) }
+#[inline] pub fn shuffle_zwyz(a:f32x4)->f32x4 { simd_swizzle!(a, [3,0,2,3]) }
+#[inline] pub fn shuffle_yzwy(a:f32x4)->f32x4 { simd_swizzle!(a, [2,3,0,2]) }
 
-#[inline] pub fn shuffle_wyzw(a:f32x4)->f32x4 { a.shuffle::<{[0,2,3,0]}>(a) }
+#[inline] pub fn shuffle_zwyx(a:f32x4)->f32x4 { simd_swizzle!(a, [3,0,2,1]) }
+#[inline] pub fn shuffle_yzwx(a:f32x4)->f32x4 { simd_swizzle!(a, [2,3,0,1]) }
 
-#[inline] pub fn shuffle_wwww(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
-#[inline] pub fn shuffle_dddd(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
-#[inline] pub fn shuffle_xxxx(a:f32x4)->f32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
+#[inline] pub fn shuffle_wyzw(a:f32x4)->f32x4 { simd_swizzle!(a, [0,2,3,0]) }
 
-#[inline] pub fn shuffle_zxxx(a:f32x4)->f32x4 { a.shuffle::<{[3,1,1,1]}>(a) }
-#[inline] pub fn shuffle_yzxy(a:f32x4)->f32x4 { a.shuffle::<{[2,3,1,2]}>(a) }
-#[inline] pub fn shuffle_yyzx(a:f32x4)->f32x4 { a.shuffle::<{[2,2,3,1]}>(a) }
-#[inline] pub fn shuffle_xyzx(a:f32x4)->f32x4 { a.shuffle::<{[1,2,3,1]}>(a) }
-#[inline] pub fn shuffle_xzxy(a:f32x4)->f32x4 { a.shuffle::<{[1,3,1,2]}>(a) }
-#[inline] pub fn shuffle_wzxy(a:f32x4)->f32x4 { a.shuffle::<{[0,3,1,2]}>(a) }
-#[inline] pub fn shuffle_wyzx(a:f32x4)->f32x4 { a.shuffle::<{[0,2,3,1]}>(a) }
-#[inline] pub fn shuffle_zyzx(a:f32x4)->f32x4 { a.shuffle::<{[3,2,3,1]}>(a) }
-#[inline] pub fn shuffle_zzxy(a:f32x4)->f32x4 { a.shuffle::<{[3,3,1,2]}>(a) }
-#[inline] pub fn shuffle_yxyz(a:f32x4)->f32x4 { a.shuffle::<{[2,1,2,3]}>(a) }
-#[inline] pub fn shuffle_zwww(a:f32x4)->f32x4 { a.shuffle::<{[3,0,0,0]}>(a) }
-#[inline] pub fn shuffle_wwyy(a:f32x4)->f32x4 { a.shuffle::<{[0,0,2,2]}>(a) }
-#[inline] pub fn shuffle_ywww(a:f32x4)->f32x4 { a.shuffle::<{[2,0,0,0]}>(a) }
-#[inline] pub fn shuffle_xwww(a:f32x4)->f32x4 { a.shuffle::<{[1,0,0,0]}>(a) }
-#[inline] pub fn shuffle_xxyz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,2,3]}>(a) }
-#[inline] pub fn shuffle_xxzz(a:f32x4)->f32x4 { a.shuffle::<{[1,1,3,3]}>(a) }
-#[inline] pub fn shuffle_wwxx(a:f32x4)->f32x4 { a.shuffle::<{[0,0,1,1]}>(a) }
-#[inline] pub fn shuffle_yzyz(a:f32x4)->f32x4 { a.shuffle::<{[2,3,2,3]}>(a) }
-#[inline] pub fn shuffle_zyzw(a:f32x4)->f32x4 { a.shuffle::<{[3,2,3,0]}>(a) }
-#[inline] pub fn shuffle_ywyz(a:f32x4)->f32x4 { a.shuffle::<{[2,0,2,3]}>(a) }
-#[inline] pub fn shuffle_wzwy(a:f32x4)->f32x4 { a.shuffle::<{[0,3,0,2]}>(a) }
-#[inline] pub fn shuffle_xzwy(a:f32x4)->f32x4 { a.shuffle::<{[1,3,0,2]}>(a) }
+#[inline] pub fn shuffle_wwww(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,0,0]) }
+#[inline] pub fn shuffle_dddd(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,0,0]) }
+#[inline] pub fn shuffle_xxxx(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,0,0]) }
 
-#[inline] pub fn bits_wwww(a:u32x4)->u32x4 { a.shuffle::<{[0,0,0,0]}>(a) }
+#[inline] pub fn shuffle_zxxx(a:f32x4)->f32x4 { simd_swizzle!(a, [3,1,1,1]) }
+#[inline] pub fn shuffle_yzxy(a:f32x4)->f32x4 { simd_swizzle!(a, [2,3,1,2]) }
+#[inline] pub fn shuffle_yyzx(a:f32x4)->f32x4 { simd_swizzle!(a, [2,2,3,1]) }
+#[inline] pub fn shuffle_xyzx(a:f32x4)->f32x4 { simd_swizzle!(a, [1,2,3,1]) }
+#[inline] pub fn shuffle_xzxy(a:f32x4)->f32x4 { simd_swizzle!(a, [1,3,1,2]) }
+#[inline] pub fn shuffle_wzxy(a:f32x4)->f32x4 { simd_swizzle!(a, [0,3,1,2]) }
+#[inline] pub fn shuffle_wyzx(a:f32x4)->f32x4 { simd_swizzle!(a, [0,2,3,1]) }
+#[inline] pub fn shuffle_zyzx(a:f32x4)->f32x4 { simd_swizzle!(a, [3,2,3,1]) }
+#[inline] pub fn shuffle_zzxy(a:f32x4)->f32x4 { simd_swizzle!(a, [3,3,1,2]) }
+#[inline] pub fn shuffle_yxyz(a:f32x4)->f32x4 { simd_swizzle!(a, [2,1,2,3]) }
+#[inline] pub fn shuffle_zwww(a:f32x4)->f32x4 { simd_swizzle!(a, [3,0,0,0]) }
+#[inline] pub fn shuffle_wwyy(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,2,2]) }
+#[inline] pub fn shuffle_ywww(a:f32x4)->f32x4 { simd_swizzle!(a, [2,0,0,0]) }
+#[inline] pub fn shuffle_xwww(a:f32x4)->f32x4 { simd_swizzle!(a, [1,0,0,0]) }
+#[inline] pub fn shuffle_xxyz(a:f32x4)->f32x4 { simd_swizzle!(a, [1,1,2,3]) }
+#[inline] pub fn shuffle_xxzz(a:f32x4)->f32x4 { simd_swizzle!(a, [1,1,3,3]) }
+#[inline] pub fn shuffle_wwxx(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,1,1]) }
+#[inline] pub fn shuffle_yzyz(a:f32x4)->f32x4 { simd_swizzle!(a, [2,3,2,3]) }
+#[inline] pub fn shuffle_zyzw(a:f32x4)->f32x4 { simd_swizzle!(a, [3,2,3,0]) }
+#[inline] pub fn shuffle_ywyz(a:f32x4)->f32x4 { simd_swizzle!(a, [2,0,2,3]) }
+#[inline] pub fn shuffle_wzwy(a:f32x4)->f32x4 { simd_swizzle!(a, [0,3,0,2]) }
+#[inline] pub fn shuffle_xzwy(a:f32x4)->f32x4 { simd_swizzle!(a, [1,3,0,2]) }
+
+#[inline] pub fn bits_wwww(a:u32x4)->u32x4 { simd_swizzle!(a, [0,0,0,0]) }
 
 // a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
 /* 

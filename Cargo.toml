@@ -3,6 +3,7 @@ name = "g3"
 version = "0.1.0"
 authors = ["Werner Laurensse <werner@alman.ax>"]
 edition = "2018"
+resolver = "2"
 
 [dependencies]
 core_simd = { git = "https://github.com/rust-lang/stdsimd"}

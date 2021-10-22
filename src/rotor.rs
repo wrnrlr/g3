@@ -1,9 +1,9 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
-use core_simd::{f32x4,mask32x4};
+use core_simd::{f32x4,mask32x4,simd_swizzle};
 use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
 use crate::sqrt::rsqrt_nr1;
 use crate::sandwich::{sw012,swmm};
-use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, swizzle};
+use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1};
 use crate::geometric::{gp11,gp12,gprt};
 
 #[derive(Default,Debug,Clone,PartialEq)]
@@ -76,7 +76,7 @@ impl Rotor {
 
   // Constrains the rotor to traverse the shortest arc
   pub fn constrained(&self)->Rotor {
-    let mask = swizzle::<{[0,0,0,0]}>(-self.p1); // TODO
+    let mask = simd_swizzle!(-self.p1, [0,0,0,0]); // TODO
     let p1 =  f32x4_xor(mask,self.p1);
     Rotor{p1}
   }
