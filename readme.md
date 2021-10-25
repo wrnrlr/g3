@@ -14,6 +14,12 @@ rustup update -- nightly
 cargo +nightly build
 ```
 
+## Run example
+
+```
+cargo +nightly run --example elements --features="mirror"
+```
+
 ## Awesome Links
 
 * [Siggraph2019 Geometric Algebra](https://www.youtube.com/watch?v=tX4H_ctggYo), Talk explaining the why and a bit of the how of GA.

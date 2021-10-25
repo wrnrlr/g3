@@ -13,6 +13,10 @@ mod rotor;
 mod direction;
 mod translator;
 
+#[cfg(feature = "mirror")]
+mod mirror;
+pub use mirror::mirror;
+
 pub mod util;
 pub mod sqrt;
 pub mod inner;

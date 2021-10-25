@@ -2,11 +2,21 @@
 name = "g3"
 version = "0.1.0"
 authors = ["Werner Laurensse <werner@alman.ax>"]
-edition = "2018"
+edition = "2021"
 resolver = "2"
 
+[features]
+mirror = ["baryon", "mint", "pollster"]
+
 [dependencies]
-core_simd = { git = "https://github.com/rust-lang/stdsimd"}
+core_simd = { git = "https://github.com/rust-lang/stdsimd" }
+baryon = { git = "https://github.com/kvark/baryon", optional = true }
+mint = { version = "0.5.8", optional = true }
+pollster = { version = "0.2.4", optional =  true}
 
 [dev-dependencies]
 peg = "0.7.0"
+
+[[example]]
+name = "elements"
+required-features = ["mirror"]
