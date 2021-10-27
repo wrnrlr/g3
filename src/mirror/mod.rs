@@ -1,6 +1,6 @@
 // Example based on https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_objects
 
-use baryon::{Color,geometry::{Geometry, Streams},window::{Event, Window}};
+use baryon::{Color,geometry::{Geometry, Streams},window::{Event, Key, Window}};
 use crate::{Point};
 
 mod cylinder;
@@ -68,6 +68,9 @@ impl Mirror {
       Event::Draw => {
         // scene[node].pre_rotate(mint::Vector3{x: 0.0, y: 0.0, z: 1.0 }, delta * 20.0);
         context.present(&mut pass, &scene, &camera);
+      }
+      Event::Keyboard {key:Key::Escape, pressed:true} => {
+        std::process::exit(0x0100);
       }
       _ => {}
     })
