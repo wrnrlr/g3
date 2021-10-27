@@ -31,4 +31,4 @@ pub use translator::Translator;
 
 #[cfg(feature = "mirror")]
 mod mirror;
-pub use mirror::mirror;
+pub use mirror::{mirror,Mirror};

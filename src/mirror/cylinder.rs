@@ -1,7 +1,7 @@
 use baryon::{Position,geometry::{Geometry}};
 
 // https://github.com/mrdoob/three.js/blob/dev/src/geometries/CylinderGeometry.js
-pub fn cylinder(streams:super::Streams, radius:f32, height:f32)->Geometry {
+pub fn cylinder(_streams:super::Streams, radius:f32, height:f32)->Geometry {
   const RADIAL_SEGMENTS:u32 = 8;
 
   let half_height = height / 2 as f32;

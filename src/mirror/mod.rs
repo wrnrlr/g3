@@ -1,11 +1,7 @@
 // Example based on https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_objects
 
-use std::cell::RefCell;
-use std::rc::Rc;
-use crate::{line, Line, plane, Plane, point, Point};
-use baryon::{Position,geometry::{Geometry, Streams},window::{Event, Window}};
-
-use std::time;
+use baryon::{Color,geometry::{Geometry, Streams},window::{Event, Window}};
+use crate::{Point};
 
 mod cylinder;
 mod triangle;
@@ -23,13 +19,6 @@ use triangle::triangle;
 //   Line(Line)
 // }
 
-const black:u32 = 0xFF000000;
-const white:u32 = 0xFFFFFFFF;
-const red:u32 = 0xFF0000FF;
-const green:u32 = 0xFF00FF00;
-const blue:u32 = 0xFFFF0000;
-const pink:u32 = 0xFFCCBBFF;
-
 pub struct Mirror {
   window:Window,
   scene:baryon::Scene,
@@ -41,7 +30,7 @@ impl Mirror {
 
   pub fn new()->Self {
     let window = Window::new().title("Mirror").build();
-    let mut context = pollster::block_on(baryon::Context::init().build(&window));
+    let context = pollster::block_on(baryon::Context::init().build(&window));
     let mut scene = baryon::Scene::new();
 
     let camera = baryon::Camera {
@@ -52,17 +41,15 @@ impl Mirror {
         .position([1.8f32, -8.0, 3.0].into())
         .look_at([0f32; 3].into(), [0f32, 0.0, 1.0].into())
         .build(),
-      background: baryon::Color(0xFFFFFFFF),
+      background: Color(0xFFFFFFFF),
     };
 
     Self{window, scene, context, camera}
   }
 
+  // https://users.rust-lang.org/t/self-has-an-anonymous-lifetime-but-it-needs-to-satisfy-a-static-lifetime-requirement/58641/3
   pub fn run(self) {
-
-    let Self {
-      window, scene, mut context, camera
-    } = self;
+    let Self { window, scene, mut context, camera } = self;
 
     let mut pass = baryon::pass::Solid::new(
       &baryon::pass::SolidConfig {
@@ -86,30 +73,28 @@ impl Mirror {
     })
   }
 
-  pub fn vertex(&mut self, p:Point, rgba:u32) {
+  pub fn vertex(&mut self, p:Point, col:Color) {
     let sphere_prototype = Geometry::sphere(Streams::NORMAL, 0.1, 4).bake(&mut self.context);
     self.scene
       .add_entity(&sphere_prototype)
       .position([p.x(), p.y(), p.z()].into())
-      .component(baryon::Color(rgba))
+      .component(col)
       // .component(baryon::pass::Shader::Phong { glossiness: 10 })
       .build();
   }
 
   pub fn edge(&mut self) {}
 
-  pub fn face(&mut self, f:[Point;3], rgba:u32) {
+  pub fn face(&mut self, f:[Point;3], col:Color) {
     let triangle_prototype = triangle(f).bake(&mut self.context);
     self.scene
       .add_entity(&triangle_prototype)
       // .position([p.x(), p.y(), p.z()].into())
-      .component(baryon::Color(rgba))
+      .component(col)
       // .component(baryon::pass::Shader::Phong { glossiness: 10 })
       .build();
   }
 }
-
-// https://users.rust-lang.org/t/self-has-an-anonymous-lifetime-but-it-needs-to-satisfy-a-static-lifetime-requirement/58641/3
 
 pub fn mirror() {
     // let _point_light = scene
@@ -121,25 +106,6 @@ pub fn mirror() {
     //     .add_directional_light()
     //     .position([0.0, 0.0, 5.0].into())
     //     .intensity(4.0)
-    //     .color(baryon::Color(white))
+    //     .color(baryon::Color(WHITE))
     //     .build();
-
-    let mut mr = Mirror::new();
-
-    let a = point(0.0, 0.0, 0.0);
-    let b = point(1.0, 1.0, 1.0);
-    let c = point(1.0, -1.0, 2.0);
-    let d = point(0.0, -1.0, 3.0);
-    // let e = point(0.0, -1.0, 3.0);
-
-    mr.vertex(a, black);
-    mr.vertex(b, red);
-    mr.vertex(c, green);
-    mr.vertex(d, blue);
-
-    mr.face([a, b, c], pink);
-
-    // mr.edge();
-
-    mr.run();
 }
