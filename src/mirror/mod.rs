@@ -1,5 +1,3 @@
-// Example based on https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_objects
-
 use baryon::{Color,geometry::{Geometry, Streams},window::{Event, Key, Window}};
 use crate::{Point};
 
