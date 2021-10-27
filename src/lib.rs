@@ -13,10 +13,6 @@ mod rotor;
 mod direction;
 mod translator;
 
-#[cfg(feature = "mirror")]
-mod mirror;
-pub use mirror::mirror;
-
 pub mod util;
 pub mod sqrt;
 pub mod inner;
@@ -24,11 +20,15 @@ pub mod geometric;
 pub mod exterior;
 pub mod sandwich;
 
-pub use dual::{Dual,dual};
-pub use point::{Point,point,Origin};
-pub use line::{Line,line,IdealLine,ideal_line,Branch,branch};
-pub use plane::{Plane,plane};
-pub use motor::{Motor};
-pub use rotor::{Rotor};
-pub use direction::{Direction};
-pub use translator::{Translator};
+pub use dual::{Dual, dual};
+pub use point::{Origin, Point, point};
+pub use line::{Branch, branch, ideal_line, IdealLine, Line, line};
+pub use plane::{Plane, plane};
+pub use motor::Motor;
+pub use rotor::Rotor;
+pub use direction::Direction;
+pub use translator::Translator;
+
+#[cfg(feature = "mirror")]
+mod mirror;
+pub use mirror::mirror;
