@@ -5,6 +5,7 @@ mod cylinder;
 mod triangle;
 
 use triangle::triangle;
+use cylinder::cylinder;
 
 // struct Vertex(Point);
 // struct Edge([Point;2]);
@@ -32,11 +33,11 @@ impl Mirror {
     let mut scene = baryon::Scene::new();
 
     let camera = baryon::Camera {
-      projection: baryon::Projection::Perspective { fov_y: 45.0 },
+      projection: baryon::Projection::Perspective { fov_y: 80.0 },
       depth: 1.0..10.0,
       node: scene
         .add_node()
-        .position([1.8f32, -8.0, 3.0].into())
+        .position([1.0f32, 0.0, 4.0].into())
         .look_at([0f32; 3].into(), [0f32, 0.0, 1.0].into())
         .build(),
       background: Color(0xFFFFFFFF),
@@ -45,7 +46,6 @@ impl Mirror {
     Self{window, scene, context, camera}
   }
 
-  // https://users.rust-lang.org/t/self-has-an-anonymous-lifetime-but-it-needs-to-satisfy-a-static-lifetime-requirement/58641/3
   pub fn run(self) {
     let Self { window, scene, mut context, camera } = self;
 
@@ -84,16 +84,22 @@ impl Mirror {
       .build();
   }
 
-  pub fn edge(&mut self) {}
-
-  pub fn face(&mut self, f:[Point;3], col:Color) {
-    let triangle_prototype = triangle(f).bake(&mut self.context);
+  pub fn edge(&mut self, e:[Point;2], col:Color) {
+    let cylinder_prototype = cylinder(Streams::NORMAL, 0.5, 1.0).bake(&mut self.context);
     self.scene
-      .add_entity(&triangle_prototype)
+      .add_entity(&cylinder_prototype)
       // .position([p.x(), p.y(), p.z()].into())
       .component(col)
       // .component(baryon::pass::Shader::Phong { glossiness: 10 })
       .build();
+  }
+
+  pub fn face(&mut self, f:[Point;3], col:Color) {
+    // TODO: Instead of adding the same triangle in both the clockwise and counter-clockwise direction, instead use indexes.
+    let triangle_prototype1 = triangle(f).bake(&mut self.context);
+    let triangle_prototype2 = triangle([f[2],f[1],f[0]]).bake(&mut self.context);
+    self.scene.add_entity(&triangle_prototype1).component(col).build();
+    self.scene.add_entity(&triangle_prototype2).component(col).build();
   }
 }
 
