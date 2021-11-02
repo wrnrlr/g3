@@ -10,9 +10,9 @@ mirror = ["baryon", "mint", "pollster"]
 
 [dependencies]
 core_simd = { git = "https://github.com/rust-lang/stdsimd" }
-baryon = { git = "https://github.com/kvark/baryon", optional = true }
+baryon = { git = "https://github.com/wrnrlr/baryon", rev = "f90f696", optional = true }
 mint = { version = "0.5.8", optional = true }
-pollster = { version = "0.2.4", optional =  true}
+pollster = { version = "0.2.4", optional =  true }
 
 [dev-dependencies]
 peg = "0.7.0"
