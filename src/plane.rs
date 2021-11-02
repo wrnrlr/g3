@@ -1,3 +1,4 @@
+use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn};
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
@@ -8,6 +9,7 @@ use crate::exterior::{ext00,ext02,ext03,extpb};
 use crate::geometric::{gp00,gp03};
 use crate::inner::{dot00,dot03,dotpl};
 
+// form: ax + by + cz + d
 pub fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
@@ -79,6 +81,12 @@ impl Plane {
   // that maximizes $p \cdot p'$ (that is, $p'$ is as parallel to $p$ as
   // possible).
   pub fn project_line(self, l:Line)->Plane {  (self | l) | l }
+}
+
+impl Display for Plane {
+  fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    write!(f, "{}e1 + {}e2 + {}e2 + {}e0)", self.x(), self.y(), self.z(), self.d())
+  }
 }
 
 // Reflect another plane $p_2$ through this plane $p_1$. The operation
@@ -193,7 +201,7 @@ impl Div<Plane> for Plane {
   }
 }
 
-// Inner Product | 
+// Inner Product |
 impl BitOr<Plane> for Plane {
   type Output = f32;
   fn bitor(self, other:Plane) -> f32 {
