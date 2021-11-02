@@ -29,6 +29,5 @@ pub use rotor::Rotor;
 pub use direction::Direction;
 pub use translator::Translator;
 
-#[cfg(feature = "mirror")]
-mod mirror;
-pub use mirror::{mirror,Mirror};
+#[cfg(feature = "mirror")] mod mirror;
+#[cfg(feature = "mirror")] pub use mirror::{Mirror};
