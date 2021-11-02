@@ -172,7 +172,7 @@ pub fn log(p1:f32x4, p2:f32x4)->(f32x4,f32x4) {
   let norm_real = a * a2_sqrt_rcp;
   let mut norm_ideal = b * a2_sqrt_rcp;
   norm_ideal -= a * ab * a2_sqrt_rcp * rcp_nr1(a2);
-  
+
   let uvec = f32x4::splat(u);
   let p1_out = uvec * norm_real;
   let p2_out = (uvec * norm_ideal) - (f32x4::splat(v) * norm_real);
@@ -184,7 +184,7 @@ pub fn log(p1:f32x4, p2:f32x4)->(f32x4,f32x4) {
 pub fn hi_dp(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
   let hi = shuffle_odd(out);
-  
+
   let sum  = hi + out;
   out = sum + shuffle_low(out);
   mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
@@ -193,7 +193,7 @@ pub fn hi_dp(a:f32x4, b:f32x4)->f32x4 {
 pub fn hi_dp_bc(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
   let hi = shuffle_odd(out);
-  
+
   let sum  = hi + out;
   out = sum + shuffle_low(out);
   mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
@@ -284,8 +284,7 @@ pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
 
 #[inline] pub fn shuffle_zwyx(a:f32x4)->f32x4 { simd_swizzle!(a, [3,0,2,1]) }
 #[inline] pub fn shuffle_yzwx(a:f32x4)->f32x4 { simd_swizzle!(a, [2,3,0,1]) }
-
-#[inline] pub fn shuffle_wyzw(a:f32x4)->f32x4 { simd_swizzle!(a, [0,2,3,0]) }
+#[inline] pub fn shuffle_wyzw(a:f32x4)->f32x4 { simd_swizzle!(a, [3,1,2,3]) }
 
 #[inline] pub fn shuffle_wwww(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,0,0]) }
 #[inline] pub fn shuffle_dddd(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,0,0]) }
@@ -317,7 +316,7 @@ pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
 #[inline] pub fn bits_wwww(a:u32x4)->u32x4 { simd_swizzle!(a, [0,0,0,0]) }
 
 // a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
-/* 
+/*
 let res: f64 = x
         .par_chunks(8)
         .map(f64x8::from_slice_unaligned)
