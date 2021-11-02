@@ -1,3 +1,4 @@
+use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual,Plane,Line,IdealLine,Branch,Motor,Translator};
@@ -36,7 +37,7 @@ impl Point {
     #[inline] pub fn e013(&self)->f32 { self.y() }
     #[inline] pub fn z(&self)->f32 { self.p3[3] }
     #[inline] pub fn e021(&self)->f32 { self.z() }
-    
+
     // Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
     pub fn new(x:f32,y:f32,z:f32)->Point { Point{p3:f32x4::from_array([1.0,x,y,z])} }
 
@@ -60,6 +61,12 @@ impl Point {
 
     // Project a point onto a plane
     pub fn project_plane(self, p:Plane)->Point { (self | p) ^ p }
+}
+
+impl Display for Point {
+  fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    write!(f, "(x:{}, y:{}, z:{}, w:{})", self.x(), self.y(), self.z(), self.w())
+  }
 }
 
 impl Add<Point> for Point {
@@ -178,7 +185,7 @@ impl BitXor<Plane> for Point {
 //   type Output = Dual;
 //   fn bitxor(self, a:Point) -> Dual { todo!() }
 // }
-  
+
 // Join Operation, Regressive Product, &
 impl BitAnd<Point> for Point {
   type Output = Line;
