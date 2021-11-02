@@ -120,7 +120,7 @@ pub fn sw30(a:f32x4, b:f32x4) ->f32x4 {
   p3_out *= a * f32x4::from_array([0.0,-2.0,-2.0,-2.0]);
 
   let mut tmp = a_yzwy * a_yzwy;
-  tmp += (a_zwyz * a_zwyz);
+  tmp += a_zwyz * a_zwyz;
   tmp -= f32x4_xor(a_wyzw * a_wyzw, f32x4::from_array([-0.0,0.0,0.0,0.0]));
 
   p3_out + b * tmp
