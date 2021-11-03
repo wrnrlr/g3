@@ -9,7 +9,7 @@ use crate::geometric::{gp11,gp12,gprt,gpmm};
 
 // A motor is a combination of an even number of reflections, i.e. a combination of rotations and translations.
 // These elements are classically called dual quaternions or screws.
-#[derive(Default,Debug,Clone,PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq, Copy)]
 pub struct Motor {
   pub p1:f32x4,
   pub p2:f32x4
@@ -32,6 +32,7 @@ impl Motor {
   pub fn e30(&self)->f32 { -self.e03() }
   pub fn e0123(&self)->f32 { self.p2[0] }
 
+  /// a + b*e23 + c*e31 + d*e12 + e*e01 + f*e02 + g*e03 + h*e0123
   pub fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor {
     Motor{p1:f32x4::from_array([a,b,c,d]), p2:f32x4::from_array([h,e,f,g])}}
 
@@ -112,7 +113,7 @@ impl Motor {
 
   pub fn sqrt(self)->Motor {
     let p1 = self.p1 * f32x4::splat(1.0);
-    Motor{p1:p1, p2:f32x4::splat(0.0)}.normalize() // TODO avoid extra copy of Motor 
+    Motor{p1:p1, p2:f32x4::splat(0.0)}.normalize() // TODO avoid extra copy of Motor
   }
 
   pub fn reverse(self)->Motor {
@@ -162,7 +163,7 @@ impl FnMut<(Point,)> for Motor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Point,)> for Motor { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
 // Conjugates a point p with this motor and returns the result.
 impl Fn<(Point,)> for Motor {
-  extern "rust-call" fn call(&self, args: (Point,))->Self::Output {
+  extern "rust-call" fn call(&self, args: (Point,))->Point {
     let p3 = sw312::<false, true>(args.0.p3, self.p1, self.p2);
     Point{p3: p3}
   }
