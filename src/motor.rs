@@ -62,7 +62,7 @@ impl Motor {
     Motor{p1,p2}
   }
 
-  pub fn normalize(&self)->Motor {
+  pub fn normalized(&self)->Motor {
     // m = b + c where b is p1 and c is p2
     //
     // m * ~m = |b|^2 + 2(b0 c0 - b1 c1 - b2 c2 - b3 c3)e0123
