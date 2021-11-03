@@ -1,4 +1,4 @@
-use baryon::{Color,geometry::{Geometry, Streams},window::{Event, Key, Button, Window}};
+use baryon::{Color, geometry::{Geometry, Streams}, window::{Event, Key, Button, Window}};
 use mint;
 use crate::{Point};
 
@@ -39,7 +39,7 @@ impl Mirror {
   }
 
   pub fn run(self) {
-    let Self { window, mut scene, mut context, mut camera } = self;
+    let Self { window, mut scene, mut context, camera } = self;
 
     let mut pass = baryon::pass::Solid::new(
       &baryon::pass::SolidConfig {
@@ -48,36 +48,23 @@ impl Mirror {
       &context,
     );
 
-    let mut leftPressed = false;
+    let mut orbit = Orbit::default();
 
-
-    window.run(move |event| match event {
-      Event::Resize { width, height } => {
-        context.resize(width, height);
+    window.run(move |event| {
+      orbit.event(&event, &mut scene, &camera);
+      match event {
+        Event::Resize { width, height } => {
+          context.resize(width, height);
+        }
+        Event::Draw => {
+          //context.present(&mut pass, &scene, &camera);
+        }
+        Event::Keyboard { key: Key::Escape, pressed: true } => {
+          std::process::exit(0x0100);
+        }
+        _ => {}
       }
-      Event::Draw => {
-        context.present(&mut pass, &scene, &camera);
-      }
-      Event::Keyboard {key:Key::Escape, pressed:true} => {
-        std::process::exit(0x0100);
-      }
-      Event::Pointer { position } => {
-        if !leftPressed { return; }
-        println!("pointer: {:?}", position);
-        let v = mint::Vector3{x:1.0, y:1.0, z:0.0};
-        scene[camera.node].post_rotate(v, 10.0);
-        context.present(&mut pass, &scene, &camera);
-      }
-      Event::Click { button:Button::Left, pressed } => {
-        leftPressed = pressed
-      }
-      Event::Scroll { delta } => {
-        println!("scroll: {:?}", delta);
-        let v = mint::Vector3{x:0.0, y:0.0, z:delta.y};
-        scene[camera.node].post_move(v);
-        context.present(&mut pass, &scene, &camera);
-      }
-      _ => {}
+      context.present(&mut pass, &scene, &camera);
     })
   }
 
@@ -107,3 +94,43 @@ impl Mirror {
   }
 }
 
+struct Orbit {
+  dragging:bool,
+  draggingStart:Option<mint::Vector2<f32>>
+
+}
+
+impl Default for Orbit {
+  fn default() -> Self {
+    Orbit{dragging: false, draggingStart: None}
+  }
+}
+
+impl Orbit {
+  fn event(&mut self, event:&Event, scene:&mut baryon::Scene, camera:&baryon::Camera) {
+    match event {
+      Event::Pointer { position } => {
+        if !self.dragging { return; }
+        if self.draggingStart == None {
+          self.draggingStart = Some(*position);
+        }
+        println!("pointer: {:?}", position);
+        let v = mint::Vector3{x:1.0, y:-1.0, z:0.0};
+        scene[camera.node].post_rotate(v, 1.0);
+      }
+      Event::Click { button:Button::Left, pressed:true } => {
+        self.dragging = true;
+      }
+      Event::Click { button:Button::Left, pressed:false } => {
+        self.dragging = false;
+        self.draggingStart = None;
+      }
+      Event::Scroll { delta } => {
+        println!("scroll: {:?}", delta);
+        let v = mint::Vector3{x:0.0, y:0.0, z:delta.y};
+        scene[camera.node].post_move(v);
+      },
+      _ => {}
+    }
+  }
+}
