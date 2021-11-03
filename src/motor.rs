@@ -118,7 +118,7 @@ impl Motor {
 
   pub fn sqrt(self)->Motor {
     let p1 = self.p1 * f32x4::splat(1.0);
-    Motor{p1:p1, p2:f32x4::splat(0.0)}.normalize() // TODO avoid extra copy of Motor
+    Motor{p1:p1, p2:f32x4::splat(0.0)}.normalized() // TODO avoid extra copy of Motor
   }
 
   pub fn reverse(self)->Motor {
