@@ -1,4 +1,5 @@
-use baryon::{Color,geometry::{Geometry, Streams},window::{Event, Key, Window}};
+use baryon::{Color,geometry::{Geometry, Streams},window::{Event, Key, Button, Window}};
+use mint;
 use crate::{Point};
 
 mod cylinder;
@@ -38,7 +39,7 @@ impl Mirror {
   }
 
   pub fn run(self) {
-    let Self { window, scene, mut context, camera } = self;
+    let Self { window, mut scene, mut context, mut camera } = self;
 
     let mut pass = baryon::pass::Solid::new(
       &baryon::pass::SolidConfig {
@@ -46,6 +47,8 @@ impl Mirror {
       },
       &context,
     );
+
+    let mut leftPressed = false;
 
 
     window.run(move |event| match event {
@@ -57,6 +60,22 @@ impl Mirror {
       }
       Event::Keyboard {key:Key::Escape, pressed:true} => {
         std::process::exit(0x0100);
+      }
+      Event::Pointer { position } => {
+        if !leftPressed { return; }
+        println!("pointer: {:?}", position);
+        let v = mint::Vector3{x:1.0, y:1.0, z:0.0};
+        scene[camera.node].post_rotate(v, 10.0);
+        context.present(&mut pass, &scene, &camera);
+      }
+      Event::Click { button:Button::Left, pressed } => {
+        leftPressed = pressed
+      }
+      Event::Scroll { delta } => {
+        println!("scroll: {:?}", delta);
+        let v = mint::Vector3{x:0.0, y:0.0, z:delta.y};
+        scene[camera.node].post_move(v);
+        context.present(&mut pass, &scene, &camera);
       }
       _ => {}
     })
