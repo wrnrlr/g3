@@ -36,6 +36,11 @@ impl Motor {
   pub fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor {
     Motor{p1:f32x4::from_array([a,b,c,d]), p2:f32x4::from_array([h,e,f,g])}}
 
+  /// Motor with only scalar component set to one
+  pub fn one()->Motor {
+    Motor::new(1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0)
+  }
+
   pub fn inverse(&self)->Motor {
     // s, t computed as in the normalization
     let b2 = dp_bc(self.p1, self.p1);
@@ -195,6 +200,13 @@ impl AddAssign for Motor {
   fn add_assign(&mut self, other: Self) {
     self.p1 += other.p1;
     self.p2 += other.p2;
+  }
+}
+
+impl Add<Translator> for Motor {
+  type Output = Motor;
+  fn add(self, other: Translator)->Motor {
+    Motor{p1: self.p1, p2: self.p2+other.p2}
   }
 }
 
