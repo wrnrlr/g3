@@ -1,6 +1,6 @@
 use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
-use core_simd::{f32x4,mask32x4};
+use core_simd::{f32x4,mask32x4, simd_swizzle as swizzle};
 use crate::{Dual,Plane,Line,IdealLine,Branch,Motor,Translator};
 use crate::util::{flip_signs,rcp_nr1,shuffle_wwww};
 use crate::geometric::{gp03,gp33};
@@ -42,7 +42,7 @@ impl Point {
     pub fn new(x:f32,y:f32,z:f32)->Point { Point{p3:f32x4::from_array([1.0,x,y,z])} }
 
     pub fn normalized(&self)->Point {
-        let tmp = rcp_nr1(shuffle!(self.p3,[0,0,0,0]));
+        let tmp = rcp_nr1(swizzle!(self.p3,[0,0,0,0]));
         Point{ p3: self.p3 * tmp }
     }
 
