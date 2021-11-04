@@ -37,8 +37,6 @@ pub fn rcp_nr1(a:f32x4)->f32x4 {
   xn * (f32x4::splat(2.0) - axn)
 }
 
-// a := p1
-// b := p2
 // a + b is a general bivector but it is most likely *non-simple* meaning
 // that it is neither purely real nor purely ideal.
 // Exponentiates the bivector and returns the motor defined by partitions 1
@@ -199,8 +197,6 @@ pub fn log(p1:f32x4, p2:f32x4)->(f32x4,f32x4) {
   (p1_out, p2_out)
 }
 
-// Equivalent to _mm_dp_ps(a, b, 0b11100001);
-
 pub fn hi_dp(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
   let hi = shuffle_odd(out);
@@ -246,7 +242,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
   out = hi + out;
   out[0] += b2b3a2a3(hi,out)[0];
-  shuffle_first(out);
+  shuffle_xxxx(out);
   out
 }
 
@@ -281,12 +277,9 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
   swizzle!(tmp, a, [First(0), Second(1), Second(2), Second(3)])
 }
 
-#[inline] pub fn shuffle_first(a:f32x4)->f32x4 { swizzle!(a, [0,0,0,0]) }
-#[inline] pub fn shuffle_low(a:f32x4)->f32x4 { swizzle!(a, [0,0,1,1]) }
-
 #[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) } // b2b3a2a3
-#[inline] pub fn a0a1b0b1(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [First(0),First(1),Second(0),Second(1)]) }
 
+#[inline] pub fn shuffle_low(a:f32x4)->f32x4 { swizzle!(a, [0,0,1,1]) }
 #[inline] pub fn shuffle_odd(a:f32x4)->f32x4 { swizzle!(a, [1,1,3,3]) }
 #[inline] pub fn shuffle_even(a:f32x4)->f32x4 { swizzle!(a, [0,0,2,2]) }
 
