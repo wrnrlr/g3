@@ -1,4 +1,6 @@
-// Meet Operation, Exterior Product, ^
+// The wedge product ^ (also known as the meet or outer) is
+// bilinear, anti-symmetric, and extended to be associative.
+// Note that a ^ a = 0
 
 #[cfg(test)]
 mod tests {

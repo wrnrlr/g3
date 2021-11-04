@@ -1,4 +1,7 @@
 // Join Operation, Regressive Product, &
+
+// the pseudoscalar  is the identity for the regressive product
+
 #[cfg(test)]
 mod tests {
   use g3::{plane,line,point,ideal_line,branch};
@@ -36,5 +39,5 @@ mod tests {
     let _d2 = a & p1;
     todo!();
   }
-  
+
 }
