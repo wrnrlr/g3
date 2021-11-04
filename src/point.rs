@@ -48,8 +48,7 @@ impl Point {
 
     pub fn inverse(&self)->Point {
         let inv_norm = rcp_nr1(shuffle_wwww(self.p3));
-        let p3 = inv_norm * self.p3;
-        Point{p3:inv_norm * p3}
+        Point{p3:inv_norm * inv_norm * self.p3}
     }
 
     pub fn reverse(&self)->Point {
