@@ -1,8 +1,8 @@
 use core_simd::{f32x4,mask32x4, simd_swizzle};
-use crate::util::{b2b3a2a3, dp, flip_signs, rcp_nr1, shuffle_wwww,
-  shuffle_wwyy, shuffle_wyzx, shuffle_wzxy, shuffle_xwww, shuffle_xxyz,
+use crate::util::{dp, flip_signs, rcp_nr1, shuffle_wwww,
+  shuffle_wyzx, shuffle_wzxy, shuffle_xwww, shuffle_xxyz,
   shuffle_xyzx, shuffle_xzxy, shuffle_ywww, shuffle_yxyz, shuffle_yyzx,
-  shuffle_yzxy, shuffle_zwww, shuffle_zyzx, shuffle_zzxy, add_ss};
+  shuffle_yzxy, shuffle_zwww, shuffle_zyzx, shuffle_zzxy, shuffle_xxxx, add_ss};
 
 // plane * plane
 pub fn gp00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
@@ -85,14 +85,16 @@ pub fn gp33(a:f32x4, b:f32x4)->f32x4 {
   // (-a0 b3 + a3 b0) e03
   //
   // Produce a translator by dividing all terms by a0 b0
-  let mut tmp = shuffle_wwww(a) * b;
-  tmp = tmp * f32x4::from_array([-2.0, -1.0, -1.0, -1.0]);
-  tmp = tmp + a * shuffle_wwww(b);
-  // (0, 1, 2, 3) -> (0, 0, 2, 2)
-  let mut ss = shuffle_wwyy(tmp);
-  ss = b2b3a2a3(ss,ss);
+  let mut tmp = shuffle_xxxx(a) * b;
+  // -2a0b0        | -a0b1        | -a0b2        | -a0b3
+  tmp *= f32x4::from_array([-2.0, -1.0, -1.0, -1.0]);
+  // -2a0b0 + a0b0 | -a0b1 + a1b0 | -a0b2 + a2b0 | -a0b3 + a3b0
+  // -a0b0         | -a0b1 + a1b0 | -a0b2 + a2b0 | -a0b3 + a3b0
+  tmp += a * shuffle_xxxx(b);
+
+  let ss = shuffle_xxxx(tmp);
+
   tmp = tmp * rcp_nr1(ss);
-  // p2 = _mm_and_ps(tmp, _mm_castsi128_ps(_mm_set_epi32(-1, -1, -1, 0)));
   mask32x4::from_array([false, true, true, true]).select(tmp, f32x4::splat(0.0))
 }
 
