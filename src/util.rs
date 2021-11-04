@@ -14,7 +14,7 @@ pub fn rcp_nr1(a:f32x4)->f32x4 {
   //         = 2x_n - a x_n^2 = x_n (2 - a x_n)
   let xn = f32x4::splat(1.0) / a; // TODO fast reciprocal?
   let axn = a * xn;
-  xn * (f32x4::splat(1.0) - axn)
+  xn * (f32x4::splat(2.0) - axn)
 }
 
 // a := p1
@@ -279,12 +279,13 @@ pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
 
 #[inline] pub fn shuffle_yyzw(a:f32x4)->f32x4 { simd_swizzle!(a, [2,2,3,0]) }
 
-#[inline] pub fn shuffle_zwyz(a:f32x4)->f32x4 { simd_swizzle!(a, [3,0,2,3]) }
-#[inline] pub fn shuffle_yzwy(a:f32x4)->f32x4 { simd_swizzle!(a, [2,3,0,2]) }
+#[inline] pub fn shuffle_zwyz(a:f32x4)->f32x4 { simd_swizzle!(a, [2,3,1,2]) }
+#[inline] pub fn shuffle_yzwy(a:f32x4)->f32x4 { simd_swizzle!(a, [1,2,3,1]) }
 
 #[inline] pub fn shuffle_zwyx(a:f32x4)->f32x4 { simd_swizzle!(a, [3,0,2,1]) }
 #[inline] pub fn shuffle_yzwx(a:f32x4)->f32x4 { simd_swizzle!(a, [2,3,0,1]) }
 #[inline] pub fn shuffle_wyzw(a:f32x4)->f32x4 { simd_swizzle!(a, [3,1,2,3]) }
+#[inline] pub fn shuffle_xwyz(a:f32x4)->f32x4 { simd_swizzle!(a, [0,3,1,2]) }
 
 #[inline] pub fn shuffle_wwww(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,0,0]) }
 #[inline] pub fn shuffle_dddd(a:f32x4)->f32x4 { simd_swizzle!(a, [0,0,0,0]) }
