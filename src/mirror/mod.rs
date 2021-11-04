@@ -1,12 +1,13 @@
-use baryon::{Color, geometry::{Geometry, Streams}, window::{Event, Key, Button, Window}};
-use mint;
+use baryon::{Color, geometry::{Geometry, Streams}, window::{Event, Key, Window}};
 use crate::{Point};
 
 mod cylinder;
 mod triangle;
+mod orbit;
 
 use triangle::triangle;
 use cylinder::cylinder;
+use orbit::Orbit;
 
 const POINT_RADIUS:f32 = 0.1;
 
@@ -91,46 +92,5 @@ impl Mirror {
     let triangle_prototype2 = triangle([f[2],f[1],f[0]]).bake(&mut self.context);
     self.scene.add_entity(&triangle_prototype1).component(col).build();
     self.scene.add_entity(&triangle_prototype2).component(col).build();
-  }
-}
-
-struct Orbit {
-  dragging:bool,
-  draggingStart:Option<mint::Vector2<f32>>
-
-}
-
-impl Default for Orbit {
-  fn default() -> Self {
-    Orbit{dragging: false, draggingStart: None}
-  }
-}
-
-impl Orbit {
-  fn event(&mut self, event:&Event, scene:&mut baryon::Scene, camera:&baryon::Camera) {
-    match event {
-      Event::Pointer { position } => {
-        if !self.dragging { return; }
-        if self.draggingStart == None {
-          self.draggingStart = Some(*position);
-        }
-        println!("pointer: {:?}", position);
-        let v = mint::Vector3{x:1.0, y:-1.0, z:0.0};
-        scene[camera.node].post_rotate(v, 1.0);
-      }
-      Event::Click { button:Button::Left, pressed:true } => {
-        self.dragging = true;
-      }
-      Event::Click { button:Button::Left, pressed:false } => {
-        self.dragging = false;
-        self.draggingStart = None;
-      }
-      Event::Scroll { delta } => {
-        println!("scroll: {:?}", delta);
-        let v = mint::Vector3{x:0.0, y:0.0, z:delta.y};
-        scene[camera.node].post_move(v);
-      },
-      _ => {}
-    }
   }
 }
