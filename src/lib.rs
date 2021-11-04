@@ -14,7 +14,6 @@ mod direction;
 mod translator;
 
 pub mod util;
-pub mod sqrt;
 pub mod inner;
 pub mod geometric;
 pub mod exterior;

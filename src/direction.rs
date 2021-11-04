@@ -1,7 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg};
 use core_simd::{f32x4,u32x4};
-use crate::util::{refined_reciprocal,hi_dp_bc};
-use crate::sqrt::{rsqrt_nr1};
+use crate::util::{refined_reciprocal,hi_dp_bc,rsqrt_nr1};
 
 // Directions in are represented using points at infinity (homogeneous coordinate 0).
 // Having a homogeneous coordinate of zero ensures that directions are translation-invariant.
@@ -14,7 +13,7 @@ impl Direction {
   pub fn x(&self)->f32 { self.p3[1] }
   pub fn y(&self)->f32 { self.p3[2] }
   pub fn z(&self)->f32 { self.p3[3] }
-  
+
   // Create a normalized direction
   pub fn new(x:f32,y:f32,z:f32)->Direction {
     Direction{p3:f32x4::from_array([0.0,x,y,z])}.normalized()

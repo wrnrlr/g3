@@ -1,9 +1,8 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use std::convert::{From};
 use core_simd::{f32x4,mask32x4};
-use crate::sqrt::rsqrt_nr1;
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
-use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs};
+use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1};
 use crate::sandwich::{sw012,sw312,swmm,swo12};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 
@@ -39,6 +38,10 @@ impl Motor {
   /// Motor with only scalar component set to one
   pub fn one()->Motor {
     Motor::new(1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0)
+  }
+
+  pub fn from_scalar(s:f32)->Motor {
+    Motor::new(s,0.0,0.0,0.0,0.0,0.0,0.0,0.0)
   }
 
   pub fn inverse(&self)->Motor {

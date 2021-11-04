@@ -1,8 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
-use crate::util::{exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1};
-use crate::sqrt::{rsqrt_nr1, sqrt_nr1};
+use crate::util::{exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1, rsqrt_nr1, sqrt_nr1};
 use crate::inner::{dot11,dotpl,dotpil};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
@@ -34,7 +33,7 @@ impl Line {
   }
 
   pub fn from_branch(b:Branch)->Line { Line{p1: b.p1, p2: f32x4::splat(0.0)} }
-  
+
   pub fn from_ideal_line(l:IdealLine)->Line { Line{p1: f32x4::splat(0.0), p2: l.p2} }
 
   // Returns the square root of the quantity produced by `squared_norm`.
@@ -416,7 +415,7 @@ impl Branch {
 
   // Returns the square root of the quantity produced by `squared_norm`.
   pub fn norm(self)->f32 { self.squared_norm().sqrt() }
-  
+
   // TODO normalize
 
   pub fn normalized(self)->Branch {
