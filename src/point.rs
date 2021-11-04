@@ -2,7 +2,7 @@ use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
 use core_simd::{f32x4,mask32x4, simd_swizzle as swizzle};
 use crate::{Dual,Plane,Line,IdealLine,Branch,Motor,Translator};
-use crate::util::{flip_signs,rcp_nr1,shuffle_wwww};
+use crate::util::{flip_signs,rcp_nr1,shuffle_xxxx};
 use crate::geometric::{gp03,gp33};
 use crate::inner::{dotptl,dot33};
 use crate::exterior::{ext03};
@@ -47,7 +47,7 @@ impl Point {
     }
 
     pub fn inverse(&self)->Point {
-        let inv_norm = rcp_nr1(shuffle_wwww(self.p3));
+        let inv_norm = rcp_nr1(shuffle_xxxx(self.p3));
         Point{p3:inv_norm * inv_norm * self.p3}
     }
 

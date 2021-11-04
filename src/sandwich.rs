@@ -1,8 +1,8 @@
 use core_simd::{f32x4,mask32x4};
 use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1,
-  shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw,
-  shuffle_yyzz, shuffle_yzwy, shuffle_zwyz, shuffle_zzwy, shuffle_zyzw, shuffle_ywyz,
-  shuffle_wzwy, shuffle_xzwy, shuffle_yyzx, shuffle_zzxy, shuffle_xxyz, shuffle_xxxx, shuffle_xwyz};
+                  shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw,
+                  shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zzwy, shuffle_zyzw, shuffle_ywyz,
+                  shuffle_wzwy, shuffle_xzwy, shuffle_yyzx, shuffle_zzxy, shuffle_xxyz, shuffle_xwyz};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -31,8 +31,8 @@ pub fn sw00(a:f32x4,b:f32x4)->f32x4 {
   let mut tmp = a_zzwy * shuffle_zzwy(b);
   tmp = tmp + a_wwyz * shuffle_wwyz(b);
 
-  let a1 = shuffle_yyzz(a);
-  let b1 = shuffle_yyzz(b);
+  let a1 = shuffle_yyww(a);
+  let b1 = shuffle_yyww(b);
   tmp = tmp + a1 * b1;
   tmp = tmp * (a + a);
 
@@ -77,7 +77,7 @@ pub fn sw10(a:f32x4,b:f32x4)->(f32x4,f32x4) {
 
   let mut p2 = a_zyzw * b_xzwy;
   p2 = p2 - a_wzwy * b;
-  p2 = p2 * shuffle_wwww(a) * two_zero;
+  p2 = p2 * shuffle_xxxx(a) * two_zero;
   p2 = shuffle_wyzx(p2);
 
   (p1,p2)
@@ -191,7 +191,7 @@ pub fn sw32(a:f32x4, b:f32x4)->f32x4 {
   // (a1 - 2 a0 b1) e032 +
   // (a2 - 2 a0 b2) e013 +
   // (a3 - 2 a0 b3) e021
-  let mut tmp = shuffle_wwww(a) * b;
+  let mut tmp = shuffle_xxxx(a) * b;
   tmp *= f32x4::from_array([0.0, -2.0, -2.0, -2.0]);
   a + tmp
 }
@@ -211,7 +211,7 @@ pub fn swl2(a:f32x4, d:f32x4, c:f32x4)->(f32x4, f32x4) {
   let mut p2_out = shuffle_wyzx(a) * shuffle_wzxy(c);
   // Add and subtract the same quantity in the low component to produce a cancellation
   p2_out -= shuffle_wzxy(a) * shuffle_wyzx(c);
-  p2_out -= flip_signs(a * shuffle_wwww(c), mask32x4::from_array([true, false, false, false]));
+  p2_out -= flip_signs(a * shuffle_xxxx(c), mask32x4::from_array([true, false, false, false]));
   (a, p2_out + p2_out + d)
 }
 

@@ -1,6 +1,6 @@
 use core_simd::{f32x4,mask32x4};
 
-use crate::util::{dp, flip_signs, shuffle_wwww, shuffle_wyzx, shuffle_xwww, add_ss, hi_dp};
+use crate::util::{dp, flip_signs, shuffle_xxxx, shuffle_wyzx, shuffle_xwww, add_ss, hi_dp};
 
 pub fn ext00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // (a1 b2 - a2 b1) e12 +
@@ -11,8 +11,8 @@ pub fn ext00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // (a0 b3 - a3 b0) e03
   let mut p1_out = a * shuffle_wyzx(b);
   p1_out = shuffle_wyzx(p1_out - shuffle_wyzx(a) * b);
-  let mut p2_out = shuffle_wwww(a) * b;
-  p2_out = p2_out - a * shuffle_wwww(b);
+  let mut p2_out = shuffle_xxxx(a) * b;
+  p2_out = p2_out - a * shuffle_xxxx(b);
   // For both outputs above, we don't zero the lowest component because
   // we've arranged a cancelation TODO wdym???
   return (p1_out,p2_out);

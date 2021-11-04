@@ -1,8 +1,8 @@
 use core_simd::{f32x4,mask32x4, simd_swizzle};
-use crate::util::{dp, flip_signs, rcp_nr1, shuffle_wwww,
-  shuffle_wyzx, shuffle_wzxy, shuffle_xwww, shuffle_xxyz,
+use crate::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx,
+  shuffle_wyzx, shuffle_wzxy, shuffle_xwww, shuffle_xxyz, shuffle_zzwy,
   shuffle_xyzx, shuffle_xzxy, shuffle_ywww, shuffle_yxyz, shuffle_yyzx,
-  shuffle_yzxy, shuffle_zwww, shuffle_zyzx, shuffle_zzxy, shuffle_xxxx, add_ss};
+  shuffle_zwyz, shuffle_zwww, shuffle_zyzx, shuffle_zzxy, add_ss};
 
 // plane * plane
 pub fn gp00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
@@ -16,14 +16,14 @@ pub fn gp00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // (a0 b2 - a2 b0) e02 +
   // (a0 b3 - a3 b0) e03
   let mut p1_out = shuffle_xyzx(a) * shuffle_xzxy(b);
-  p1_out = p1_out - (-(shuffle_yzxy(a) * shuffle_yyzx(b)));
+  p1_out = p1_out - (-(shuffle_zwyz(a) * shuffle_yyzx(b)));
   // Add a3 b3 to the lowest component
   p1_out = add_ss(p1_out, shuffle_zwww(a) * shuffle_zwww(b));
   // (a0 b0, a0 b1, a0 b2, a0 b3)
-  let mut p2_out = shuffle_wwww(a) * b;
+  let mut p2_out = shuffle_xxxx(a) * b;
   // Sub (a0 b0, a1 b0, a2 b0, a3 b0)
   // Note that the lowest component cancels
-  p2_out = p2_out - a * shuffle_wwww(b);
+  p2_out = p2_out - a * shuffle_xxxx(b);
   return (p1_out, p2_out);
 }
 
@@ -45,7 +45,7 @@ pub fn gp03<const F:bool>(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // (a3 b2 - a2 b3) e01 +
   // (a1 b3 - a3 b1) e02 +
   // (a2 b1 - a1 b2) e03
-  let mut p1 = a * shuffle_wwww(b);
+  let mut p1 = a * shuffle_xxxx(b);
   p1 = mask32x4::from_array([false, true, true, true]).select(p1, f32x4::splat(0.0));
   // (_, a3 b2, a1 b3, a2 b1)
   let mut p2 = shuffle_wzxy(a) * shuffle_wyzx(b);
@@ -68,7 +68,7 @@ pub fn gp11(a:f32x4, b:f32x4)->f32x4 {
   // coefficients with cartesian coordinates
 
   // In general, we can get rid of at most one swizzle
-  let mut p1_out = shuffle_wwww(a) * b;
+  let mut p1_out = shuffle_xxxx(a) * b;
   p1_out = p1_out - (shuffle_xyzx(a) * shuffle_xzxy(b));
   // In a separate register, accumulate the later components so we can
   // negate the lower single-precision element with a single instruction
@@ -115,14 +115,14 @@ pub fn gprt<const F:bool>(a:f32x4, b:f32x4)->f32x4 {
   // (a0 b2 + a1 b3 - a3 b1) e02 +
   // (a0 b3 + a2 b1 - a1 b2) e03
   let mut p2 = shuffle_xwww(a) * shuffle_xxyz(b);
-  p2 = p2 + shuffle_yyzx(a) * shuffle_yzxy(b);
+  p2 = p2 + shuffle_zzwy(a) * shuffle_zwyz(b);
   let tmp = if F { shuffle_zzxy(a) * shuffle_zyzx(b)} else { shuffle_zyzx(a) * shuffle_zzxy(b) };
   p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false])) // TODO Correct?
 }
 
 pub fn gp12<const F:bool>(a:f32x4, b:f32x4)->f32x4 {
   let p2 = gprt::<F>(a,b);
-  let tmp = a * shuffle_wwww(b);
+  let tmp = a * shuffle_xxxx(b);
   p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
 }
 
