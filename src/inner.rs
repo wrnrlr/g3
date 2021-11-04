@@ -1,5 +1,5 @@
 use core_simd::{mask32x4, f32x4};
-use crate::util::{hi_dp, mul_ss, shuffle_xxxx, shuffle_wyzx};
+use crate::util::{hi_dp, mul_ss, shuffle_xxxx, shuffle_xzwy};
 
 pub fn dot00(a:f32x4, b:f32x4)->f32x4 {
   // a1 b1 + a2 b2 + a3 b3
@@ -15,7 +15,7 @@ pub fn dot03(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // a3 b0 e12
   let mut p1_out = a * shuffle_xxxx(b);
   p1_out = mask32x4::from_array([true, false, false, false]).select(p1_out, f32x4::splat(0.0)); // TODO check if correct
-  let p2_out = shuffle_wyzx(shuffle_wyzx(a)*b - a*shuffle_wyzx(b));
+  let p2_out = shuffle_xzwy(shuffle_xzwy(a)*b - a*shuffle_xzwy(b));
   return (p1_out, p2_out);
 }
 

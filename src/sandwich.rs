@@ -1,8 +1,8 @@
 use core_simd::{f32x4,mask32x4};
 use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1,
-                  shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw,
-                  shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zzwy, shuffle_zyzw, shuffle_ywyz,
-                  shuffle_wzwy, shuffle_xzwy, shuffle_yyzx, shuffle_zzxy, shuffle_xxyz, shuffle_xwyz};
+                  shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw,
+                  shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz,
+                  shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -71,14 +71,14 @@ pub fn sw10(a:f32x4,b:f32x4)->(f32x4,f32x4) {
   tmp = tmp + a_wzwy * a_wzwy;
   tmp = -tmp;
   tmp = (a_ywyz * a_ywyz) - tmp;
-  tmp = shuffle_wzxy(b) * tmp;
+  tmp = shuffle_xwyz(b) * tmp;
 
-  let p1 = shuffle_wyzx(p1 + tmp);
+  let p1 = shuffle_xzwy(p1 + tmp);
 
   let mut p2 = a_zyzw * b_xzwy;
   p2 = p2 - a_wzwy * b;
   p2 = p2 * shuffle_xxxx(a) * two_zero;
-  p2 = shuffle_wyzx(p2);
+  p2 = shuffle_xzwy(p2);
 
   (p1,p2)
 }
@@ -88,19 +88,19 @@ pub fn sw20(a:f32x4,b:f32x4)->f32x4 {
   // (-2a3(a1 b1 + a2 b2) + b3(a1^2 + a2^2 - a3^2)) e03
   // (-2a1(a2 b2 + a3 b3) + b1(a2^2 + a3^2 - a1^2)) e01 +
   // (-2a2(a3 b3 + a1 b1) + b2(a3^2 + a1^2 - a2^2)) e02 +
-  let a_zzwy = shuffle_yyzx(a);
-  let a_wwyz = shuffle_zzxy(a);
+  let a_zzwy = shuffle_zzwy(a);
+  let a_wwyz = shuffle_wwyz(a);
 
   let mut p2 = a * b;
-  p2 = p2 + a_zzwy * shuffle_wyzx(b);
+  p2 = p2 + a_zzwy * shuffle_xzwy(b);
   p2 = p2 * (a_wwyz * f32x4::from_array([0.0, -2.0, -2.0, -2.0]));
 
-  let a_yyzw = shuffle_xxyz(a);
+  let a_yyzw = shuffle_yyzw(a);
   let mut tmp = a_yyzw * a_yyzw;
   tmp = -(tmp + (a_zzwy * a_zzwy));
   tmp = tmp - (a_wwyz * a_wwyz);
-  p2 = p2 + tmp * shuffle_wzxy(b);
-  shuffle_wyzx(p2)
+  p2 = p2 + tmp * shuffle_xwyz(b);
+  shuffle_xzwy(p2)
 }
 
 // reflect point through plane
@@ -208,9 +208,9 @@ pub fn swl2(a:f32x4, d:f32x4, c:f32x4)->(f32x4, f32x4) {
   // (2(a2 c3 - a3 c2 - a1 c0) + d1) e01 +
   // (2(a3 c1 - a1 c3 - a2 c0) + d2) e02 +
   // (2(a1 c2 - a2 c1 - a3 c0) + d3) e03
-  let mut p2_out = shuffle_wyzx(a) * shuffle_wzxy(c);
+  let mut p2_out = shuffle_xzwy(a) * shuffle_xwyz(c);
   // Add and subtract the same quantity in the low component to produce a cancellation
-  p2_out -= shuffle_wzxy(a) * shuffle_wyzx(c);
+  p2_out -= shuffle_xwyz(a) * shuffle_xzwy(c);
   p2_out -= flip_signs(a * shuffle_xxxx(c), mask32x4::from_array([true, false, false, false]));
   (a, p2_out + p2_out + d)
 }
