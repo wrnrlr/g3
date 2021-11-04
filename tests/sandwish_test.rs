@@ -9,8 +9,7 @@ mod tests {
   // -ab^(-a) = b
 
 
-  #[test] #[ignore] fn sandwich_point_between_plane() {
-    // the homogeneous coordinate are not the smame, lhs 0, rhs 1
+  #[test] fn sandwich_point_between_plane() {
     assert_eq!(plane(1.0,0.0,0.0,0.0)(point(1.0,0.0,0.0)), point(-1.0,0.0,0.0))
   }
 }

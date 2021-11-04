@@ -2,7 +2,7 @@ use core_simd::{f32x4,mask32x4};
 use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1,
   shuffle_wwww, shuffle_wwyz, shuffle_wyzw, shuffle_wyzx, shuffle_wzxy, shuffle_yyzw,
   shuffle_yyzz, shuffle_yzwy, shuffle_zwyz, shuffle_zzwy, shuffle_zyzw, shuffle_ywyz,
-  shuffle_wzwy, shuffle_xzwy, shuffle_yyzx, shuffle_zzxy, shuffle_xxyz};
+  shuffle_wzwy, shuffle_xzwy, shuffle_yyzx, shuffle_zzxy, shuffle_xxyz, shuffle_xxxx, shuffle_xwyz};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -110,20 +110,30 @@ pub fn sw30(a:f32x4, b:f32x4) ->f32x4 {
   // (-2a2(a0 b0 + a1 b1 + a3 b3) + b2(a3^2 + a1^2 - a2^2)) e013 +
   // (-2a3(a0 b0 + a2 b2 + a1 b1) + b3(a1^2 + a2^2 - a3^2)) e021
 
-  let a_zwyz = shuffle_zwyz(a);
-  let a_yzwy = shuffle_yzwy(a);
-  let a_wyzw = shuffle_wyzw(a);
+  let a_zwyz = shuffle_zwyz(a); // a2, a3, a1, a2
+  let a_yzwy = shuffle_yzwy(a); // a1, a2, a3, a1
+  let a_wyzw = shuffle_wyzw(a); // a3, a1, a2, a3
 
-  let mut p3_out = shuffle_wwww(a) * shuffle_wwww(b);
-  p3_out += a_zwyz * shuffle_wzxy(b);
-  p3_out += a_yzwy * shuffle_wyzx(b);
+  //     a0 b0              |      a0 b0              |      a0 b0              |      a0 b0
+  let mut p3_out = shuffle_xxxx(a) * shuffle_xxxx(b);
+  //     a0 b0+a2 b0        |      a0 b0+a3 b3        |      a0 b0+a1 b1        |      a0 b0+a3 b2
+  p3_out += a_zwyz * shuffle_xwyz(b);
+  //     a0 b0+a2 b0+a1 b0  |      a0 b0+a3 b3+a2 b2  |      a0 b0+a1 b0+a3 b3  |      a0 b0+a3 b2+a1 b1
+  p3_out += a_yzwy * shuffle_xzwy(b);
+  // 0b0(a0 b0+a2 b0+a1 b0) | -2a1(a0 b0+a3 b3+a2 b2) | -2a2(a0 b0+a1 b0+a3 b3) | -2a3(a0 b0+a3 b2+a1 b1)
   p3_out *= a * f32x4::from_array([0.0,-2.0,-2.0,-2.0]);
+  //                        | -2a1(a0 b0+a3 b3+a2 b2) | -2a2(a0 b0+a1 b0+a3 b3) | -2a3(a0 b0+a3 b2+a1 b1)
 
+  // a1^2           | a2^2           | a3^2           | a1^2
   let mut tmp = a_yzwy * a_yzwy;
+  // a1^2+a2^2      | a2^2+a3^2      | a3^2+a1^2      | a1^2+a2^2
   tmp += a_zwyz * a_zwyz;
+  // a1^2+a2^2+a3^2 | a2^2+a3^2-a1^2 | a3^2+a1^2-a2^2 | a1^2+a2^2-a3^2
   tmp -= f32x4_xor(a_wyzw * a_wyzw, f32x4::from_array([-0.0,0.0,0.0,0.0]));
 
-  p3_out + b * tmp
+  p3_out = p3_out + b * tmp;
+
+  p3_out
 }
 
 pub fn sw012<const N:bool,const F:bool>(_p0:f32x4,_p1:f32x4)->f32x4 {
