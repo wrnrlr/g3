@@ -75,6 +75,20 @@ impl Fn<(Point,)> for Translator {
   }
 }
 
+impl Add<f32> for Translator {
+  type Output = Translator;
+  fn add(self, f:f32) -> Translator {
+    Translator{ p2: self.p2+f }
+  }
+}
+
+impl Add<Translator> for f32 {
+  type Output = Translator;
+  fn add(self, t:Translator) -> Translator {
+    Translator{ p2: t.p2+self }
+  }
+}
+
 impl Add<Translator> for Translator {
   type Output = Translator;
   fn add(self, other: Translator) -> Translator {
