@@ -5,7 +5,7 @@ use crate::util::{flip_signs};
 use crate::sandwich::{sw02,sw32,swl2};
 use crate::geometric::{gprt};
 
-#[derive(Debug)]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Translator {
   pub p2:f32x4
 }
