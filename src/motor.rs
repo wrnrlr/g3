@@ -95,7 +95,7 @@ impl Motor {
     // (s c2 - t b2) e02 +
     // (s c3 - t b3) e03
     let tmp = self.p2 * s;
-    let p2 = tmp - (flip_signs(self.p1, neg)); // Why not just +????
+    let p2 = tmp - (flip_signs(self.p1 * t, neg));
     let p1 = self.p1 * t;
     Motor{p1,p2}
   }
@@ -152,7 +152,7 @@ impl Fn<(Plane,)> for Motor {
 
 impl From<Rotor> for Motor { fn from(r:Rotor)->Motor { Motor{p1: r.p1, p2: f32x4::splat(0.0)} } }
 
-impl From<Translator> for Motor { fn from(t:Translator)->Motor { Motor{p1: f32x4::splat(0.0), p2: t.p2} } }
+impl From<Translator> for Motor { fn from(t:Translator)->Motor { Motor{p1: f32x4::from_array([1.0,0.0,0.0,0.0]), p2: t.p2} } }
 
 // TODO operator()(plane* in, plane* out, size_t count)
 
