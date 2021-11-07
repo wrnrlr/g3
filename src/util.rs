@@ -280,7 +280,6 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 
 #[inline] pub fn shuffle_low(a:f32x4)->f32x4 { swizzle!(a, [0,0,1,1]) }
 #[inline] pub fn shuffle_odd(a:f32x4)->f32x4 { swizzle!(a, [1,1,3,3]) }
-#[inline] pub fn shuffle_even(a:f32x4)->f32x4 { swizzle!(a, [0,0,2,2]) }
 
 #[inline] pub fn shuffle_xxxx(a:f32x4)->f32x4 { swizzle!(a, [0,0,0,0]) }
 #[inline] pub fn shuffle_xxyy(a:f32x4)->f32x4 { swizzle!(a, [0,0,1,1]) }
