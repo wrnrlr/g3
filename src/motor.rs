@@ -192,6 +192,20 @@ impl Fn<(Origin,)> for Motor {
 
 // TODO operator()(direction* in,direction* out,size_t count)
 
+impl Add<f32> for Motor {
+  type Output = Motor;
+  fn add(self, f:f32) -> Motor {
+    Motor{ p1: self.p1+f, p2: self.p2+f }
+  }
+}
+
+impl Add<Motor> for f32 {
+  type Output = Motor;
+  fn add(self, t:Motor) -> Motor {
+    Motor{ p1: t.p1+self, p2: t.p2+self }
+  }
+}
+
 impl Add for Motor {
   type Output = Motor;
   fn add(self, other: Self)->Motor {
