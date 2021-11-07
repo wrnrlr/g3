@@ -172,7 +172,7 @@ impl FnOnce<(Point,)> for Motor { type Output = Point; extern "rust-call" fn cal
 // Conjugates a point p with this motor and returns the result.
 impl Fn<(Point,)> for Motor {
   extern "rust-call" fn call(&self, args: (Point,))->Point {
-    let p3 = sw312::<false, true>(args.0.p3, self.p1, self.p2);
+    let p3 = sw312(args.0.p3, self.p1, self.p2);
     Point{p3: p3}
   }
 }
