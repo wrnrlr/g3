@@ -21,7 +21,7 @@ pub fn rsqrt_nr1(a:f32x4)->f32x4 {
   // From Intel optimization manual: expected performance is ~5.2x
   // baseline (sqrtps + divps) with ~22 bits of accuracy
   let xn = f32x4::splat(1.0) / a.sqrt();
-  let axn2 = a * xn * xn;
+  let axn2 = xn * xn * a;
   let xn3 = f32x4::splat(3.0) - axn2;
   f32x4::splat(0.5) * xn * xn3
 }
@@ -236,14 +236,13 @@ pub fn dp(a:f32x4, b:f32x4)->f32x4 {
 
 pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
-  let hi = shuffle_odd(out);
+  let hi = shuffle_yyww(out);
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
   out = hi + out;
-  out[0] += b2b3a2a3(hi,out)[0];
-  shuffle_xxxx(out);
-  out
+  out = add_ss(hi, out);
+  shuffle_xxxx(out)
 }
 
 #[inline] pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
