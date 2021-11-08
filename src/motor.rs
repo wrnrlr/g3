@@ -1,5 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use std::convert::{From};
+use std::fmt::{Display,Formatter,Result};
 use core_simd::{f32x4,mask32x4};
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
 use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1};
@@ -140,6 +141,14 @@ impl Motor {
 
   pub fn as_mat3x4(&self) { todo!(); }
   pub fn as_mat4x4(&self) { todo!(); }
+}
+
+impl Display for Motor {
+  fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    write!(f, "{} + {}e23 + {}e31 + {}e12 + {}e01 + {}e02 + {}e03 + {}e0123",
+           self.scalar(), self.e23(), self.e31(), self.e12(),
+           self.e01(), self.e02(), self.e03(), self.e0123())
+  }
 }
 
 impl FnMut<(Plane,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}

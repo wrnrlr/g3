@@ -1,4 +1,5 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,Fn};
+use std::fmt::{Display, Formatter, Result};
+use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn};
 use core_simd::{f32x4,mask32x4};
 use crate::{Plane,Line,Point,Motor,Rotor,IdealLine};
 use crate::util::{flip_signs};
@@ -46,6 +47,12 @@ impl Translator {
   // In practice, the logarithm of a translator is simply the ideal partition
   // (without the scalar $1$).
   pub fn log(self)->IdealLine { IdealLine{p2: self.p2} }
+}
+
+impl Display for Translator {
+  fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    write!(f, "{}e01 + {}e02 + {}e03 + 1e0123", self.e01(), self.e02(), self.e03())
+  }
 }
 
 impl FnMut<(Plane,)> for Translator { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
