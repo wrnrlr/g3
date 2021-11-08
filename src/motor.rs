@@ -3,12 +3,13 @@ use std::convert::{From};
 use std::fmt::{Display,Formatter,Result};
 use core_simd::{f32x4,mask32x4};
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
-use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1};
+use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss};
 use crate::sandwich::{sw012,sw312,swmm,swo12};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 
 /// A Motor is a combination of a translation along a line combined
 /// with a rotation about an axis parallel to that line.
+/// In other words, it is the geometric product of a Translator and a Rotor.
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 pub struct Motor {
   pub p1:f32x4,
@@ -121,8 +122,10 @@ impl Motor {
   }
 
   pub fn sqrt(self)->Motor {
-    let p1 = self.p1 * f32x4::splat(1.0);
-    Motor{p1:p1, p2:f32x4::splat(0.0)}.normalized() // TODO avoid extra copy of Motor
+    // TODO check if this is the fastest way to do this: m.p1_ = _mm_add_ss(m.p1_, _mm_set_ss(1.f))
+    let p1 = add_ss(self.p1, f32x4::splat(1.0));
+    // TODO avoid extra copy of Motor
+    Motor{p1:p1, p2:self.p2}.normalized()
   }
 
   pub fn reverse(self)->Motor {
