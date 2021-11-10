@@ -61,7 +61,7 @@ impl Orbit {
         if self.dragging_start == None {
           self.dragging_start = Some(*position);
         }
-        println!("pointer: {:?}", position);
+        // println!("pointer: {:?}", position);
         let v = mint::Vector3{x:1.0, y:-1.0, z:0.0};
         scene[camera.node].post_rotate(v, 1.0);
       }
@@ -73,7 +73,7 @@ impl Orbit {
         self.dragging_start = None;
       }
       Event::Scroll { delta } => {
-        println!("scroll: {:?}", delta);
+        // println!("scroll: {:?}", delta);
         let v = mint::Vector3{x:0.0, y:0.0, z:delta.y};
         scene[camera.node].post_move(v);
       },
