@@ -14,7 +14,7 @@ pub struct EulerAngels {
 
 // The rotor is an entity that represents a rigid rotation about an axis.
 // To apply the rotor to a supported entity, the call operator is available.
-#[derive(Default,Debug,Clone,PartialEq)]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Rotor {
   // p1: scalar, e12, e31, e23
   pub p1:f32x4
