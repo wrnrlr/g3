@@ -158,7 +158,7 @@ impl FnMut<(Plane,)> for Motor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Plane,)> for Motor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
 impl Fn<(Plane,)> for Motor {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0:sw012::<false,true>(args.0.p0, self.p1)}
+    Plane{p0:sw012::<false,true>(args.0.p0, self.p1, None)}
   }
 }
 

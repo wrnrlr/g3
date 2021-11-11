@@ -126,7 +126,7 @@ impl FnMut<(Plane,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Plane,)> for Rotor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
 impl Fn<(Plane,)> for Rotor {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0: sw012::<false,false>(args.0.p0, self.p1, )}
+    Plane{p0: sw012::<false,false>(args.0.p0, self.p1, None)}
   }
 }
 
@@ -147,8 +147,8 @@ impl Fn<(Line,)> for Rotor {
 impl FnMut<(Point,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Point,))->Point {self.call(args)} }
 impl FnOnce<(Point,)> for Rotor { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
 impl Fn<(Point,)> for Rotor {
-  extern "rust-call" fn call(&self, _args: (Point,))->Point {
-    todo!() // The c++ impl is strange...
+  extern "rust-call" fn call(&self, args: (Point,))->Point {
+    Point{p3:sw012::<false,false>(args.0.p3, self.p1, None)}
   }
 }
 

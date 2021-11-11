@@ -1,5 +1,5 @@
 use core_simd::{f32x4,mask32x4};
-use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx};
+use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -133,8 +133,33 @@ pub fn sw30(a:f32x4, b:f32x4) ->f32x4 {
   p3_out
 }
 
-pub fn sw012<const N:bool,const F:bool>(_p0:f32x4,_p1:f32x4)->f32x4 {
-  todo!()
+pub fn sw012<const VARIADIC:bool,const TRANSLATE:bool>(a:f32x4, b:f32x4, _c:Option<f32x4>) ->f32x4 {
+  // rotor(point): false, false
+  if VARIADIC || TRANSLATE { todo!() }
+
+  let dc_scale = f32x4::from_array([1.0,2.0,2.0,2.0]);
+  let b_xwyz = shuffle_xwyz(b);
+  let b_xzwy = shuffle_xzwy(b);
+  let b_xxxx = shuffle_xxxx(b);
+
+  let mut tmp1 = shuffle_zxxx(b) * shuffle_zwyz(b);
+  tmp1 += shuffle_yzwy(b) * shuffle_yyzw(b);
+  tmp1 *= dc_scale;
+
+  let mut tmp2 = b * b_xwyz;
+  tmp2 -= flip_signs(shuffle_wxxx(b) * shuffle_wzwy(b), mask32x4::from_array([true,false,false,false]));
+  tmp2 *= dc_scale;
+
+  let mut tmp3 = b * b;
+  tmp3 -= b_xwyz * b_xwyz;
+  tmp3 += b_xxxx * b_xxxx;
+  tmp3 -= b_xzwy * b_xzwy;
+
+  let mut out = tmp1 * shuffle_xzwy(a);
+  out += tmp2 * shuffle_xwyz(a);
+  out += tmp3 * a;
+
+  out
 }
 
 pub fn swmm<const N:bool,const F:bool,const P:bool>(_a:f32x4,_b:f32x4,_c:Option<f32x4>)->(f32x4,f32x4) { // todo, c doesn't seem to be used add count argument
