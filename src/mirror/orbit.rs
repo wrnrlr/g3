@@ -1,5 +1,6 @@
-use baryon::{window::{Event, Button}};
-use crate::{Point,Plane,Motor};
+// use baryon::{window::{Event,Button}};
+// use crate::{Point,Plane,Motor};
+// use mint::{Vector2,Vector3,ColumnMatrix4};
 
 // https://observablehq.com/@enkimute/glu-lookat-in-3d-pga#11
 // fn align3(a:[Point;3], b:[Point;3])->Motor {
@@ -27,9 +28,9 @@ use crate::{Point,Plane,Motor};
 //   return (1 + q2.normalized()/p2.normalized()).normalized() * m;
 // }
 
-fn align(p:Point,q:Point)->Motor {
-  (Motor::one() + q.normalized() / p.normalized()).normalized()
-}
+// fn align(p:Point,q:Point)->Motor {
+//   (Motor::one() + q.normalized() / p.normalized()).normalized()
+// }
 
 
 // fn look_at(position:Point, target:Point, pole:Point) {
@@ -41,43 +42,115 @@ fn align(p:Point,q:Point)->Motor {
 
 // https://github.com/Jam3/orbit-controls
 // https://catlikecoding.com/unity/tutorials/movement/orbit-camera/
-pub struct Orbit {
-  dragging:bool,
-  dragging_start:Option<mint::Vector2<f32>>
+// https://github.com/Formlabs/foxtrot/blob/master/gui/src/camera.rs
+// https://github.com/dmnsgn/cameras
 
-}
+// enum MouseState {
+//   Unknown,
+//   Free(Vector2<f32>),
+//   Rotate(Vector2<f32>),
+// }
 
-impl Default for Orbit {
-  fn default() -> Self {
-    Orbit{dragging: false, dragging_start: None}
-  }
-}
+/// Camera Control
+// pub struct Orbit {
+//   scene:baryon::Scene,
+//   cid:baryon::NodeRef,
+//
+//   width:f32,
+//   height:f32,
+//
+//   pitch:f32,
+//   yaw:f32,
+//
+//   scale:f32,
+//
+//   center:Vector3<f32>,
+//
+//   mouse:MouseState
+// }
 
-impl Orbit {
-  pub fn event(&mut self, event:&Event, scene:&mut baryon::Scene, camera:&baryon::Camera) {
-    match event {
-      Event::Pointer { position } => {
-        if !self.dragging { return; }
-        if self.dragging_start == None {
-          self.dragging_start = Some(*position);
-        }
-        // println!("pointer: {:?}", position);
-        let v = mint::Vector3{x:1.0, y:-1.0, z:0.0};
-        scene[camera.node].post_rotate(v, 1.0);
-      }
-      Event::Click { button:Button::Left, pressed:true } => {
-        self.dragging = true;
-      }
-      Event::Click { button:Button::Left, pressed:false } => {
-        self.dragging = false;
-        self.dragging_start = None;
-      }
-      Event::Scroll { delta } => {
-        // println!("scroll: {:?}", delta);
-        let v = mint::Vector3{x:0.0, y:0.0, z:delta.y};
-        scene[camera.node].post_move(v);
-      },
-      _ => {}
-    }
-  }
-}
+// impl Orbit {
+//   pub fn new(scene:baryon::Scene, cid:baryon::NodeRef, width:f32, height:f32)->Self {
+//     Self{ scene, cid, width, height, pitch:0.0, yaw:0.0, scale:0.0, center: Vector3([0f32, 0, 0]), mouse:MouseState::Unknown }
+//   }
+
+  // pub fn event(&mut self, event:&Event) {
+  //   match event {
+  //     Event::Resize { width, height } => self.set_size(width as f32, height as f32),
+  //     Event::Pointer { position } => self.mouse_move(*position),
+  //     Event::Click { button, pressed:true } => self.mouse_pressed(*button),
+  //     Event::Click { button, pressed:false } => self.mouse_released(*button),
+  //     Event::Scroll { delta } => self.mouse_scroll(delta.y),
+  //     _ => {}
+  //   }
+  // }
+  //
+  // fn set_size(&mut self, width: f32, height: f32) {
+  //   self.width = width;
+  //   self.height = height;
+  // }
+  //
+  // fn mouse_pressed(&mut self, button:Button) {
+  //   // If we were previously free, then switch to panning or rotating
+  //   if let MouseState::Free(pos) = &self.mouse {
+  //     match button {
+  //       Button::Left => Some(MouseState::Rotate(*pos)),
+  //       Button::Right => Some(MouseState::Pan(*pos, self.mouse_pos(*pos))),
+  //       _ => None,
+  //     }.map(|m| self.mouse = m);
+  //   }
+  // }
+  //
+  // fn mouse_released(&mut self, button:Button) {
+  //   match &self.mouse {
+  //     MouseState::Rotate(pos) if button == Button::Left => Some(MouseState::Free(*pos)),
+  //     MouseState::Pan(pos, ..) if button == Button::Right => Some(MouseState::Free(*pos)),
+  //     _ => None,
+  //   }.map(|m| self.mouse = m);
+  // }
+  //
+  // fn mouse_move(&mut self, pos:Vector2<f32>) {
+  //   let x_norm =  2.0 * (pos.x / self.width - 0.5);
+  //   let y_norm = -2.0 * (pos.y / self.height - 0.5);
+  //   let new_pos = Vector2(x_norm, y_norm);
+  //
+  //   match &self.mouse {
+  //     MouseState::Rotate(pos) => {
+  //       let delta = new_pos - *pos;
+  //       self.spin(delta.x * 3.0, -delta.y * 3.0 * self.height / self.width);
+  //     },
+  //     _ => (),
+  //   }
+  //
+  //   // Store new mouse position
+  //   match &mut self.mouse {
+  //     MouseState::Free(pos)
+  //     | MouseState::Pan(pos, ..)
+  //     | MouseState::Rotate(pos) => *pos = new_pos,
+  //     MouseState::Unknown => self.mouse = MouseState::Free(new_pos),
+  //   }
+  // }
+  //
+  // fn mouse_scroll(&mut self, delta: f32) {
+  //   if let MouseState::Free(pos) = self.mouse {
+  //     self.scale(1.0 + delta / 200.0, pos);
+  //   }
+  // }
+  //
+  // fn spin(&mut self, dx: f32, dy: f32) {
+  //   self.pitch += dx;
+  //   self.yaw += dy;
+  // }
+  //
+  // pub fn scale(&mut self, value: f32, pos: Vecor2<f32>){
+  //   let start_pos = self.mouse_pos(pos);
+  //   self.scale *= value;
+  //   let end_pos = self.mouse_pos(pos);
+  //
+  //   let delta = start_pos - end_pos;
+  //   let mut delta_mouse = (self.mat() * delta.to_homogeneous()).xyz();
+  //   delta_mouse.z = 0.0;
+  //
+  //   self.center += (self.mat_i() * delta_mouse.to_homogeneous()).xyz();
+  // }
+// }
