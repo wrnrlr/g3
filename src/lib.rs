@@ -28,5 +28,7 @@ pub use rotor::Rotor;
 pub use direction::Direction;
 pub use translator::Translator;
 
+pub use std::f32::consts::PI;
+
 #[cfg(feature = "mirror")] mod mirror;
-#[cfg(feature = "mirror")] pub use mirror::{Mirror};
+#[cfg(feature = "mirror")] pub use mirror::{*};
