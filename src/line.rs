@@ -261,7 +261,7 @@ impl IdealLine {
   //
   // $$\exp{\left[a\ee_{01} + b\ee_{02} + c\ee_{03}\right]} = 1 +\
   // a\ee_{01} + b\ee_{02} + c\ee_{03}$$
-  pub fn exp(self)->Translator { Translator{p2: self.p2} }
+  #[inline] pub fn exp(self)->Translator { Translator{p2: self.p2} }
 
   pub fn reverse(self)->IdealLine {
     IdealLine{p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))}
