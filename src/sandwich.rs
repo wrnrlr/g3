@@ -213,9 +213,7 @@ pub fn sw32(a:f32x4, b:f32x4)->f32x4 {
   // (a1 - 2 a0 b1) e032 +
   // (a2 - 2 a0 b2) e013 +
   // (a3 - 2 a0 b3) e021
-  let mut tmp = shuffle_xxxx(a) * b;
-  tmp *= f32x4::from_array([0.0, -2.0, -2.0, -2.0]);
-  a + tmp
+  a + shuffle_xxxx(a) * b * f32x4::from_array([0.0, -2.0, -2.0, -2.0])
 }
 
 // Apply a translator to a line
