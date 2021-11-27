@@ -5,23 +5,20 @@
 
 #[cfg(test)]
 mod tests {
-  use g3::{Point, Translator, point};
-
-  const A:Point = point(1.0, 1.0, 1.0);
-  const B:Point = point(-1.0, -1.0, -1.0);
-  const O:Point = point(0.0, 0.0, 0.0);
+  use g3::{Translator, point, Origin};
 
   #[test] fn translator_from_points() {
-    assert_eq!((B / A).sqrt()(A), B);
-  }
+    let a = point(1.0, 1.0, 1.0);
+    let b = point(-1.0, -1.0, -1.0);
+    let o = Origin::to_point();
+    let a_to_b = (b.normalized() / a.normalized()).sqrt();
 
-  #[test] fn translator_new() {
+    assert_eq!(a_to_b);
+
+    assert_eq!(a_to_b(a), b, "translate a to b");
+    assert_eq!((a_to_b*0.5)(a), o, "translate halfway between a and b (origin)");
+
     let t = Translator::new(4.0,1.0,0.0,1.0);
-    assert_eq!(t(O), point(8f32.sqrt(), 0.0, 8f32.sqrt()));
-  }
-
-  #[test] fn translator_multiply_by_scalar() {
-    let t = (B / A).sqrt();
-    assert_eq!(O, (t*0.5)(A));
+    assert_eq!(t(o), point(8f32.sqrt(), 0.0, 8f32.sqrt()));
   }
 }

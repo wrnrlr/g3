@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter, Result};
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn};
 use core_simd::{f32x4,mask32x4};
 use crate::{Plane,Line,Point,Motor,Rotor,IdealLine};
-use crate::util::{flip_signs};
+use crate::util::{dp_bc, flip_signs, rsqrt_nr1};
 use crate::sandwich::{sw02,sw32,swl2};
 use crate::geometric::{gprt};
 
@@ -31,6 +31,11 @@ impl Translator {
 
   // TODO pub load_normalized() {}
 
+  pub fn normalized(&self)->Translator {
+    let inv_norm = rsqrt_nr1(dp_bc(self.p2,self.p2));
+    Translator{p2: self.p2 * inv_norm}
+  }
+
   pub fn inverse(&self)->Translator {
     Translator{p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))}
   }
@@ -41,7 +46,7 @@ impl Translator {
   // pub fn log(&self)->IdealLine { IdealLine{p2: self.p2} } TODO
 
   // Compute the square root of the provided translator $t$.
-  pub fn sqrt(self)->Translator { self * 0.5 }
+  #[inline] pub fn sqrt(self)->Translator { self * 0.5 }
 
   // Compute the logarithm of the translator, producing an ideal line axis.
   // In practice, the logarithm of a translator is simply the ideal partition
@@ -119,6 +124,13 @@ impl Sub<Translator> for Translator {
 impl SubAssign for Translator {
   fn sub_assign(&mut self, other: Self) {
     self.p2 -= other.p2;
+  }
+}
+
+impl Mul<Translator> for f32 {
+  type Output = Translator;
+  fn mul(self, t: Translator) -> Translator {
+    Translator{ p2: self*t.p2 }
   }
 }
 
