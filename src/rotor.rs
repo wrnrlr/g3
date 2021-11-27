@@ -164,6 +164,20 @@ impl Fn<(Direction,)> for Rotor {
 
 // TODO operator()(direction* in, direction* out, size_t count) const noexcept
 
+impl Add<f32> for Rotor {
+  type Output = Rotor;
+  fn add(self, f:f32) -> Rotor {
+    Rotor{ p1: self.p1+f }
+  }
+}
+
+impl Add<Rotor> for f32 {
+  type Output = Rotor;
+  fn add(self, t:Rotor) -> Rotor {
+    Rotor{ p1: t.p1+self }
+  }
+}
+
 impl Add<Rotor> for Rotor {
   type Output = Rotor;
   fn add(self, other: Rotor) -> Rotor { Rotor { p1:self.p1+other.p1 } }
