@@ -11,9 +11,7 @@ fn main() {
   let mut b = point((1.0 - 0.5f32.atan().powf(2.0)).sqrt(), 0.5f32.atan().atan(), 0.0);
   let mut c = Rotor::new(PI/5.0, 0.0, 1.0, 0.0)(E2(b));
 
-  mr.vertex(a, Color::RED);
-  mr.vertex(b, Color::RED);
-  mr.vertex(c, Color::RED);
+  mr.vertex(a, Color::BLUE);
 
   for _ in 0..5 {
     b = r(b);
