@@ -21,5 +21,17 @@ fn main() {
     mr.vertex(E2(a), Color::BLUE);
   }
 
+  let lightpink = Color(0xFFCCCCFF);
+  for _ in 0..5 {
+    let b2 = r(b);
+    mr.face([a,b,b2], lightpink);
+    mr.face([b,b2,c], lightpink);
+    b = b2;
+    mr.face([c,b,r(c)], lightpink);
+    let c2 = r(c);
+    mr.face([c,E2(a),c2], lightpink);
+    c = c2;
+  }
+
   mr.run();
 }
