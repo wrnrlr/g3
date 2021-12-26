@@ -13,6 +13,10 @@ impl Origin {
   pub fn to_point()->Point { Point::new(0.0,0.0,0.0) }
 }
 
+pub const E032:Point = Point{p3:f32x4::from_array([1.0,1.0,0.0,0.0])};
+pub const E012:Point = Point{p3:f32x4::from_array([1.0,0.1,0.0,0.0])};
+pub const E023:Point = Point{p3:f32x4::from_array([1.0,0.0,0.1,0.0])};
+
 pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 
 // A point is represented as the multivector
@@ -175,34 +179,33 @@ impl BitXor<Plane> for Point {
     Dual::new(0.0,out[0])
   }
 }
-// Do not exist in klein
+// Do not exist because
 // impl BitXor<Line> for Point {
 //   type Output = Point;
-//   fn bitxor(self, l:Line) -> Point { todo!() }
+//   fn bitxor(self, l:Line) -> Point {} }
 // }
 // impl BitXor<Point> for Point {
 //   type Output = Dual;
-//   fn bitxor(self, a:Point) -> Dual { todo!() }
+//   fn bitxor(self, a:Point) -> Dual {}
 // }
 
-// TODO:
 // Join Operation, Regressive Product, &
-// impl BitAnd<Point> for Point {
-//   type Output = Line;
-//   fn bitand(self, other: Point) -> Line { !(!self ^ (!other)) }
-// }
-// impl BitAnd<Line> for Point {
-//   type Output = Plane;
-//   fn bitand(self, l: Line) -> Plane { !(!self ^ !l) }
-// }
-// impl BitAnd<IdealLine> for Point {
-//   type Output = Plane;
-//   fn bitand(self, l: IdealLine) -> Plane { !(!self ^ !l) }
-// }
-// impl BitAnd<Branch> for Point {
-//   type Output = Plane;
-//   fn bitand(self, b: Branch) -> Plane { !(!self ^ !b) }
-// }
+impl BitAnd<Point> for Point {
+  type Output = Line;
+  fn bitand(self, other: Point) -> Line { !(!self ^ (!other)) }
+}
+impl BitAnd<Line> for Point {
+  type Output = Plane;
+  fn bitand(self, l: Line) -> Plane { !(!self ^ !l) }
+}
+impl BitAnd<IdealLine> for Point {
+  type Output = Plane;
+  fn bitand(self, l: IdealLine) -> Plane { !(!self ^ !l) }
+}
+impl BitAnd<Branch> for Point {
+  type Output = Plane;
+  fn bitand(self, b: Branch) -> Plane { !(!self ^ !b) }
+}
 impl BitAnd<Plane> for Point {
   type Output = Dual;
   fn bitand(self, p: Plane)->Dual { !(!self ^ !p) }

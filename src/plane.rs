@@ -8,6 +8,11 @@ use crate::exterior::{ext00,ext02,ext03,extpb};
 use crate::geometric::{gp00,gp03};
 use crate::inner::{dot00,dot03,dotpl};
 
+pub const E0:Plane = Plane{p0:f32x4::from_array([1.0,0.0,0.0,0.0])};
+pub const E1:Plane = Plane{p0:f32x4::from_array([0.0,1.0,0.0,0.0])};
+pub const E2:Plane = Plane{p0:f32x4::from_array([0.0,0.0,1.0,0.0])};
+pub const E3:Plane = Plane{p0:f32x4::from_array([0.0,0.0,0.0,1.0])};
+
 // form: ax + by + cz + d
 pub fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
