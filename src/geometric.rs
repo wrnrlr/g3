@@ -126,6 +126,7 @@ pub fn gp12<const F:bool>(a:f32x4, b:f32x4)->f32x4 {
   p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
 }
 
+/// Motor * Motor Operation
 pub fn gpmm(a:f32x4, b:f32x4, c:f32x4, d:f32x4)->(f32x4,f32x4) {
   // (a0 c0 - a1 c1 - a2 c2 - a3 c3) +
   // (a0 c1 + a3 c2 + a1 c0 - a2 c3) e23 +
