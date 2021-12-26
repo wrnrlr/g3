@@ -260,6 +260,13 @@ impl Mul<f32> for Motor {
   }
 }
 
+impl Mul<Motor> for f32 {
+  type Output = Motor;
+  fn mul(self, m: Motor) -> Motor {
+    Motor { p1:self*m.p1, p2:self*m.p2 }
+  }
+}
+
 impl MulAssign<f32> for Motor {
   fn mul_assign(&mut self, s: f32) {
     self.p1 *= s
