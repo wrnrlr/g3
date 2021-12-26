@@ -2,6 +2,11 @@
 // bilinear, anti-symmetric, and extended to be associative.
 // Note that a ^ a = 0
 
+// inner product with itself is the magnitude squared
+// outer product with itself is 0
+// inner commutative
+// outer anti-commutative
+
 #[cfg(test)]
 mod tests {
   use g3::{plane,point,line,branch,ideal_line};
@@ -53,4 +58,11 @@ mod tests {
     let _d = l1 ^ l2;
     todo!();
   }
+  #[test] fn anti_commute() {
+    let a = point(1.0, 2.0, 3.0);
+    let l = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+    // assert_eq!(a^l, b)
+  }
+
+  #[todo] #[test] fn squares_to_zero() {}
 }
