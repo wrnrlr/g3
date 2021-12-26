@@ -61,7 +61,8 @@ cargo +nightly run --example elements --features="mirror"
   * [Geometric Algebra - Duality and the Cross Product](https://www.youtube.com/watch?v=RAcyVrMNV5s)
   * [Geometric Algebra Tutorial](https://geometricalgebratutorial.com)
   * https://mattferraro.dev/posts/geometric-algebra
-  
+* [Cheat Sheet](https://enki.ws/ganja.js/examples/coffeeshop.html#V3k2baxG2&fullscreen)
+
 ## Status
 
 This software is very much still a work in progress.
