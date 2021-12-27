@@ -20,9 +20,9 @@ pub mod exterior;
 pub mod sandwich;
 
 pub use dual::{Dual, dual};
-pub use point::{Origin, Point, point};
+pub use point::*;
 pub use line::{Branch, branch, ideal_line, IdealLine, Line, line};
-pub use plane::{Plane, plane};
+pub use plane::*;
 pub use motor::Motor;
 pub use rotor::Rotor;
 pub use direction::Direction;
