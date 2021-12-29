@@ -26,16 +26,15 @@ pub fn sw00(a:f32x4,b:f32x4)->f32x4 {
 
   // Left block
   let mut tmp = a_zzwy * shuffle_zzwy(b);
-  tmp = tmp + a_wwyz * shuffle_wwyz(b);
+  tmp += a_wwyz * shuffle_wwyz(b);
 
   let a1 = shuffle_yyww(a);
   let b1 = shuffle_yyww(b);
   tmp = add_ss(tmp, mul_ss(a1, b1));
-  tmp = tmp * (a + a);
+  tmp *= a + a;
 
   // Right block
   let a_yyzw = shuffle_yyzw(a);
-  // let mut tmp2 = (a_yyzw * a_yyzw) ^ f32x4::from([-0.0, 0.0, 0.0, 0.0]);
   let mut tmp2 = f32x4_xor(a_yyzw * a_yyzw, f32x4::from([-0.0, 0.0, 0.0, 0.0]));
   tmp2 -= a_zzwy * a_zzwy;
   tmp2 -= a_wwyz * a_wwyz;
