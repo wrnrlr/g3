@@ -59,14 +59,14 @@ pub fn sw10(a:f32x4,b:f32x4)->(f32x4,f32x4) {
 
   let b_xzwy = shuffle_xzwy(b);
 
-  let two_zero = f32x4::from_array([0.0, 2.0, 2.0, 2.0]);
+  let two_zero = f32x4::from([0.0, 2.0, 2.0, 2.0]);
   let mut p1 = a * b;
-  p1 = p1 + a_wzwy * b_xzwy;
-  p1 = a_ywyz *  two_zero * p1;
+  p1 += a_wzwy * b_xzwy;
+  p1 *= a_ywyz * two_zero;
 
   let mut tmp = a_zyzw * a_zyzw;
-  tmp = tmp + a_wzwy * a_wzwy;
-  tmp = -tmp;
+  tmp += a_wzwy * a_wzwy;
+  tmp = f32x4_xor(tmp, f32x4::from([-0.0, 0.0, 0.0, 0.0]));
   tmp = (a_ywyz * a_ywyz) - tmp;
   tmp = shuffle_xwyz(b) * tmp;
 
@@ -89,14 +89,14 @@ pub fn sw20(a:f32x4,b:f32x4)->f32x4 {
   let a_wwyz = shuffle_wwyz(a);
 
   let mut p2 = a * b;
-  p2 = p2 + a_zzwy * shuffle_xzwy(b);
-  p2 = p2 * (a_wwyz * f32x4::from_array([0.0, -2.0, -2.0, -2.0]));
+  p2 += a_zzwy * shuffle_xzwy(b);
+  p2 *= a_wwyz * f32x4::from([0.0, -2.0, -2.0, -2.0]);
 
   let a_yyzw = shuffle_yyzw(a);
   let mut tmp = a_yyzw * a_yyzw;
-  tmp = -(tmp + (a_zzwy * a_zzwy));
-  tmp = tmp - (a_wwyz * a_wwyz);
-  p2 = p2 + tmp * shuffle_xwyz(b);
+  tmp = f32x4_xor(f32x4::from([-0.0, 0.0, 0.0, 0.0]), tmp + a_zzwy * a_zzwy);
+  tmp -= a_wwyz * a_wwyz;
+  p2 += tmp * shuffle_xwyz(b);
   shuffle_xzwy(p2)
 }
 

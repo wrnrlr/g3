@@ -123,9 +123,9 @@ impl FnOnce<(Line,)> for Plane { type Output = Line; extern "rust-call" fn call_
 impl Fn<(Line,)> for Plane {
   extern "rust-call" fn call(&self, args: (Line,)) -> Line {
     let l = args.0;
-    let (p1,p2_tmp1) = sw10(self.p0, l.p1);
-    let p2_tmp2 = sw20(self.p0, l.p2);
-    let p2 = p2_tmp1 + p2_tmp2;
+    let (p1, mut p2) = sw10(self.p0, l.p1);
+    let p2_tmp = sw20(self.p0, l.p2);
+    p2 += p2_tmp;
     Line{p1,p2}
   }
 }
