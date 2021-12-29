@@ -202,8 +202,9 @@ pub fn hi_dp(a:f32x4, b:f32x4)->f32x4 {
   let hi = shuffle_odd(out);
 
   let sum  = hi + out;
-  out = sum + shuffle_low(out);
-  mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
+  out = sum + shuffle_xxyy(out);
+  out = shuffle_zwzw(out);
+  swizzle!(out, f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]) // TODO make faster???
 }
 
 pub fn hi_dp_bc(a:f32x4, b:f32x4)->f32x4 {
@@ -241,42 +242,24 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
   out = hi + out;
-  out = add_ss(hi, out);
+  out = add_ss(hi, b2b3a2a3(hi, out));
   shuffle_xxxx(out)
 }
 
-#[inline] pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
-  f32x4::from_bits(a.to_bits() ^ b.to_bits())
-}
+#[inline] pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() ^ b.to_bits()) }
+#[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() & b.to_bits()) }
 
-#[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 {
-  f32x4::from_bits(a.to_bits() & b.to_bits())
-}
+#[inline] pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(!a.to_bits() & b.to_bits()) }
 
-#[inline] pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 {
-  f32x4::from_bits(!a.to_bits() & b.to_bits())
-}
+// Is this faster then f32x4::abs, which is implemented in rust?
+#[inline] pub fn f32x4_abs(a:f32x4)->f32x4 { f32x4_andnot(f32x4::splat(-0.0), a) }
 
-// Is this faster tgen f32x4::abs, which is implemented in rust?
-#[inline] pub fn f32x4_abs(a:f32x4)->f32x4 {
-  f32x4_andnot(f32x4::splat(-0.0), a)
-}
+#[inline] pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 { mask.select(-x, x) }
 
-#[inline] pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 {
-  mask.select(-x, x)
-}
+#[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a + b, a, [First(0), Second(1), Second(2), Second(3)]) }
+#[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a * b, a, [First(0), Second(1), Second(2), Second(3)]) }
 
-#[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 {
-  let tmp = a + b;
-  swizzle!(tmp, a, [First(0), Second(1), Second(2), Second(3)])
-}
-
-#[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 {
-  let tmp = a * b;
-  swizzle!(tmp, a, [First(0), Second(1), Second(2), Second(3)])
-}
-
-#[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) } // b2b3a2a3
+#[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) }
 
 #[inline] pub fn shuffle_low(a:f32x4)->f32x4 { swizzle!(a, [0,0,1,1]) }
 #[inline] pub fn shuffle_odd(a:f32x4)->f32x4 { swizzle!(a, [1,1,3,3]) }
@@ -304,3 +287,77 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn shuffle_wwyz(a:f32x4)->f32x4 { swizzle!(a, [3,3,1,2]) }
 
 #[inline] pub fn bits_wwww(a:u32x4)->u32x4 { swizzle!(a, [0,0,0,0]) }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use core_simd::{f32x4, mask32x4};
+
+  #[test] fn dot_product() {
+    let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
+    let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+    // assert_eq!(dp(a, b), f32x4::from([-21.0, 0.0, 0.0, 0.0]));
+    // assert_eq!(util::dp_bc(a, b), f32x4::from([-21.0, -21.0, -21.0, -21.0]));
+    assert_eq!(hi_dp(a, b), f32x4::from([-17.0, 0.0, 0.0, 0.0]));
+    // assert_eq!(hi_dp_bc(a, b), f32x4::from([-16.0, -16.0, -16.0, -16.0]));
+  }
+
+  #[test] fn first_utils() {
+    let a = f32x4::from([2.0, 2.0, 3.0, 4.0]);
+    assert_eq!(add_ss(a, a), f32x4::from([4.0, 2.0, 3.0, 4.0]));
+    assert_eq!(mul_ss(a, a), f32x4::from([4.0, 2.0, 3.0, 4.0]));
+  }
+
+  use core::arch::x86_64::{_mm_mul_ps, __m128, _mm_set_ps, _mm_extract_ps, _mm_movelh_ps,
+                           _mm_xor_ps, _mm_set_ss, _mm_movehdup_ps, _mm_unpacklo_ps, _mm_movehl_ps, _mm_sub_ps,
+                           _mm_and_ps, _mm_add_ps, _mm_castsi128_ps, _mm_set_epi32, _mm_dp_ps};
+
+  unsafe fn m128(a:f32,b:f32,c:f32,d:f32)->__m128 {
+    _mm_set_ps(d,c,b,a)
+  }
+
+  unsafe fn assert_m128(a:__m128,b:__m128) {
+    assert_eq!(_mm_extract_ps::<0>(a) as f32,_mm_extract_ps::<0>(b) as f32, "w");
+    assert_eq!(_mm_extract_ps::<1>(a),_mm_extract_ps::<1>(b), "x");
+    assert_eq!(_mm_extract_ps::<2>(a),_mm_extract_ps::<2>(b), "y");
+    assert_eq!(_mm_extract_ps::<3>(a),_mm_extract_ps::<3>(b), "z");
+  }
+
+  unsafe fn printm128(a:__m128) {
+    println!("{} {} {} {}", _mm_extract_ps::<0>(a), _mm_extract_ps::<1>(a), _mm_extract_ps::<2>(a), _mm_extract_ps::<3>(a));
+  }
+
+  fn printv(v:f32x4) {
+    println!("{} {} {} {}", v[0], v[1], v[2], v[3]);
+  }
+
+  unsafe fn hi_dp2(a:__m128, b:__m128)->__m128 {
+  // 0 1 2 3 -> 1 + 2 + 3, 0, 0, 0
+  let mut out = _mm_mul_ps(a, b);
+  // 0 1 2 3 -> 1 1 3 3
+  let hi = _mm_movehdup_ps(out);
+  // 0 1 2 3 + 1 1 3 3 -> (0 + 1, 1 + 1, 2 + 3, 3 + 3)
+  let sum = _mm_add_ps(hi, out);
+  // unpacklo: 0 0 1 1
+  out = _mm_add_ps(sum, _mm_unpacklo_ps(out, out));
+  // (1 + 2 + 3, _, _, _)
+  out = _mm_movehl_ps(out, out);
+  return _mm_and_ps(out, _mm_castsi128_ps(_mm_set_epi32(0, 0, 0, -1)));
+}
+
+  #[test] fn hi_dp_test() {
+    let a = unsafe { m128(1.0, 2.0, 3.0, 5.0) };
+    let b = unsafe { m128(-4.0, -3.0, -2.0, -1.0) };
+    // unsafe { assert_m128(hi_dp2(a, b), m128(9.0, 2.0, 3.0, 4.0)) }
+    unsafe { printm128(_mm_dp_ps::<{ 0b11100001 as i32 }>(a, b)) };
+    unsafe { printm128(hi_dp2(a, b)) }
+    let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
+    let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+    // assert_eq!(dp(a, b), f32x4::from([-21.0, 0.0, 0.0, 0.0]));
+    // assert_eq!(util::dp_bc(a, b), f32x4::from([-21.0, -21.0, -21.0, -21.0]));
+    // assert_eq!(hi_dp(a, b), f32x4::from([-16.0, 0.0, 0.0, 0.0]));
+    printv(hi_dp(a, b));
+    assert_eq!(hi_dp(a, b), f32x4::from([-16.0, 0.0, 0.0, 0.0]));
+  }
+
+}

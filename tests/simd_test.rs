@@ -12,23 +12,20 @@ mod tests {
   }
 
   unsafe fn assert_m128(a:__m128,b:__m128) {
-    assert_eq!(_mm_extract_ps(a,0),_mm_extract_ps(b,0), "w");
-    assert_eq!(_mm_extract_ps(a,1),_mm_extract_ps(b,1), "x");
-    assert_eq!(_mm_extract_ps(a,2),_mm_extract_ps(b,2), "y");
-    assert_eq!(_mm_extract_ps(a,3),_mm_extract_ps(b,3), "z");
+    assert_eq!(_mm_extract_ps::<0>(a) as f32,_mm_extract_ps::<0>(b) as f32, "w");
+    assert_eq!(_mm_extract_ps::<1>(a),_mm_extract_ps::<1>(b), "x");
+    assert_eq!(_mm_extract_ps::<2>(a),_mm_extract_ps::<2>(b), "y");
+    assert_eq!(_mm_extract_ps::<3>(a),_mm_extract_ps::<3>(b), "z");
   }
 
   unsafe fn printm128(a:__m128) {
-    println!("{} {} {} {}",
-    _mm_extract_ps(a,0),
-    _mm_extract_ps(a,1),
-    _mm_extract_ps(a,2),
-    _mm_extract_ps(a,3));
+    println!("{} {} {} {}", _mm_extract_ps::<0>(a), _mm_extract_ps::<1>(a), _mm_extract_ps::<2>(a), _mm_extract_ps::<3>(a));
   }
 
   fn printv(v:f32x4) {
     println!("{} {} {} {}", v[0], v[1], v[2], v[3]);
   }
+
 
   #[test] fn test_f32_sign_flipping() {
     let v1 = f32x4::from_array([1.0,2.0,3.0,4.0]);
@@ -41,15 +38,6 @@ mod tests {
     let a = f32x4::from_array([0.0,1.0,2.0,3.0]);
     let zzwy = a.shuffle::<{[3,3,0,1]}>(a);
     assert_eq!(zzwy[0],3.0);
-  }
-
-  #[test] fn test_mul() {
-    let a = unsafe { _mm_set_ps(1.0,2.0,3.0,4.0) };
-    let b = unsafe { _mm_set_ps(1.0,2.0,3.0,4.0) };
-    unsafe { assert_m128(a,b) };
-    let c = unsafe { _mm_mul_ps(a,b) };
-    let d = unsafe { _mm_set_ps(1.0,4.0,9.0,16.0) };
-    unsafe { assert_m128(c,d) };
   }
 
   // https://stackoverflow.com/questions/27485959/sse-intrinsics-masking-a-float-and-using-bitwise-and
