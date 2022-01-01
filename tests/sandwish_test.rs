@@ -8,15 +8,15 @@
 #![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
-  use g3::{sandwich, plane, line, point, rotor, translator, motor, Point, Translator, PI, Rotor};
+  use g3::{sandwich, plane, line, point, rotor, translator, motor, Point, Translator, PI, Rotor, Origin};
   use core_simd::{f32x4};
 
   fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
-    const epsilon:f32 = 0.0001;
+    const EPSILON:f32 = 0.0001;
     assert_eq!(result.len(), expected.len());
     for (i, a) in result.iter().enumerate() {
       let b = expected[i];
-      assert!((a-b).abs() < epsilon, "{:} ≉ {:}", a, b);
+      assert!((a-b).abs() < EPSILON, "{:} ≉ {:}, at index {:}", a, b, i);
     }
   }
 
@@ -107,7 +107,6 @@ mod tests {
   #[test] fn motor_plane_variadic() {todo!()}
 
   #[test] fn motor_point() {
-    todo!();
     let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
     let a = point(-1.0, 1.0, 2.0);
     let b = m(a);
@@ -120,23 +119,38 @@ mod tests {
 
   #[test] fn motor_line_variadic() {todo!()}
 
-  #[test] fn motor_origin() {todo!()}
+  #[test] fn motor_origin() {
+    let r = rotor(PI * 0.5, 0.0, 0.0, 1.0);
+    let t = translator(1.0, 0.0, 0.0, 1.0);
+    let m = r * t;
+    let p = m(Origin{});
+    approx_eq([p.x(), p.y(), p.z()], [0.0, 0.0, 1.0]);
+  }
 
   #[test] fn motor_to_matrix() {todo!()}
 
   #[test] fn motor_to_matrix_3x4() {todo!()}
 
-  #[test] fn normalize_motor() {todo!()}
+  #[test] fn normalize_motor() {
+    let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0).normalized();
+    let norm = m * m.inverse();
+    approx_eq([norm.scalar(), norm.e0123(), 0.0], [1.0, 0.0, 0.0]);
+  }
 
   #[test] fn motor_sqrt() {todo!()}
 
   #[test] fn rotor_sqrt() {
-    todo!();
     let r = rotor(PI * 0.5, 1.0, 2.0, 3.0);
     let s = r.sqrt();
     let s = s * s;
     assert_eq!([s.scalar(), s.e23(), s.e31(), s.e12()], [r.scalar(), r.e23(), r.e31(), r.e12()]);
   }
 
-  #[test] fn normalize_rotor() {todo!()}
+  #[test] fn normalize_rotor() {
+    let r = Rotor{p1: f32x4::from([4.0, -3.0, 3.0, 28.0])};
+    r.normalized();
+    let norm = r * r.inverse();
+    assert_eq!(norm.scalar(), 1.0);
+    approx_eq([norm.e12(), norm.e31(), norm.e23()], [0.0, 0.0, 0.0]);
+  }
 }
