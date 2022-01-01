@@ -270,6 +270,20 @@ pub fn sw312(a:f32x4, b:f32x4, c:f32x4)->f32x4 {
   p + tmp4 * shuffle_xxxx(a)
 }
 
-pub fn swo12(_a:f32x4, _b:f32x4)->f32x4 {
-  todo!()
+// Conjugate origin with motor. Unlike other operations the motor MUST be
+// normalized prior to usage, b is the rotor component (p1) c is the
+// translator component (p2)
+pub fn swo12(b:f32x4, c:f32x4)->f32x4 {
+  //  (b0^2 + b1^2 + b2^2 + b3^2) e123 +
+  // 2(b2 c3 - b1 c0 - b0 c1 - b3 c2) e032 +
+  // 2(b3 c1 - b2 c0 - b0 c2 - b1 c3) e013 +
+  // 2(b1 c2 - b3 c0 - b0 c3 - b2 c1) e021
+  let mut tmp = b * shuffle_xxxx(c);
+  tmp += shuffle_xxxx(b) * c;
+  tmp += shuffle_xwyz(b) * shuffle_xzwy(c);
+  tmp -= shuffle_xzwy(b) * shuffle_xwyz(c);
+  tmp *= f32x4::from([0.0, 2.0, 2.0, 2.0]);
+  // b0^2 + b1^2 + b2^2 + b3^2 assumed to equal 1
+  // Set the low component to unity
+  tmp + f32x4::from([1f32, 0.0, 0.0, 0.0])
 }
