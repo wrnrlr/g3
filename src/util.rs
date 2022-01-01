@@ -296,8 +296,8 @@ mod tests {
   #[test] fn dot_product() {
     let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
     let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
-    // assert_eq!(dp(a, b), f32x4::from([-21.0, 0.0, 0.0, 0.0]));
-    // assert_eq!(util::dp_bc(a, b), f32x4::from([-21.0, -21.0, -21.0, -21.0]));
+    assert_eq!(dp(a, b), f32x4::from([-21.0, 0.0, 0.0, 0.0]));
+    // assert_eq!(dp_bc(a, b), f32x4::from([-21.0, -21.0, -21.0, -21.0]));
     assert_eq!(hi_dp(a, b), f32x4::from([-17.0, 0.0, 0.0, 0.0]));
     // assert_eq!(hi_dp_bc(a, b), f32x4::from([-16.0, -16.0, -16.0, -16.0]));
   }

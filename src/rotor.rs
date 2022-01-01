@@ -5,6 +5,11 @@ use crate::sandwich::{sw012,swmm};
 use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1};
 use crate::geometric::{gp11,gp12,gprt};
 
+
+pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
+  Rotor::new(ang_rad, x, y, z)
+}
+
 #[derive(Default,Debug,Clone,PartialEq)]
 pub struct EulerAngels {
   pub roll:f32,

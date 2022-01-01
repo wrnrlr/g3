@@ -7,6 +7,8 @@ use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_n
 use crate::sandwich::{sw012,sw312,swmm,swo12};
 use crate::geometric::{gp11,gp12,gprt,gpmm};
 
+pub fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
+
 /// A Motor is a combination of a translation along a line combined
 /// with a rotation about an axis parallel to that line.
 /// In other words, it is the geometric product of a Translator and a Rotor.

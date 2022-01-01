@@ -6,6 +6,10 @@ use crate::util::{dp_bc, flip_signs, rsqrt_nr1};
 use crate::sandwich::{sw02,sw32,swl2};
 use crate::geometric::{gprt};
 
+pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
+  Translator::new(delta,x,y,z)
+}
+
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Translator {
   pub p2:f32x4
@@ -29,7 +33,19 @@ impl Translator {
     Translator{p2:p2}
   }
 
-  // TODO pub load_normalized() {}
+  /// Fast load operation for packed data that is already normalized. The
+  /// argument `data` should point to a set of 4 float values with layout
+  /// `(0.f, a, b, c)` corresponding to the multivector $a\mathbf{e}_{01} +
+  /// b\mathbf{e}_{02} + c\mathbf{e}_{03}$.
+  ///
+  /// !!! danger
+  ///
+  ///     The translator data loaded this way *must* be normalized. That is,
+  ///     the quantity $-\sqrt{a^2 + b^2 + c^2}$ must be half the desired
+  ///     displacement.
+  pub fn load_normalized(data:[f32;4])->Translator {
+    Translator{ p2: f32x4::from(data)}
+  }
 
   pub fn normalized(&self)->Translator {
     let inv_norm = rsqrt_nr1(dp_bc(self.p2,self.p2));

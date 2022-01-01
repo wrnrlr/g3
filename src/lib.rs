@@ -23,10 +23,10 @@ pub use dual::{Dual, dual};
 pub use point::*;
 pub use line::{Branch, branch, ideal_line, IdealLine, Line, line};
 pub use plane::*;
-pub use motor::Motor;
-pub use rotor::Rotor;
+pub use motor::{Motor,motor};
+pub use rotor::{Rotor,rotor};
 pub use direction::Direction;
-pub use translator::Translator;
+pub use translator::{Translator,translator};
 
 pub use std::f32::consts::PI;
 
