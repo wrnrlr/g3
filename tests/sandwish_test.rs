@@ -8,7 +8,7 @@
 #![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
-  use g3::{sandwich, plane, line, point, rotor, translator, motor, Point, Translator, PI, Rotor, Origin};
+  use g3::{sandwich, plane, line, point, rotor, translator, motor, Point, Translator, Motor, PI, Rotor, Origin};
   use core_simd::{f32x4};
 
   fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
@@ -94,7 +94,10 @@ mod tests {
   }
 
   #[test] fn construct_motor_via_screw_axis() {
-    todo!()
+    let m = Motor::from_screw_axis(PI*0.5, 1.0, line(0.0,0.0,0.0,0.0,0.0,1.0));
+    let a = point(1.0, 0.0, 0.0);
+    let b = m(a);
+    approx_eq([b.x(), b.y(), b.z()], [0.0, 1.0, 1.0]);
   }
 
   #[test] fn motor_plane() {

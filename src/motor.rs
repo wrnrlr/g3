@@ -3,9 +3,9 @@ use std::convert::{From};
 use std::fmt::{Display,Formatter,Result};
 use core_simd::{f32x4,mask32x4};
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
-use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss};
+use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss, exp};
 use crate::sandwich::{sw012,sw312,swmm,swo12};
-use crate::geometric::{gp11,gp12,gprt,gpmm};
+use crate::geometric::{gp11, gp12, gprt, gpmm, gpdl};
 
 pub fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
 
@@ -38,6 +38,14 @@ impl Motor {
   /// a + b*e23 + c*e31 + d*e12 + e*e01 + f*e02 + g*e03 + h*e0123
   pub fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor {
     Motor{p1:f32x4::from_array([a,b,c,d]), p2:f32x4::from_array([h,e,f,g])}}
+
+  /// Produce a screw motion rotating and translating by given amounts along a
+  /// provided Euclidean axis.
+  pub fn from_screw_axis(angle:f32, d:f32, l:Line)->Motor {
+    let (p1,p2) = gpdl(-angle * 0.5, d * 0.5, l.p1, l.p2);
+    let (p1,p2) = exp(p1, p2);
+    Motor{p1,p2}
+  }
 
   /// Motor with only scalar component set to one
   pub fn one()->Motor {
