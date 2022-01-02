@@ -209,11 +209,11 @@ pub fn hi_dp(a:f32x4, b:f32x4)->f32x4 {
 
 pub fn hi_dp_bc(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
-  let hi = shuffle_odd(out);
+  let hi = shuffle_yyww(out);
 
   let sum  = hi + out;
-  out = sum + shuffle_low(out);
-  mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
+  out = sum + shuffle_xxyy(out);
+  shuffle_zzzz(out)
 }
 
 pub fn hi_dp_ss(a:f32x4, b:f32x4)->f32x4 {
@@ -280,6 +280,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn shuffle_zzwy(a:f32x4)->f32x4 { swizzle!(a, [2,2,3,1]) }
 #[inline] pub fn shuffle_zwyz(a:f32x4)->f32x4 { swizzle!(a, [2,3,1,2]) }
 #[inline] pub fn shuffle_zwzw(a:f32x4)->f32x4 { swizzle!(a, [2,3,2,3]) }
+#[inline] pub fn shuffle_zzzz(a:f32x4)->f32x4 { swizzle!(a, [2,2,2,2]) }
 
 #[inline] pub fn shuffle_wxxx(a:f32x4)->f32x4 { swizzle!(a, [3,0,0,0]) }
 #[inline] pub fn shuffle_wyzw(a:f32x4)->f32x4 { swizzle!(a, [3,1,2,3]) }
@@ -299,7 +300,7 @@ mod tests {
     assert_eq!(dp(a, b), f32x4::from([-21.0, 0.0, 0.0, 0.0]));
     // assert_eq!(dp_bc(a, b), f32x4::from([-21.0, -21.0, -21.0, -21.0]));
     assert_eq!(hi_dp(a, b), f32x4::from([-17.0, 0.0, 0.0, 0.0]));
-    // assert_eq!(hi_dp_bc(a, b), f32x4::from([-16.0, -16.0, -16.0, -16.0]));
+    assert_eq!(hi_dp_bc(a, b), f32x4::from([-17.0, -17.0, -17.0, -17.0]));
   }
 
   #[test] fn first_utils() {
