@@ -196,9 +196,8 @@ impl Not for Translator {
 impl Mul<Rotor> for Translator {
   type Output = Motor;
   fn mul(self, r: Rotor) -> Self::Output {
-    let p2 = gprt::<true>(r.p1,self.p2);
-    let p1 = f32x4::splat(0.0); // TODO default zero??? p1 is not set in klein...
-    Motor{p1,p2}
+    let p2 = gprt::<true>(r.p1, self.p2);
+    Motor{p1: r.p1, p2}
   }
 }
 impl Mul<Translator> for Translator {
@@ -210,11 +209,8 @@ impl Mul<Translator> for Translator {
 impl Mul<Motor> for Translator {
   type Output = Motor;
   fn mul(self, m: Motor) -> Self::Output {
-    let mut p2 = gprt::<true>(m.p1,self.p2);
-    let homogenious = self.p2[0];
-    p2 = p2 + f32x4::splat(homogenious);
-    let p1 = f32x4::splat(0.0); // TODO default zero??? p1 is not set in klein...
-    Motor{p2,p1}
+    let p2 = gprt::<true>(m.p1, self.p2);
+    Motor{p1: m.p1, p2: p2 + m.p2}
   }
 }
 impl Div<Translator> for Translator {
