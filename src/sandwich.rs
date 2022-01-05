@@ -1,5 +1,5 @@
 use core_simd::{f32x4,mask32x4};
-use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, f32x4_and};
+use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, f32x4_and, shuffle_xwzy};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -133,9 +133,9 @@ pub fn sw30(a:f32x4, b:f32x4) ->f32x4 {
   p3_out
 }
 
-pub fn sw012<const VARIADIC:bool,const TRANSLATE:bool>(a:f32x4, b:f32x4, _c:Option<f32x4>) ->f32x4 {
+pub fn sw012<const VARIADIC:bool,const TRANSLATE:bool>(a:f32x4, b:f32x4, c:Option<f32x4>)->f32x4 {
   // rotor(point): false, false
-  if VARIADIC || TRANSLATE { todo!() }
+  if !(!VARIADIC && !TRANSLATE) && !(!VARIADIC && TRANSLATE) { todo!() }
 
   let dc_scale = f32x4::from_array([1.0,2.0,2.0,2.0]);
   let b_xwyz = shuffle_xwyz(b);
@@ -155,9 +155,28 @@ pub fn sw012<const VARIADIC:bool,const TRANSLATE:bool>(a:f32x4, b:f32x4, _c:Opti
   tmp3 += b_xxxx * b_xxxx;
   tmp3 -= b_xzwy * b_xzwy;
 
-  let mut out = tmp1 * shuffle_xzwy(a);
-  out += tmp2 * shuffle_xwyz(a);
-  out += tmp3 * a;
+  let mut out:f32x4;
+
+  // motor(plane)
+  if c.is_some() {
+    let c = c.unwrap();
+    let mut tmp4 = b_xxxx * c;
+    tmp4 += b_xzwy * shuffle_xwyz(c);
+    tmp4 += b * shuffle_xxxx(c);
+    tmp4 -= b_xwyz * shuffle_xzwy(c);
+    tmp4 *= dc_scale;
+
+    out = tmp1 * shuffle_xzwy(a);
+    out += tmp2 * shuffle_xwzy(a);
+    out += tmp3 * a;
+
+    let tmp5 = hi_dp(tmp4, a);
+    out += tmp5;
+  } else {
+    out = tmp1 * shuffle_xzwy(a);
+    out += tmp2 * shuffle_xwzy(a);
+    out += tmp3 * a;
+  }
 
   out
 }

@@ -164,17 +164,17 @@ impl Display for Motor {
   }
 }
 
+impl From<Rotor> for Motor { fn from(r:Rotor)->Motor { Motor{p1: r.p1, p2: f32x4::splat(0.0)} } }
+
+impl From<Translator> for Motor { fn from(t:Translator)->Motor { Motor{p1: f32x4::from_array([1.0,0.0,0.0,0.0]), p2: t.p2} } }
+
 impl FnMut<(Plane,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane { self.call(args) }}
 impl FnOnce<(Plane,)> for Motor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
 impl Fn<(Plane,)> for Motor {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0:sw012::<false,true>(args.0.p0, self.p1, None)}
+    Plane{p0:sw012::<false,true>(args.0.p0, self.p1, Some(self.p2))}
   }
 }
-
-impl From<Rotor> for Motor { fn from(r:Rotor)->Motor { Motor{p1: r.p1, p2: f32x4::splat(0.0)} } }
-
-impl From<Translator> for Motor { fn from(t:Translator)->Motor { Motor{p1: f32x4::from_array([1.0,0.0,0.0,0.0]), p2: t.p2} } }
 
 // TODO operator()(plane* in, plane* out, size_t count)
 

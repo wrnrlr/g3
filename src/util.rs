@@ -20,7 +20,8 @@ pub fn rsqrt_nr1(a:f32x4)->f32x4 {
   // TODO find portable version of _mm_rsqrt_ps in core_simd
   // From Intel optimization manual: expected performance is ~5.2x
   // baseline (sqrtps + divps) with ~22 bits of accuracy
-  let xn = f32x4::splat(1.0) / a.sqrt();
+  let a_sqrt = a.sqrt();
+  let xn = f32x4::splat(1.0) / a_sqrt;
   let axn2 = xn * xn * a;
   let xn3 = f32x4::splat(3.0) - axn2;
   f32x4::splat(0.5) * xn * xn3
@@ -155,7 +156,7 @@ pub fn log(p1:f32x4, p2:f32x4)->(f32x4,f32x4) {
   let a = bv_mask * p1;
 
   // Early out if we're taking the log of a motor without any rotation
-  if a == f32x4::splat(0.0) { return (f32x4::splat(0.0), p2); }
+  if a == f32x4::splat(0.0) { return (a, p2); }
 
   let b = bv_mask * p2;
 
@@ -268,6 +269,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn shuffle_xxyy(a:f32x4)->f32x4 { swizzle!(a, [0,0,1,1]) }
 #[inline] pub fn shuffle_xzwy(a:f32x4)->f32x4 { swizzle!(a, [0,2,3,1]) }
 #[inline] pub fn shuffle_xwyz(a:f32x4)->f32x4 { swizzle!(a, [0,3,1,2]) }
+#[inline] pub fn shuffle_xwzy(a:f32x4)->f32x4 { swizzle!(a, [0,3,2,1]) }
 
 #[inline] pub fn shuffle_yxxx(a:f32x4)->f32x4 { swizzle!(a, [1,0,0,0]) }
 #[inline] pub fn shuffle_yyzw(a:f32x4)->f32x4 { swizzle!(a, [1,1,2,3]) }
