@@ -1,5 +1,5 @@
 use core_simd::{f32x4,mask32x4};
-use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, f32x4_and, shuffle_xwzy};
+use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, f32x4_and, shuffle_xwzy, shuffle_zwwy, shuffle_wzyz};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -181,7 +181,75 @@ pub fn sw012<const VARIADIC:bool,const TRANSLATE:bool>(a:f32x4, b:f32x4, c:Optio
   out
 }
 
-pub fn swmm<const N:bool,const F:bool,const P:bool>(_a:f32x4,_b:f32x4,_c:Option<f32x4>)->(f32x4,f32x4) { // todo, c doesn't seem to be used add count argument
+// motor(line), swmm<false, true, true>
+pub fn swml(a1:f32x4, a2:f32x4, b:f32x4, c:f32x4)->(f32x4,f32x4) {
+  let b_xwyz = shuffle_xwyz(b);
+  let b_xzwy = shuffle_xzwy(b);
+  let b_yxxx = shuffle_yxxx(b);
+  let b_yxxx_2 = b_yxxx * b_yxxx;
+
+  let mut tmp = b * b;
+  tmp = tmp + b_yxxx_2;
+  let b_tmp = shuffle_zwyz(b);
+  let mut tmp2 = b_tmp * b_tmp;
+  let b_tmp = shuffle_wzwy(b);
+  tmp2 += b_tmp * b_tmp;
+  tmp -= flip_signs(tmp2, mask32x4::from([true, false, false, false]));
+
+  let b_xxxx = shuffle_xxxx(b);
+  let scale = f32x4::from([0.0, 2.0, 2.0, 2.0]);
+  tmp2 = b_xxxx * b_xwyz;
+  tmp2 += b * b_xzwy;
+  tmp2 = tmp2 * scale;
+
+  let mut tmp3 = b * b_xwyz;
+  tmp3 -= b_xxxx * b_xzwy;
+  tmp3 = tmp3 * scale;
+
+  let czero = shuffle_xxxx(c);
+  let c_xzwy = shuffle_xzwy(c);
+  let c_xwyz = shuffle_xwyz(c);
+
+  let mut tmp4 = b * c;
+  tmp4 -= b_yxxx * shuffle_yxxx(c);
+  tmp4 -= shuffle_zwwy(b) * shuffle_zwwy(c);
+  tmp4 -= shuffle_wzyz(b) * shuffle_wzyz(c);
+  tmp4 = tmp4 + tmp4;
+
+  let mut tmp5 = b * c_xwyz;
+  tmp5 += b_xzwy * czero;
+  tmp5 += b_xwyz * c;
+  tmp5 -= b_xxxx * c_xzwy;
+  tmp5 = tmp5 * scale;
+
+  let mut tmp6 = b * c_xzwy;
+  tmp6 += b_xxxx * c_xwyz;
+  tmp6 += b_xzwy * c;
+  tmp6 -= b_xwyz * czero;
+  tmp6 = tmp6 * scale;
+
+  let p1_in_xzwy = shuffle_xzwy(a1);
+  let p1_in_xwyz = shuffle_xwyz(a1);
+
+  let mut p1_out = tmp * a1;
+  p1_out = p1_out + tmp2 * p1_in_xzwy;
+  p1_out = p1_out + tmp3 * p1_in_xwyz;
+
+  let mut p2_out = tmp * a2;
+  p2_out += tmp2 * shuffle_xzwy(a2);
+  p2_out += tmp3 * shuffle_xwyz(a2);
+
+  p2_out += tmp4 * a1;
+  p2_out += tmp5 * p1_in_xwyz;
+  p2_out += tmp6 * p1_in_xzwy;
+
+  (p1_out, p2_out)
+}
+
+pub fn swmm<const VARIADIC:bool, const TRANSLATE:bool, const INPUT_P2:bool>(_a:f32x4,_b:f32x4,_c:Option<f32x4>)->(f32x4,f32x4) {
+  // todo, c doesn't seem to be used add count argument
+  // motor(line), false, true, true
+
   todo!()
 }
 

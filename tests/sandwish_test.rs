@@ -118,7 +118,13 @@ mod tests {
 
   #[test] fn motor_point_variadic() {todo!()}
 
-  #[test] fn motor_line() {todo!()}
+  #[test] fn motor_line() {
+    let m = motor(2.0, 4.0, 3.0, -1.0, -5.0, -2.0, 2.0, -3.0);
+    let l = line(-1.0, 2.0, -3.0, -6.0, 5.0, 4.0);
+    let k = m(l);
+    approx_eq([k.e01(), k.e02(), k.e03()], [6.0, 522.0, 96.0]);
+    approx_eq([k.e12(), k.e31(), k.e23()], [-214.0, -148.0, -40.0]);
+  }
 
   #[test] fn motor_line_variadic() {todo!()}
 

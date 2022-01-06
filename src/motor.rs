@@ -4,7 +4,7 @@ use std::fmt::{Display,Formatter,Result};
 use core_simd::{f32x4,mask32x4};
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
 use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss, exp};
-use crate::sandwich::{sw012,sw312,swmm,swo12};
+use crate::sandwich::{sw012, sw312, swml, swo12};
 use crate::geometric::{gp11, gp12, gprt, gpmm, gpdl};
 
 pub fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
@@ -182,7 +182,7 @@ impl FnMut<(Line,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: 
 impl FnOnce<(Line,)> for Motor { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
 impl Fn<(Line,)> for Motor {
   extern "rust-call" fn call(&self, args: (Line,))->Self::Output {
-    let (p1,p2) = swmm::<false,true,true>(args.0.p1, self.p1, Some(self.p2));
+    let (p1,p2) = swml(args.0.p1, args.0.p2, self.p1, self.p2);
     Line{p1:p1,p2:p2}
   }
 }
