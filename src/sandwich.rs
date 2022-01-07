@@ -156,7 +156,7 @@ pub fn sw01(a:f32x4, b:f32x4)->f32x4 {
   let mut out:f32x4;
 
   out = tmp1 * shuffle_xzwy(a);
-  out += tmp2 * shuffle_xwzy(a);
+  out += tmp2 * shuffle_xwyz(a);
   out += tmp3 * a;
 
   out
