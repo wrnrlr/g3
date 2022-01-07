@@ -1,7 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,mask32x4,simd_swizzle};
 use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
-use crate::sandwich::{sw012, swrl};
+use crate::sandwich::{sw01, swrl};
 use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1};
 use crate::geometric::{gp11,gp12,gprt};
 
@@ -133,7 +133,7 @@ impl FnMut<(Plane,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Plane,)> for Rotor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
 impl Fn<(Plane,)> for Rotor {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0: sw012::<false,false>(args.0.p0, self.p1, None)}
+    Plane{p0: sw01(args.0.p0, self.p1)}
   }
 }
 
@@ -155,7 +155,7 @@ impl FnMut<(Point,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Point,)> for Rotor { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
 impl Fn<(Point,)> for Rotor {
   extern "rust-call" fn call(&self, args: (Point,))->Point {
-    Point{p3:sw012::<false,false>(args.0.p3, self.p1, None)}
+    Point{p3:sw01(args.0.p3, self.p1)}
   }
 }
 
@@ -164,8 +164,8 @@ impl Fn<(Point,)> for Rotor {
 impl FnMut<(Direction,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Direction,))->Direction {self.call(args)} }
 impl FnOnce<(Direction,)> for Rotor { type Output = Direction; extern "rust-call" fn call_once(self, args: (Direction,))->Direction { self.call(args) }}
 impl Fn<(Direction,)> for Rotor {
-  extern "rust-call" fn call(&self, _args: (Direction,))->Direction {
-    todo!() // The c++ impl is strange...
+  extern "rust-call" fn call(&self, args: (Direction,))->Direction {
+    Direction{p3: sw01(args.0.p3, self.p1)}
   }
 }
 
