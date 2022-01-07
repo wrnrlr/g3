@@ -170,3 +170,17 @@ pub fn gpmm(a:f32x4, b:f32x4, c:f32x4, d:f32x4)->(f32x4,f32x4) {
 
   return (e, f);
 }
+
+pub fn gpdl(u:f32, v:f32, b:f32x4, c:f32x4)->(f32x4,f32x4) {
+  // b1 u e23 +
+  // b2 u e31 +
+  // b3 u e12 +
+  // (-b1 v + c1 u) e01 +
+  // (-b2 v + c2 u) e02 +
+  // (-b3 v + c3 u) e03
+  let u_vec = f32x4::splat(u);
+  let v_vec = f32x4::splat(v);
+  let p1 = u_vec * b;
+  let p2 = c * u_vec - b * v_vec;
+  (p1,p2)
+}
