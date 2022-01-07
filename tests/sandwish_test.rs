@@ -50,7 +50,11 @@ mod tests {
   }
 
   #[test] fn rotor_line() {
-    todo!();
+    let r = Rotor::load_normalized([1.0, 4.0, -3.0, 2.0]);
+    let l = line(-1.0, 2.0, -3.0, -6.0, 5.0, 4.0);
+    let k = r(l);
+    approx_eq([k.e01(), k.e02(), k.e03()], [-110.0, 20.0, 10.0]);
+    approx_eq([k.e12(), k.e31(), k.e23()], [-240.0, 102.0, -36.0]);
   }
 
   #[test] fn rotor_point() {

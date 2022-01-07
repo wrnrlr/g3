@@ -246,6 +246,44 @@ pub fn swml(a1:f32x4, a2:f32x4, b:f32x4, c:f32x4)->(f32x4,f32x4) {
   (p1_out, p2_out)
 }
 
+pub fn swrl(a1:f32x4, a2:f32x4, b:f32x4)->(f32x4,f32x4) {
+  let b_xwyz = shuffle_xwyz(b);
+  let b_xzwy = shuffle_xzwy(b);
+  let b_yxxx = shuffle_yxxx(b);
+  let b_yxxx_2 = b_yxxx * b_yxxx;
+
+  let mut tmp = b * b;
+  tmp = tmp + b_yxxx_2;
+  let b_tmp = shuffle_zwyz(b);
+  let mut tmp2 = b_tmp * b_tmp;
+  let b_tmp = shuffle_wzwy(b);
+  tmp2 += b_tmp * b_tmp;
+  tmp -= flip_signs(tmp2, mask32x4::from([true, false, false, false]));
+
+  let b_xxxx = shuffle_xxxx(b);
+  let scale = f32x4::from([0.0, 2.0, 2.0, 2.0]);
+  tmp2 = b_xxxx * b_xwyz;
+  tmp2 += b * b_xzwy;
+  tmp2 = tmp2 * scale;
+
+  let mut tmp3 = b * b_xwyz;
+  tmp3 -= b_xxxx * b_xzwy;
+  tmp3 = tmp3 * scale;
+
+  let p1_in_xzwy = shuffle_xzwy(a1);
+  let p1_in_xwyz = shuffle_xwyz(a1);
+
+  let mut p1_out = tmp * a1;
+  p1_out = p1_out + tmp2 * p1_in_xzwy;
+  p1_out = p1_out + tmp3 * p1_in_xwyz;
+
+  let mut p2_out = tmp * a2;
+  p2_out += tmp2 * shuffle_xzwy(a2);
+  p2_out += tmp3 * shuffle_xwyz(a2);
+
+  (p1_out, p2_out)
+}
+
 pub fn swmm<const VARIADIC:bool, const TRANSLATE:bool, const INPUT_P2:bool>(_a:f32x4,_b:f32x4,_c:Option<f32x4>)->(f32x4,f32x4) {
   // todo, c doesn't seem to be used add count argument
   // motor(line), false, true, true

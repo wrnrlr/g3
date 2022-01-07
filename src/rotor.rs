@@ -1,7 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,mask32x4,simd_swizzle};
 use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
-use crate::sandwich::{sw012,swmm};
+use crate::sandwich::{sw012, swrl};
 use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1};
 use crate::geometric::{gp11,gp12,gprt};
 
@@ -63,7 +63,9 @@ impl Rotor {
       cos_r * cos_p * cos_y + sin_r * sin_p * sin_y])}
   }
 
-  // TODO load_normalized
+  pub fn load_normalized(data:[f32;4])->Rotor {
+    Rotor{ p1: f32x4::from(data) }
+  }
 
   pub fn normalized(&self)->Rotor {
     let inv_norm = rsqrt_nr1(dp_bc(self.p1,self.p1));
@@ -142,8 +144,8 @@ impl FnMut<(Line,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: 
 impl FnOnce<(Line,)> for Rotor { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
 impl Fn<(Line,)> for Rotor {
   extern "rust-call" fn call(&self, args: (Line,))->Line {
-    let (p1,_) = swmm::<false,false,true>(args.0.p1,self.p1,None); // TODO is correct
-    Line{p1, p2: f32x4::from_array([0.0,0.0,0.0,0.0])}
+    let (p1, p2) = swrl(args.0.p1, args.0.p2, self.p1);
+    Line{p1, p2}
   }
 }
 
