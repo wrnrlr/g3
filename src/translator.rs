@@ -4,7 +4,7 @@ use core_simd::{f32x4,mask32x4};
 use crate::{Plane,Line,Point,Motor,Rotor,IdealLine};
 use crate::util::{dp_bc, flip_signs, rsqrt_nr1};
 use crate::sandwich::{sw02,sw32,swl2};
-use crate::geometric::{gprt};
+use crate::geometric::{gptr};
 
 pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
   Translator::new(delta,x,y,z)
@@ -196,7 +196,7 @@ impl Not for Translator {
 impl Mul<Rotor> for Translator {
   type Output = Motor;
   fn mul(self, r: Rotor) -> Self::Output {
-    let p2 = gprt::<true>(r.p1, self.p2);
+    let p2 = gptr(r.p1, self.p2);
     Motor{p1: r.p1, p2}
   }
 }
@@ -209,7 +209,7 @@ impl Mul<Translator> for Translator {
 impl Mul<Motor> for Translator {
   type Output = Motor;
   fn mul(self, m: Motor) -> Self::Output {
-    let p2 = gprt::<true>(m.p1, self.p2);
+    let p2 = gptr(m.p1, self.p2);
     Motor{p1: m.p1, p2: p2 + m.p2}
   }
 }

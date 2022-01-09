@@ -113,8 +113,8 @@ impl Rotor {
 
   // Compute the square root of the provided rotor $r$.
   pub fn sqrt(&self)->Rotor {
-    let p1 = add_ss(self.p1, f32x4::splat(1.0));
-    Rotor{p1:p1}.normalized() // TODO avoid extra by normalize...
+    let p1 = add_ss(self.p1, f32x4::from([1.0, 0.0, 0.0, 0.0]));
+    Rotor{p1}.normalized() // TODO avoid extra by normalize...
   }
 
   pub fn as_mat3x4() { todo!() }
@@ -241,21 +241,21 @@ impl Neg for Rotor {
 impl Mul<Rotor> for Rotor {
   type Output = Rotor;
   fn mul(self,other:Rotor)->Self::Output {
-    Rotor{p1: gp11(self.p1,other.p1)}
+    Rotor{p1: gp11(self.p1, other.p1)}
   }
 }
 
 impl Mul<Translator> for Rotor {
   type Output = Motor;
   fn mul(self,t:Translator)->Self::Output {
-    Motor{p1: self.p1, p2: gprt::<false>(self.p1, t.p2)}
+    Motor{p1: self.p1, p2: gprt(self.p1, t.p2)}
   }
 }
 
 impl Mul<Motor> for Rotor {
   type Output = Motor;
   fn mul(self,m:Motor)->Self::Output {
-    Motor{p1: gp11(m.p1,self.p1), p2: gp12::<false>(self.p1,m.p2)}
+    Motor{p1: gp11(m.p1,self.p1), p2: gp12(self.p1,m.p2)}
   }
 }
 

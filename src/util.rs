@@ -6,7 +6,7 @@ pub fn refined_reciprocal(s:f32)->f32x4 {
 }
 
 pub fn sqrt_nr1(a:f32x4)->f32x4 {
-  a * rsqrt_nr1(a)
+  a * rsqrt_nr1(a) // TODO either write faster rsqrt_nr1, or derive sqrt_nr1 yourself...
 }
 
 // Reciprocal sqrt with an additional single Newton-Raphson refinement.
@@ -279,10 +279,11 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 
 #[inline] pub fn shuffle_zxxx(a:f32x4)->f32x4 { swizzle!(a, [2,0,0,0]) }
 #[inline] pub fn shuffle_zyzw(a:f32x4)->f32x4 { swizzle!(a, [2,1,2,3]) }
+#[inline] pub fn shuffle_zzzz(a:f32x4)->f32x4 { swizzle!(a, [2,2,2,2]) }
 #[inline] pub fn shuffle_zzwy(a:f32x4)->f32x4 { swizzle!(a, [2,2,3,1]) }
+#[inline] pub fn shuffle_zwxy(a:f32x4)->f32x4 { swizzle!(a, [2,3,0,1]) }
 #[inline] pub fn shuffle_zwyz(a:f32x4)->f32x4 { swizzle!(a, [2,3,1,2]) }
 #[inline] pub fn shuffle_zwzw(a:f32x4)->f32x4 { swizzle!(a, [2,3,2,3]) }
-#[inline] pub fn shuffle_zzzz(a:f32x4)->f32x4 { swizzle!(a, [2,2,2,2]) }
 #[inline] pub fn shuffle_zwwy(a:f32x4)->f32x4 { swizzle!(a, [2,3,3,1]) }
 
 #[inline] pub fn shuffle_wxxx(a:f32x4)->f32x4 { swizzle!(a, [3,0,0,0]) }
@@ -290,6 +291,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn shuffle_wzyz(a:f32x4)->f32x4 { swizzle!(a, [3,2,1,2]) }
 #[inline] pub fn shuffle_wzwy(a:f32x4)->f32x4 { swizzle!(a, [3,2,3,1]) }
 #[inline] pub fn shuffle_wwyz(a:f32x4)->f32x4 { swizzle!(a, [3,3,1,2]) }
+
 
 #[inline] pub fn bits_wwww(a:u32x4)->u32x4 { swizzle!(a, [0,0,0,0]) }
 
@@ -311,6 +313,12 @@ mod tests {
     let a = f32x4::from([2.0, 2.0, 3.0, 4.0]);
     assert_eq!(add_ss(a, a), f32x4::from([4.0, 2.0, 3.0, 4.0]));
     assert_eq!(mul_ss(a, a), f32x4::from([4.0, 2.0, 3.0, 4.0]));
+  }
+
+  #[test] fn rsqrt_test() {
+    let a = f32x4::from([4.0, 9.0, 16.0, 25.0]);
+    assert_eq!(a.sqrt(), f32x4::from([2.0, 3.0, 4.0, 5.0]));
+    assert_eq!(1.0/a.sqrt(), f32x4::from([1.0/2.0, 1.0/3.0, 1.0/4.0, 1.0/5.0]));
   }
 
   use core::arch::x86_64::{_mm_mul_ps, __m128, _mm_set_ps, _mm_extract_ps, _mm_movelh_ps,

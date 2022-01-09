@@ -5,7 +5,7 @@ use core_simd::{f32x4,mask32x4};
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
 use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss, exp};
 use crate::sandwich::{sw012, sw312, swml, swo12};
-use crate::geometric::{gp11, gp12, gprt, gpmm, gpdl};
+use crate::geometric::{gp11, gprt, gpmm, gpdl, gp21};
 
 pub fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
 
@@ -310,30 +310,30 @@ impl Neg for Motor {
 impl Mul<Rotor> for Motor {
   type Output = Self;
   fn mul(self, r:Rotor)->Motor {
-    let p1 = gp11(self.p1,r.p1);
-    let p2 = gp12::<true>(r.p1,self.p1);
+    let p1 = gp11(self.p1, r.p1);
+    let p2 = gp21(r.p1, self.p1);
     Motor{p1,p2}
   }
 }
 
 impl MulAssign<Rotor> for Motor {
   fn mul_assign(&mut self, r: Rotor) {
-    self.p1 = gp11(self.p1,r.p1);
-    self.p2 = gp12::<true>(r.p1,self.p1);
+    self.p1 = gp11(self.p1, r.p1);
+    self.p2 = gp21(r.p1, self.p1);
   }
 }
 
 impl Mul<Translator> for Motor {
   type Output = Motor;
   fn mul(self, t:Translator)->Motor {
-    let p2 = gprt::<false>(self.p1,t.p2) + self.p2;
+    let p2 = gprt(self.p1, t.p2) + self.p2;
     Motor{p1:self.p1, p2:p2}
   }
 }
 
 impl MulAssign<Translator> for Motor {
   fn mul_assign(&mut self, t: Translator) {
-    self.p1 = gprt::<false>(self.p1,t.p2) + self.p2
+    self.p1 = gprt(self.p1, t.p2) + self.p2
   }
 }
 

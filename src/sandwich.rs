@@ -174,7 +174,7 @@ pub fn sw012(a:f32x4, b:f32x4, c:f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= flip_signs(shuffle_wxxx(b) * shuffle_wzwy(b), mask32x4::from_array([true,false,false,false]));
+  tmp2 -= f32x4_xor(f32x4::from([-0.0, 0.0, 0.0, 0.0]), shuffle_wxxx(b) * shuffle_wzwy(b));
   tmp2 *= dc_scale;
 
   let mut tmp3 = b * b;
@@ -182,22 +182,18 @@ pub fn sw012(a:f32x4, b:f32x4, c:f32x4)->f32x4 {
   tmp3 += b_xxxx * b_xxxx;
   tmp3 -= b_xzwy * b_xzwy;
 
-  let mut out:f32x4;
-
   let mut tmp4 = b_xxxx * c;
   tmp4 += b_xzwy * shuffle_xwyz(c);
   tmp4 += b * shuffle_xxxx(c);
   tmp4 -= b_xwyz * shuffle_xzwy(c);
   tmp4 *= dc_scale;
 
-  out = tmp1 * shuffle_xzwy(a);
+  let mut out = tmp1 * shuffle_xzwy(a);
   out += tmp2 * shuffle_xwzy(a);
   out += tmp3 * a;
 
   let tmp5 = hi_dp(tmp4, a);
-  out += tmp5;
-
-  out
+  out + tmp5
 }
 
 // motor(line), swmm<false, true, true>

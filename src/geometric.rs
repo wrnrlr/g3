@@ -1,8 +1,5 @@
 use core_simd::{f32x4,mask32x4, simd_swizzle};
-use crate::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx,
-                  shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz,
-                  shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy,
-                  shuffle_zwyz, add_ss};
+use crate::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx, shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz, shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy, shuffle_zwyz, add_ss};
 
 // plane * plane
 pub fn gp00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
@@ -69,12 +66,12 @@ pub fn gp11(a:f32x4, b:f32x4)->f32x4 {
 
   // In general, we can get rid of at most one swizzle
   let mut p1_out = shuffle_xxxx(a) * b;
-  p1_out = p1_out - (shuffle_yzwy(a) * shuffle_ywyz(b));
+  p1_out -= shuffle_yzwy(a) * shuffle_ywyz(b);
   // In a separate register, accumulate the later components so we can
   // negate the lower single-precision element with a single instruction
   let tmp1 = shuffle_zyzw(a) * shuffle_zxxx(b);
   let tmp2 = shuffle_wwyz(a) * shuffle_wzwy(b);
-  let tmp = -(tmp1 + tmp2);
+  let tmp = flip_signs(tmp1 + tmp2, mask32x4::from([true, false, false, false]));
   p1_out + tmp
 }
 
@@ -104,24 +101,36 @@ pub fn gp133()->(f32x4,f32x4) {
   todo!()
 }
 
-pub fn gprt<const F:bool>(a:f32x4, b:f32x4)->f32x4 {
+pub fn gptr(a:f32x4, b:f32x4)->f32x4 {
   // (a1 b1 + a2 b2 + a3 b3) e0123 +
   // (a0 b1 + a2 b3 - a3 b2) e01 +
   // (a0 b2 + a3 b1 - a1 b3) e02 +
   // (a0 b3 + a1 b2 - a2 b1) e03
-  // or
+  let mut p2 = shuffle_yxxx(a) * shuffle_yyzw(b);
+  p2 += shuffle_zzwy(a) * shuffle_zwyz(b);
+  let tmp = shuffle_wwyz(a) * shuffle_wzwy(b);
+  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
+}
+
+pub fn gprt(a:f32x4, b:f32x4)->f32x4 {
   // (a1 b1 + a2 b2 + a3 b3) e0123 +
   // (a0 b1 + a3 b2 - a2 b3) e01 +
   // (a0 b2 + a1 b3 - a3 b1) e02 +
   // (a0 b3 + a2 b1 - a1 b2) e03
   let mut p2 = shuffle_yxxx(a) * shuffle_yyzw(b);
-  p2 = p2 + shuffle_zzwy(a) * shuffle_zwyz(b); // TODO other flip is different
-  let tmp = if F { shuffle_wwyz(a) * shuffle_wzwy(b)} else { shuffle_wzwy(a) * shuffle_wwyz(b) };
-  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false])) // TODO Correct?
+  p2 += shuffle_zwyz(a) * shuffle_zzwy(b);
+  let tmp = shuffle_wzwy(a) * shuffle_wwyz(b);
+  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
 }
 
-pub fn gp12<const F:bool>(a:f32x4, b:f32x4)->f32x4 {
-  let p2 = gprt::<F>(a,b);
+pub fn gp12(a:f32x4, b:f32x4)->f32x4 {
+  let p2 = gprt(a, b);
+  let tmp = a * shuffle_xxxx(b);
+  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
+}
+
+pub fn gp21(a:f32x4, b:f32x4)->f32x4 {
+  let p2 = gptr(a, b);
   let tmp = a * shuffle_xxxx(b);
   p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
 }
