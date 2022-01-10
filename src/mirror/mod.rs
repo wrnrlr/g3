@@ -42,6 +42,17 @@ impl Mirror {
   pub fn run(self) {
     let Self { window, mut scene, mut context, camera } = self;
 
+    // let mut pass = baryon::pass::Phong::new(
+    //   &baryon::pass::PhongConfig {
+    //     cull_back_faces: false,
+    //     max_lights: 10,
+    //     ambient: baryon::pass::Ambient {
+    //       color: baryon::Color(0xFFFFFFFF),
+    //       intensity: 0.2,
+    //     },
+    //   },
+    //   &context,
+    // );
     let mut pass = baryon::pass::Solid::new(
       &baryon::pass::SolidConfig {
         cull_back_faces: true,
@@ -75,6 +86,7 @@ impl Mirror {
       .add_entity(&sphere_prototype)
       .position([p.x(), p.y(), p.z()].into())
       .component(col)
+      // .component(baryon::pass::Shader::Gouraud { flat: false })
       .build();
   }
 
