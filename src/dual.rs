@@ -36,20 +36,20 @@ impl SubAssign for Dual {
 
 impl Mul<f32> for Dual {
   type Output = Dual;
-  fn mul(self, s: f32) -> Dual { Dual { p:self.p*s } }
+  fn mul(self, s: f32) -> Dual { Dual { p:self.p*f32x2::splat(s) } }
 }
 
 impl MulAssign<f32> for Dual {
-  fn mul_assign(&mut self, s: f32) { self.p = self.p*s }
+  fn mul_assign(&mut self, s: f32) { self.p = self.p*f32x2::splat(s) }
 }
 
 impl Div<f32> for Dual {
   type Output = Dual;
-  fn div(self, s: f32) -> Dual { Dual { p:self.p/s } }
+  fn div(self, s: f32) -> Dual { Dual { p:self.p/f32x2::splat(s) } }
 }
 
 impl DivAssign<f32> for Dual {
-  fn div_assign(&mut self, s: f32) { self.p = self.p/s }
+  fn div_assign(&mut self, s: f32) { self.p = self.p/f32x2::splat(s) }
 }
 
 impl Not for Dual {

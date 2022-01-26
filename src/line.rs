@@ -147,28 +147,28 @@ impl SubAssign for Line {
 impl Mul<f32> for Line {
   type Output = Line;
   fn mul(self, s: f32) -> Line {
-    Line { p1:self.p1*s, p2:self.p2*s }
+    Line { p1:self.p1*f32x4::splat(s), p2:self.p2*f32x4::splat(s) }
   }
 }
 
 impl MulAssign<f32> for Line {
   fn mul_assign(&mut self, s: f32) {
-    self.p1 *= s;
-    self.p2 *= s;
+    self.p1 *= f32x4::splat(s);
+    self.p2 *= f32x4::splat(s);
   }
 }
 
 impl Div<f32> for Line {
   type Output = Line;
   fn div(self, s: f32) -> Line {
-    Line { p1:self.p1/s, p2:self.p2/s }
+    Line { p1:self.p1/f32x4::splat(s), p2:self.p2/f32x4::splat(s) }
   }
 }
 
 impl DivAssign<f32> for Line {
   fn div_assign(&mut self, s: f32) {
-    self.p1 /= s;
-    self.p2 /= s;
+    self.p1 /= f32x4::splat(s);
+    self.p2 /= f32x4::splat(s);
   }
 }
 
@@ -297,26 +297,26 @@ impl SubAssign for IdealLine {
 impl Mul<f32> for IdealLine {
   type Output = IdealLine;
   fn mul(self, s: f32) -> IdealLine {
-    IdealLine { p2:self.p2*s }
+    IdealLine { p2:self.p2*f32x4::splat(s) }
   }
 }
 
 impl MulAssign<f32> for IdealLine {
   fn mul_assign(&mut self, s: f32) {
-    self.p2 *= s
+    self.p2 *= f32x4::splat(s)
   }
 }
 
 impl Div<f32> for IdealLine {
   type Output = IdealLine;
   fn div(self, s: f32) -> IdealLine {
-    IdealLine { p2:self.p2/s }
+    IdealLine { p2:self.p2/f32x4::splat(s) }
   }
 }
 
 impl DivAssign<f32> for IdealLine {
   fn div_assign(&mut self, s: f32) {
-    self.p2 /= s
+    self.p2 /= f32x4::splat(s)
   }
 }
 
@@ -481,26 +481,26 @@ impl SubAssign for Branch {
 impl Mul<f32> for Branch {
   type Output = Branch;
   fn mul(self, s: f32) -> Branch {
-    Branch { p1:self.p1*s }
+    Branch { p1:self.p1*f32x4::splat(s) }
   }
 }
 
 impl MulAssign<f32> for Branch {
   fn mul_assign(&mut self, s: f32) {
-    self.p1 *= s
+    self.p1 *= f32x4::splat(s)
   }
 }
 
 impl Div<f32> for Branch {
   type Output = Branch;
   fn div(self, s: f32) -> Branch {
-    Branch { p1:self.p1/s }
+    Branch { p1:self.p1/f32x4::splat(s) }
   }
 }
 
 impl DivAssign<f32> for Branch {
   fn div_assign(&mut self, s: f32) {
-    self.p1 /= s
+    self.p1 /= f32x4::splat(s)
   }
 }
 

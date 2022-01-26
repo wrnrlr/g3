@@ -216,15 +216,15 @@ impl Fn<(Origin,)> for Motor {
 
 impl Add<f32> for Motor {
   type Output = Motor;
-  fn add(self, f:f32) -> Motor {
-    Motor{ p1: self.p1+f, p2: self.p2+f }
+  fn add(self, s:f32) -> Motor {
+    Motor{ p1: self.p1+f32x4::splat(s), p2: self.p2+f32x4::splat(s) }
   }
 }
 
 impl Add<Motor> for f32 {
   type Output = Motor;
   fn add(self, t:Motor) -> Motor {
-    Motor{ p1: t.p1+self, p2: t.p2+self }
+    Motor{ p1: t.p1+f32x4::splat(self), p2: t.p2+f32x4::splat(self) }
   }
 }
 
@@ -266,33 +266,33 @@ impl SubAssign for Motor {
 impl Mul<f32> for Motor {
   type Output = Motor;
   fn mul(self, s: f32) -> Motor {
-    Motor { p1:self.p1*s, p2:self.p2*s }
+    Motor { p1:self.p1*f32x4::splat(s), p2:self.p2*f32x4::splat(s) }
   }
 }
 
 impl Mul<Motor> for f32 {
   type Output = Motor;
   fn mul(self, m: Motor) -> Motor {
-    Motor { p1:self*m.p1, p2:self*m.p2 }
+    Motor { p1:f32x4::splat(self)*m.p1, p2:f32x4::splat(self)*m.p2 }
   }
 }
 
 impl MulAssign<f32> for Motor {
   fn mul_assign(&mut self, s: f32) {
-    self.p1 *= s
+    self.p1 *= f32x4::splat(s)
   }
 }
 
 impl Div<f32> for Motor {
   type Output = Motor;
   fn div(self, s: f32) -> Motor {
-    Motor { p1:self.p1/s, p2:self.p2/s }
+    Motor { p1:self.p1/f32x4::splat(s), p2:self.p2/f32x4::splat(s) }
   }
 }
 
 impl DivAssign<f32> for Motor {
   fn div_assign(&mut self, s: f32) {
-    self.p1 /= s
+    self.p1 /= f32x4::splat(s)
   }
 }
 

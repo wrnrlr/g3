@@ -105,15 +105,15 @@ impl Fn<(Point,)> for Translator {
 
 impl Add<f32> for Translator {
   type Output = Translator;
-  fn add(self, f:f32) -> Translator {
-    Translator{ p2: self.p2+f }
+  fn add(self, s:f32) -> Translator {
+    Translator{ p2: self.p2+f32x4::splat(s) }
   }
 }
 
 impl Add<Translator> for f32 {
   type Output = Translator;
   fn add(self, t:Translator) -> Translator {
-    Translator{ p2: t.p2+self }
+    Translator{ p2: t.p2+f32x4::splat(self) }
   }
 }
 
@@ -146,33 +146,33 @@ impl SubAssign for Translator {
 impl Mul<Translator> for f32 {
   type Output = Translator;
   fn mul(self, t: Translator) -> Translator {
-    Translator{ p2: self*t.p2 }
+    Translator{ p2: f32x4::splat(self)*t.p2 }
   }
 }
 
 impl Mul<f32> for Translator {
   type Output = Translator;
   fn mul(self, s: f32) -> Translator {
-    Translator{ p2: self.p2*s }
+    Translator{ p2: self.p2*f32x4::splat(s) }
   }
 }
 
 impl MulAssign<f32> for Translator {
   fn mul_assign(&mut self, s: f32) {
-    self.p2 *= s
+    self.p2 *= f32x4::splat(s)
   }
 }
 
 impl Div<f32> for Translator {
   type Output = Translator;
   fn div(self, s: f32) -> Translator {
-    Translator{ p2:self.p2/s }
+    Translator{ p2:self.p2/f32x4::splat(s) }
   }
 }
 
 impl DivAssign<f32> for Translator {
   fn div_assign(&mut self, s: f32) {
-    self.p2 /= s
+    self.p2 /= f32x4::splat(s)
   }
 }
 

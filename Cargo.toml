@@ -9,7 +9,8 @@ resolver = "2"
 mirror = ["baryon", "mint", "pollster"]
 
 [dependencies]
-core_simd = { git = "https://github.com/rust-lang/stdsimd" }
+core_simd = { git = "https://github.com/rust-lang/stdsimd", package = "core_simd", rev = "cad7434" }
+std_float = { git = "https://github.com/rust-lang/stdsimd", package = "std_float", rev = "cad7434" }
 baryon = { git = "https://github.com/wrnrlr/baryon", rev = "887ced2", optional = true }
 mint = { version = "0.5.8", optional = true }
 pollster = { version = "0.2.4", optional =  true }

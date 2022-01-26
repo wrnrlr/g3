@@ -54,11 +54,11 @@ impl SubAssign for Direction {
 
 impl Mul<f32> for Direction {
   type Output = Direction;
-  fn mul(self, s: f32) -> Direction { Direction { p3:self.p3*s } }
+  fn mul(self, s: f32) -> Direction { Direction { p3:self.p3*f32x4::splat(s) } }
 }
 
 impl MulAssign<f32> for Direction {
-  fn mul_assign(&mut self, s: f32) { self.p3 = self.p3*s }
+  fn mul_assign(&mut self, s: f32) { self.p3 = self.p3*f32x4::splat(s) }
 }
 
 impl Div<f32> for Direction {

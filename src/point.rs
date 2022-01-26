@@ -92,20 +92,20 @@ impl SubAssign for Point {
 
 impl Mul<f32> for Point {
     type Output = Point;
-    fn mul(self, s: f32) -> Point { Point { p3:self.p3*s } }
+    fn mul(self, s: f32) -> Point { Point { p3:self.p3*f32x4::splat(s) } }
 }
 
 impl MulAssign<f32> for Point {
-    fn mul_assign(&mut self, s: f32) { self.p3 = self.p3*s }
+    fn mul_assign(&mut self, s: f32) { self.p3 = self.p3*f32x4::splat(s) }
 }
 
 impl Div<f32> for Point {
     type Output = Point;
-    fn div(self, s: f32) -> Point { Point { p3:self.p3/s } }
+    fn div(self, s: f32) -> Point { Point { p3:self.p3/f32x4::splat(s) } }
 }
 
 impl DivAssign<f32> for Point {
-    fn div_assign(&mut self, s: f32) { self.p3 = self.p3/s }
+    fn div_assign(&mut self, s: f32) { self.p3 = self.p3/f32x4::splat(s) }
 }
 
 // Reversion

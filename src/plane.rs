@@ -150,20 +150,20 @@ impl SubAssign for Plane {
 
 impl Mul<f32> for Plane {
   type Output = Plane;
-  fn mul(self, s: f32) -> Plane { Plane { p0:self.p0*s } }
+  fn mul(self, s: f32) -> Plane { Plane { p0:self.p0*f32x4::splat(s) } }
 }
 
 impl MulAssign<f32> for Plane {
-  fn mul_assign(&mut self, s: f32) { self.p0 = self.p0*s }
+  fn mul_assign(&mut self, s: f32) { self.p0 = self.p0*f32x4::splat(s) }
 }
 
 impl Div<f32> for Plane {
   type Output = Plane;
-  fn div(self, s: f32) -> Plane { Plane { p0:self.p0/s } }
+  fn div(self, s: f32) -> Plane { Plane { p0:self.p0/f32x4::splat(s) } }
 }
 
 impl DivAssign<f32> for Plane {
-  fn div_assign(&mut self, s: f32) { self.p0 = self.p0/s }
+  fn div_assign(&mut self, s: f32) { self.p0 = self.p0/f32x4::splat(s) }
 }
 
 // Unary minus (leaves displacement from origin untouched, changing orientation only)

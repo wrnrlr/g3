@@ -173,15 +173,15 @@ impl Fn<(Direction,)> for Rotor {
 
 impl Add<f32> for Rotor {
   type Output = Rotor;
-  fn add(self, f:f32) -> Rotor {
-    Rotor{ p1: self.p1+f }
+  fn add(self, s:f32) -> Rotor {
+    Rotor{ p1: self.p1+f32x4::splat(s) }
   }
 }
 
 impl Add<Rotor> for f32 {
   type Output = Rotor;
   fn add(self, t:Rotor) -> Rotor {
-    Rotor{ p1: t.p1+self }
+    Rotor{ p1: t.p1+f32x4::splat(self) }
   }
 }
 
@@ -205,20 +205,20 @@ impl SubAssign for Rotor {
 
 impl Mul<f32> for Rotor {
   type Output = Rotor;
-  fn mul(self, s: f32) -> Rotor { Rotor { p1:self.p1*s } }
+  fn mul(self, s: f32) -> Rotor { Rotor { p1:self.p1*f32x4::splat(s) } }
 }
 
 impl MulAssign<f32> for Rotor {
-  fn mul_assign(&mut self, s: f32) { self.p1 = self.p1*s }
+  fn mul_assign(&mut self, s: f32) { self.p1 = self.p1*f32x4::splat(s) }
 }
 
 impl Div<f32> for Rotor {
   type Output = Rotor;
-  fn div(self, s: f32) -> Rotor { Rotor { p1:self.p1/s } }
+  fn div(self, s: f32) -> Rotor { Rotor { p1:self.p1/f32x4::splat(s) } }
 }
 
 impl DivAssign<f32> for Rotor {
-  fn div_assign(&mut self, s: f32) { self.p1 = self.p1/s }
+  fn div_assign(&mut self, s: f32) { self.p1 = self.p1/f32x4::splat(s) }
 }
 
 // Reversion

@@ -1,3 +1,4 @@
+use std_float::StdFloat as _;
 use core_simd::{f32x4,mask32x4,u32x4,simd_swizzle as swizzle};
 use core_simd::simd::Which::{First,Second};
 
