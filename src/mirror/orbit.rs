@@ -1,5 +1,5 @@
 use baryon::{window::{Event, Button}};
-use crate::{Point,Plane,Motor};
+use crate::{Point,Motor};
 
 // https://observablehq.com/@enkimute/glu-lookat-in-3d-pga#11
 // fn align3(a:[Point;3], b:[Point;3])->Motor {
@@ -27,9 +27,9 @@ use crate::{Point,Plane,Motor};
 //   return (1 + q2.normalized()/p2.normalized()).normalized() * m;
 // }
 
-fn align(p:Point,q:Point)->Motor {
-  (Motor::one() + q.normalized() / p.normalized()).normalized()
-}
+// fn align(p:Point,q:Point)->Motor {
+//   (Motor::one() + q.normalized() / p.normalized()).normalized()
+// }
 
 
 // fn look_at(position:Point, target:Point, pole:Point) {
