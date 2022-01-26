@@ -16,10 +16,15 @@ mod tests {
     let r = rotor(PI * 0.5, 0.3, -3.0, 1.0);
     let b = r.log();
     let s = b.exp();
-    assert_eq!([r.scalar(), r.e12(), r.e31(), r.e23()], [s.scalar(), s.e12(), s.e31(), s.e23()]);
+    approx_eq([r.scalar(), r.e12(), r.e31(), r.e23()], [s.scalar(), s.e12(), s.e31(), s.e23()]);
   }
 
-  #[test] fn rotor_sqrt() { todo!() }
+  #[test] fn rotor_sqrt() {
+    let r = rotor(PI/2.0, 0.3, -3.0, 1.0);
+    let s = r.sqrt();
+    let n = s * s;
+    approx_eq([r.scalar(), r.e12(), r.e31(), r.e23()], [n.scalar(), n.e12(), n.e31(), n.e23()]);
+  }
 
   #[test] fn motor_exp_log_sqrt() { todo!() }
 
