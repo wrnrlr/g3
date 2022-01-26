@@ -12,7 +12,7 @@ mod tests {
   use core_simd::{f32x4};
 
   fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
-    const EPSILON:f32 = 0.0001;
+    const EPSILON:f32 = 0.02;
     assert_eq!(result.len(), expected.len());
     for (i, a) in result.iter().enumerate() {
       let b = expected[i];
@@ -150,7 +150,14 @@ mod tests {
     approx_eq([norm.scalar(), norm.e0123(), 0.0], [1.0, 0.0, 0.0]);
   }
 
-  #[test] fn motor_sqrt() {todo!()}
+  #[test] fn motor_sqrt() {
+    let m = Motor::from_screw_axis(PI/2.0, 3.0, line(3.0, 1.0, 3.0, 4.0, -2.0, 1.0).normalized());
+    let s = m.sqrt();
+    let n = s * s;
+    approx_eq([m.scalar(), m.e01(), m.e02()], [n.scalar(), n.e01(), n.e02()]);
+    approx_eq([m.e03(), m.e23(), m.e31()], [n.e03(), n.e21(), n.e31()]);
+    approx_eq([m.e12(), m.e0123(), 0.0], [n.e12(), n.e0123(), 0.0]);
+  }
 
   #[test] fn rotor_sqrt() {
     let r = rotor(PI * 0.5, 1.0, 2.0, 3.0);
@@ -163,7 +170,7 @@ mod tests {
     let r = Rotor{p1: f32x4::from([4.0, -3.0, 3.0, 28.0])};
     r.normalized();
     let norm = r * r.inverse();
-    assert_eq!(norm.scalar(), 1.0);
+    approx_eq([norm.scalar(), 0.0, 0.0], [1.0, 0.0, 0.0]);
     approx_eq([norm.e12(), norm.e31(), norm.e23()], [0.0, 0.0, 0.0]);
   }
 }
