@@ -1,3 +1,8 @@
+// Inner product (Dot product)
+// Inner product is commutative a|b = b|a
+// Inner product is not-associative (a|b)|c != a|(b|c)
+
+
 #[cfg(test)]
 mod tests {
   use g3::{plane,point,line};
