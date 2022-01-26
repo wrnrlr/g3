@@ -16,7 +16,7 @@ mod tests {
     assert_eq!(result.len(), expected.len());
     for (i, a) in result.iter().enumerate() {
       let b = expected[i];
-      assert!((a-b).abs() < EPSILON, "{:} ≉ {:}, at index {:}", a, b, i);
+      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
     }
   }
 
@@ -111,7 +111,7 @@ mod tests {
     assert_eq!([b.x(), b.y(), b.z(), b.d()], [78.0, 60.0, 54.0, 358.0]);
   }
 
-  #[test] fn motor_plane_variadic() {todo!()}
+  // #[test] fn motor_plane_variadic() {todo!()}
 
   #[test] fn motor_point() {
     let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
@@ -120,7 +120,7 @@ mod tests {
     assert_eq!([b.x(), b.y(), b.z(), b.w()], [-12.0, -86.0, -86.0, 30.0]);
   }
 
-  #[test] fn motor_point_variadic() {todo!()}
+  // #[test] fn motor_point_variadic() {todo!()}
 
   #[test] fn motor_line() {
     let m = motor(2.0, 4.0, 3.0, -1.0, -5.0, -2.0, 2.0, -3.0);
@@ -130,7 +130,7 @@ mod tests {
     approx_eq([k.e12(), k.e31(), k.e23()], [-214.0, -148.0, -40.0]);
   }
 
-  #[test] fn motor_line_variadic() {todo!()}
+  // #[test] fn motor_line_variadic() {todo!()}
 
   #[test] fn motor_origin() {
     let r = rotor(PI * 0.5, 0.0, 0.0, 1.0);
@@ -140,9 +140,9 @@ mod tests {
     approx_eq([p.x(), p.y(), p.z()], [0.0, 0.0, 1.0]);
   }
 
-  #[test] fn motor_to_matrix() {todo!()}
+  // #[test] fn motor_to_matrix() {todo!()}
 
-  #[test] fn motor_to_matrix_3x4() {todo!()}
+  // #[test] fn motor_to_matrix_3x4() {todo!()}
 
   #[test] fn normalize_motor() {
     let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0).normalized();
