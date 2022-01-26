@@ -62,6 +62,7 @@ cargo +nightly run --example elements --features="mirror"
   * [Geometric Algebra Tutorial](https://geometricalgebratutorial.com)
   * https://mattferraro.dev/posts/geometric-algebra
 * [Cheat Sheet](https://enki.ws/ganja.js/examples/coffeeshop.html#V3k2baxG2&fullscreen)
+* [May the forque be with you: Rigid body dynamics in PGA](https://enki.ws/ganja.js/examples/pga_dyn.html)
 
 ## Status
 
