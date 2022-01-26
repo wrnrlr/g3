@@ -7,6 +7,9 @@
 // inner commutative
 // outer anti-commutative
 
+// wedge product anti-commutes a^b = -b^a
+// wedge product is associative (a^b)^c = a^(b^c)
+
 #[cfg(test)]
 mod tests {
   use g3::{plane,point,line,branch,ideal_line};

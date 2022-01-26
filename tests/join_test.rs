@@ -1,5 +1,5 @@
 // Join Operation, Regressive Product, &
-
+// a & b = !(!a ^ !b)
 // the pseudoscalar  is the identity for the regressive product
 
 #[cfg(test)]
