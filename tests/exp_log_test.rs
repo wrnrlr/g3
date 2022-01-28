@@ -26,7 +26,18 @@ mod tests {
     approx_eq([r.scalar(), r.e12(), r.e31(), r.e23()], [n.scalar(), n.e12(), n.e31(), n.e23()]);
   }
 
-  #[test] fn motor_exp_log_sqrt() { todo!() }
+  #[test] fn motor_exp_log_sqrt() {
+    let r = rotor(PI/2.0, 0.3, -3.0, 1.0);
+    let t = translator(12.0, -2.0, 0.4, 1.0);
+    let m1 = r * t;
+    let l = m1.log();
+    let m2 = l.exp();
+    approx_eq([m1.scalar(), m1.e12(), m1.e31(), m1.e23()], [m2.scalar(), m2.e12(), m2.e31(), m2.e23()]);
+    approx_eq([m1.e01(), m1.e02(), m1.e03(), m1.e0123()], [m2.e01(), m2.e02(), m2.e03(), m2.e0123()]);
+    let m3 = m1.sqrt() * m1.sqrt();
+    approx_eq([m1.scalar(), m1.e12(), m1.e31(), m1.e23()], [m3.scalar(), m3.e12(), m3.e31(), m3.e23()]);
+    approx_eq([m1.e01(), m1.e02(), m1.e03(), m1.e0123()], [m3.e01(), m3.e02(), m3.e03(), m3.e0123()]);
+  }
 
   #[test] fn motor_slerp() { todo!() }
 
