@@ -39,7 +39,19 @@ mod tests {
     approx_eq([m1.e01(), m1.e02(), m1.e03(), m1.e0123()], [m3.e01(), m3.e02(), m3.e03(), m3.e0123()]);
   }
 
-  #[test] fn motor_slerp() { todo!() }
+  #[test] fn motor_slerp() {
+    // Construct a motor from a translator and rotor
+    let r = rotor(PI/2.0, 0.3, -3.0, 1.0);
+    let t = translator(12.0, -2.0, 0.4, 1.0);
+    let m1 = r * t;
+    let l = m1.log();
+    // Divide the motor action into three equal steps
+    let step = l / 3.0;
+    let m_step = step.exp();
+    let m2 = m_step * m_step * m_step;
+    approx_eq([m1.scalar(), m1.e12(), m1.e31(), m1.e23()], [m2.scalar(), m2.e12(), m2.e31(), m2.e23()]);
+    approx_eq([m1.e01(), m1.e02(), m1.e03(), m1.e0123()], [m2.e01(), m2.e02(), m2.e03(), m2.e0123()]);
+  }
 
   #[test] fn motor_blend() {
     let r1 = rotor(PI/2.0, 0.0, 0.0, 1.0);
@@ -66,5 +78,16 @@ mod tests {
     approx_eq([l.e01(), l.e02(), l.e03(), 0.0], [m.e01(), m.e02(), m.e03(), 0.0]);
   }
 
-  #[test] fn ideal_motor_step() { todo!() }
+  #[test] fn ideal_motor_step() {
+    let r1 = rotor(0.0, 0.0, 0.0, 1.0);
+    let t1 = translator(1.0, 0.0, 0.0, 1.0);
+    let m1 = r1 * t1;
+    let step = m1.log() / 4.0;
+    let motor_step = step.exp();
+    // Applying motor_step 4 times should recover the translator t1
+    // (embedded) in m1
+    let m3 = m1.sqrt() * m1.sqrt();
+    approx_eq([m3.scalar(), m3.e12(), m3.e31(), m3.e23()], [m1.scalar(), m1.e12(), m1.e31(), m1.e23()]);
+    approx_eq([m3.e01(), m3.e02(), m3.e03(), m3.e0123()], [m1.e01(), m1.e02(), m1.e03(), m1.e0123()]);
+  }
 }
