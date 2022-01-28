@@ -30,7 +30,23 @@ mod tests {
 
   #[test] fn motor_slerp() { todo!() }
 
-  #[test] fn motor_blend() { todo!() }
+  #[test] fn motor_blend() {
+    let r1 = rotor(PI/2.0, 0.0, 0.0, 1.0);
+    let t1 = translator(1.0, 0.0, 0.0, 1.0);
+    let m1 = r1 * t1;
+    let r2 = rotor(PI/2.0, 0.3, -3.0, 1.0);
+    let t2 = translator(12.0, -2.0, 0.4, 1.0);
+    let m2 = r2 * t2;
+    let motion = m2 * m1.reverse();
+    let step = motion.log() / 4.0;
+    let motor_step = step.exp();
+
+    // Applying motor_step 0 times to m1 is m1.
+    // Applying motor_step 4 times to m1 is m2 * ~m1;
+    let r = motor_step * motor_step * motor_step * motor_step * m1;
+    approx_eq([r.scalar(), r.e12(), r.e31(), r.e23()], [m2.scalar(), m2.e12(), m2.e31(), m2.e23()]);
+    approx_eq([r.e01(), r.e02(), r.e03(), r.e0123()], [m2.e01(), m2.e02(), m2.e03(), m2.e0123()]);
+  }
 
   #[test] fn translator_motor_log() {
     let t = translator(1.0, 1.0, 2.0, 3.0);
