@@ -86,7 +86,7 @@ mod tests {
     let motor_step = step.exp();
     // Applying motor_step 4 times should recover the translator t1
     // (embedded) in m1
-    let m3 = m1.sqrt() * m1.sqrt();
+    let m3 = motor_step * motor_step * motor_step * motor_step;
     approx_eq([m3.scalar(), m3.e12(), m3.e31(), m3.e23()], [m1.scalar(), m1.e12(), m1.e31(), m1.e23()]);
     approx_eq([m3.e01(), m3.e02(), m3.e03(), m3.e0123()], [m1.e01(), m1.e02(), m1.e03(), m1.e0123()]);
   }
