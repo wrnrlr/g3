@@ -32,7 +32,12 @@ mod tests {
 
   #[test] fn motor_blend() { todo!() }
 
-  #[test] fn translator_motor_log() { todo!() }
+  #[test] fn translator_motor_log() {
+    let t = translator(1.0, 1.0, 2.0, 3.0);
+    let m:Motor = t.into();
+    let l = m.log();
+    approx_eq([l.e01(), l.e02(), l.e03(), 0.0], [m.e01(), m.e02(), m.e03(), 0.0]);
+  }
 
   #[test] fn ideal_motor_step() { todo!() }
 }
