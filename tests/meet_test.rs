@@ -73,6 +73,13 @@ mod tests {
     assert_eq!([a.e0123(), a.scalar()], [0.0, 0.0]);
   }
 
+  #[test] fn meet_ideal_line_plane() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let i = ideal_line(-2.0, 1.0, 4.0);
+    let a = i ^ p;
+    assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [5.0, -10.0, 5.0, 0.0]);
+  }
+
   #[test] fn meet_plane_branch() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
     let l = branch(1.0,2.0,3.0);
