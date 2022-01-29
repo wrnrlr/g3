@@ -28,6 +28,13 @@ mod tests {
     assert_eq!(a.e0(), -12.0);
   }
 
+  #[test] fn inner_plane_point() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let a = point(-2.0, 1.0, 4.0);
+    let l = p | a;
+    assert_eq!([l.e01(), l.e02(), l.e03(), l.e12(), l.e31(), l.e23()], [-5.0, 10.0, -5.0, 3.0, 2.0, 1.0]);
+  }
+
   #[test] fn inner_product_line_plane() {
     todo!();
   }
