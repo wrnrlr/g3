@@ -1,27 +1,16 @@
-// The wedge product ^ (also known as the meet or outer) is
+// The wedge product ^ (also known as the meet, exterior or outer) is
 // bilinear, anti-symmetric, and extended to be associative.
-// Note that a ^ a = 0
-
-// inner product with itself is the magnitude squared
-// outer product with itself is 0
-// inner commutative
-// outer anti-commutative
-
-// wedge product anti-commutes a^b = -b^a
-// wedge product is associative (a^b)^c = a^(b^c)
 
 #[cfg(test)]
 mod tests {
   use g3::*;
 
-  fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
-    const EPSILON: f32 = 0.02;
-    assert_eq!(result.len(), expected.len());
-    for (i, a) in result.iter().enumerate() {
-      let b = expected[i];
-      assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
-    }
-  }
+  // TODO
+  // * meet_plane_branch
+  // * meet_point_line
+  // anti_commute, a^b = -b^a
+  // associative (a^b)^c = a^(b^c)
+  // outer product with itself is 0, squares_to_zero, a ^ a = 0
 
   #[test] fn meet_plane_plane() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
@@ -67,7 +56,7 @@ mod tests {
   }
 
   #[test] fn meet_line_ideal_line() {
-    let l = line(1.0, 0.0, 0.0, 3.0, 2.0, 1.0);
+    let l = line(0.0, 0.0, 1.0, 3.0, 2.0, 1.0);
     let i = ideal_line(-2.0, 1.0, 4.0);
     let a = l ^ i;
     assert_eq!([a.e0123(), a.scalar()], [0.0, 0.0]);
@@ -86,10 +75,4 @@ mod tests {
     let d = a^p;
     assert_eq!(d.e0123(), -16.0);
   }
-
-  // TODO
-  // * meet_plane_branch
-  // * meet_point_line
-  // anti_commute
-  // squares_to_zero
 }
