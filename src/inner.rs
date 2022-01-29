@@ -1,4 +1,4 @@
-use core_simd::{mask32x4, f32x4};
+use core_simd::{f32x4};
 use crate::util::{f32x4_and, f32x4_xor, hi_dp, mul_ss, shuffle_xxxx, shuffle_xzwy};
 
 pub fn dot00(a:f32x4, b:f32x4)->f32x4 {
