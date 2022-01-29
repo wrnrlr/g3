@@ -55,8 +55,22 @@ mod tests {
   #[test] fn meet_line_plane() {
     let p = plane(1.0, 2.0, 3.0, 4.0);
     let l = line(0.0, 0.0, 1.0, 4.0, 1.0, -2.0);
-    let a = l ^ a;
-    assert_eq!([a.e021(), a.e013(), a.e032(), a.e0123()], [8.0, -5.0, -14.0, 0.0]);
+    let a = l ^ p;
+    assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [8.0, -5.0, -14.0, 0.0]);
+  }
+
+  #[test] fn meet_line_line() {
+    let l = line(1.0, 0.0, 0.0, 3.0, 2.0, 1.0);
+    let k = line(0.0, 1.0, 0.0, 4.0, 1.0, -2.0);
+    let a = l ^ k;
+    assert_eq!(a.e0123(), 6.0);
+  }
+
+  #[test] fn meet_line_ideal_line() {
+    let l = line(1.0, 0.0, 0.0, 3.0, 2.0, 1.0);
+    let i = ideal_line(-2.0, 1.0, 4.0);
+    let a = l ^ i;
+    assert_eq!([a.e0123(), a.scalar()], [0.0, 0.0]);
   }
 
   #[test] fn meet_plane_branch() {
@@ -75,12 +89,7 @@ mod tests {
   //   let _p2 = l ^ a;
   //   todo!();
   // }
-  #[test] fn meet_line_line() {
-    let l1 = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-    let l2 = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-    let _d = l1 ^ l2;
-    todo!();
-  }
+
   #[test] fn anti_commute() {
     let a = point(1.0, 2.0, 3.0);
     let l = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
