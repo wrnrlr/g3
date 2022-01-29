@@ -12,13 +12,25 @@
 
 #[cfg(test)]
 mod tests {
-  use g3::{plane,point,line,branch,ideal_line};
+  use g3::*;
+
+  fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
+    const EPSILON: f32 = 0.02;
+    assert_eq!(result.len(), expected.len());
+    for (i, a) in result.iter().enumerate() {
+      let b = expected[i];
+      assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+    }
+  }
+
   #[test] fn meet_plane_plane() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
-    let p2 = plane(1.0, 2.0, 3.0, 4.0);
-    let _l = p1 ^ p2;
-    todo!();
+    let p2 = plane(2.0, 3.0, -1.0, -2.0);
+    let l = p1 ^ p2;
+    assert_eq!([l.e01(), l.e02(), l.e03()], [10.0, 16.0, 2.0]);
+    assert_eq!([l.e12(), l.e31(), l.e23()], [-1.0, 7.0, -11.0]);
   }
+
   #[test] fn meet_plane_branch() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
     let l = branch(1.0,2.0,3.0);
@@ -67,5 +79,5 @@ mod tests {
     // assert_eq!(a^l, b)
   }
 
-  #[todo] #[test] fn squares_to_zero() {}
+  #[test] fn squares_to_zero() { todo!() }
 }
