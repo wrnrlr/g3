@@ -80,28 +80,16 @@ mod tests {
     assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [5.0, -10.0, 5.0, 0.0]);
   }
 
-  #[test] fn meet_plane_branch() {
-    let p1 = plane(1.0, 2.0, 3.0, 4.0);
-    let l = branch(1.0,2.0,3.0);
-    let _a1 = p1 ^ l;
-    let _a2 = l ^ p1;
-    todo!();
+  #[test] fn meet_point_plane() {
+    let a = point(-2.0, 1.0, 4.0);
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let d = a^p;
+    assert_eq!(d.e0123(), -16.0);
   }
 
-  // Doesn't exist
-  // #[test] fn meet_point_line() {
-  //   let a = point(1.0, 2.0, 3.0);
-  //   let l = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-  //   let _p1 = a ^ l;
-  //   let _p2 = l ^ a;
-  //   todo!();
-  // }
-
-  #[test] fn anti_commute() {
-    let a = point(1.0, 2.0, 3.0);
-    let l = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-    // assert_eq!(a^l, b)
-  }
-
-  #[test] fn squares_to_zero() { todo!() }
+  // TODO
+  // * meet_plane_branch
+  // * meet_point_line
+  // anti_commute
+  // squares_to_zero
 }
