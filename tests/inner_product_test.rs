@@ -14,6 +14,13 @@ mod tests {
     assert_eq!(f, 5.0);
   }
 
+  #[test] fn inner_plane_line() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let l = line(0.0, 0.0, 1.0, 4.0, 1.0, -2.0);
+    let q = p | l;
+    assert_eq!([q.e0(), q.e1(), q.e2(), q.e3()], [-3.0, 7.0, -14.0, 7.0]);
+  }
+
   #[test] fn inner_product_line_plane() {
     todo!();
   }
