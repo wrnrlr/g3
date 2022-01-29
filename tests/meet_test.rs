@@ -52,6 +52,13 @@ mod tests {
     assert_eq!([d.scalar(), d.e0123()], [0.0, 16.0]);
   }
 
+  #[test] fn meet_line_plane() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let l = line(0.0, 0.0, 1.0, 4.0, 1.0, -2.0);
+    let a = l ^ a;
+    assert_eq!([a.e021(), a.e013(), a.e032(), a.e0123()], [8.0, -5.0, -14.0, 0.0]);
+  }
+
   #[test] fn meet_plane_branch() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
     let l = branch(1.0,2.0,3.0);
