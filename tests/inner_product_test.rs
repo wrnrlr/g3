@@ -5,7 +5,15 @@
 
 #[cfg(test)]
 mod tests {
-  use g3::{plane,point,line};
+  use g3::*;
+
+  #[test] fn inner_plane_plane() {
+    let p1 = plane(1.0, 2.0, 3.0, 4.0);
+    let p2 = plane(2.0, 3.0, -1.0, -2.0);
+    let f = p1 | p2;
+    assert_eq!(f, 5.0);
+  }
+
   #[test] fn inner_product_line_plane() {
     todo!();
   }
