@@ -4,40 +4,41 @@
 
 #[cfg(test)]
 mod tests {
-  use g3::{plane,line,point,ideal_line,branch};
-  #[test] fn join_point_point() {
-    let a = point(1.0, 2.0, 3.0);
-    let b = point(1.0, 2.0, 3.0);
-    let _l1 = a & b;
-    todo!();
-  }
-  #[test] fn join_point_line() {
-    let a = point(1.0, 2.0, 3.0);
-    let l = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-    let _p1 = a & l;
-    let _p2 = l & a;
-    todo!();
-  }
-  #[test] fn join_point_branch() {
-    let a = point(1.0, 2.0, 3.0);
-    let l = branch(1.0,2.0, 3.0);
-    let _p1 = a & l;
-    let _p2 = l & a;
-    todo!();
-  }
-  #[test] fn join_point_ideal_line() {
-    let a = point(1.0, 2.0, 3.0);
-    let l = ideal_line(1.0,2.0, 3.0);
-    let _p1 = a & l;
-    let _p2 = l & a;
-    todo!();
-  }
-  #[test] fn join_plane_point() {
-    let p1 = plane(1.0, 2.0, 3.0, 4.0);
-    let a = point(1.0, 2.0, 3.0);
-    let _d1 = p1 & a;
-    let _d2 = a & p1;
-    todo!();
+  use g3::*;
+
+  #[test] fn z_line() {
+    let p1 = point(0.0, 0.0, 0.0);
+    let p2 = point(0.0, 0.0, 1.0);
+    let p3 = p1 & p2;
+    assert_eq!(p3.e12(), 1.0);
   }
 
+  #[test] fn y_line() {
+    let p1 = point(0.0, -1.0, 0.0);
+    let p2 = point(0.0, 0.0, 0.0);
+    let p3 = p1 & p2;
+    assert_eq!(p3.e31(), 1.0);
+  }
+
+  #[test] fn x_line() {
+    let p1 = point(-2.0, 0.0, 0.0);
+    let p2 = point(-1.0, 0.0, 0.0);
+    let p3 = p1 & p2;
+    assert_eq!(p3.e23(), 1.0);
+  }
+
+  #[test] fn plane_construction() {
+    let a = point(1.0, 3.0, 2.0);
+    let b = point(-1.0, 5.0, 2.0);
+    let c = point(2.0, -1.0, -4.0);
+    let p = a & b & c;
+    assert_eq!(p.e1() + p.e2() * 3.0 + p.e3() * 2.0 + p.e0(), 0.0);
+    assert_eq!(-p.e1() + p.e2() * 5.0 + p.e3() * 2.0 + p.e0(), 0.0);
+    assert_eq!(p.e1() * 2.0 - p.e2() - p.e3() * 4.0 + p.e0(), 0.0);
+  }
+
+  // TODO
+  // * join_point_branch
+  // * join_point_ideal_line
+  // * join_plane_point
 }
