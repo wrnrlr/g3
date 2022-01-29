@@ -38,18 +38,18 @@ mod tests {
     assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [8.0, -5.0, -14.0, 0.0]);
   }
 
+  #[test] fn meet_plane_ideal_line() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let l = ideal_line(-2.0, 1.0, 4.0);
+    let a = p ^ l;
+    assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [5.0, -10.0, 5.0, 0.0]);
+  }
+
   #[test] fn meet_plane_branch() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
     let l = branch(1.0,2.0,3.0);
     let _a1 = p1 ^ l;
     let _a2 = l ^ p1;
-    todo!();
-  }
-  #[test] fn meet_plane_ideal_line() {
-    let p = plane(1.0, 2.0, 3.0, 4.0);
-    let l = ideal_line(1.0, 2.0, 3.0);
-    let _a1 = p ^ l;
-    let _a2 = l ^ p;
     todo!();
   }
 
