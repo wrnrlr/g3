@@ -45,6 +45,13 @@ mod tests {
     assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [5.0, -10.0, 5.0, 0.0]);
   }
 
+  #[test] fn meet_plane_point() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let a = point(-2.0, 1.0, 4.0);
+    let d =  p ^ a;
+    assert_eq!([d.scalar(), d.e0123()], [0.0, 16.0]);
+  }
+
   #[test] fn meet_plane_branch() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
     let l = branch(1.0,2.0,3.0);
@@ -53,13 +60,6 @@ mod tests {
     todo!();
   }
 
-  #[test] fn meet_plane_point() {
-    let p = plane(1.0, 2.0, 3.0, 4.0);
-    let a = point(1.0, 2.0, 3.0);
-    let _d1 =  p ^ a;
-    let _d2 =  a ^ p;
-    todo!();
-  }
   // Doesn't exist
   // #[test] fn meet_point_line() {
   //   let a = point(1.0, 2.0, 3.0);
