@@ -2,7 +2,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,B
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
 use crate::util::{exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1, rsqrt_nr1, sqrt_nr1};
-use crate::inner::{dot11,dotpl,dotpil};
+use crate::inner::{dot11, dotpl, dotpil, dotilp};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 pub fn ideal_line(a:f32,b:f32,c:f32)->IdealLine { IdealLine::new(a,b,c) }
@@ -355,7 +355,7 @@ impl BitAnd<Point> for IdealLine {
 // Inner Product, |
 impl BitOr<Plane> for IdealLine {
   type Output = Plane;
-  fn bitor(self, p:Plane)->Plane { Plane{p0: dotpil::<true>(p.p0, self.p2)} }
+  fn bitor(self, p:Plane)->Plane { Plane{p0: dotilp(p.p0, self.p2)} }
 }
 
 // The `Branch` both a line through the origin and also the principal branch of
@@ -435,7 +435,7 @@ impl Branch {
   pub fn exp(self)->Rotor {
     let ang = sqrt_nr1(hi_dp(self.p1, self.p1))[0];
     let cos_ang = ang.cos();
-    let sin_ang = ang.sin();
+    let sin_ang = ang.sin() / ang;
     let mut p1 = f32x4::splat(sin_ang) * self.p1;
     p1 = p1 + f32x4::from_array([cos_ang, 0.0, 0.0, 0.0]);
     Rotor{p1}

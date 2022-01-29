@@ -1,5 +1,5 @@
 use core_simd::{mask32x4, f32x4};
-use crate::util::{hi_dp, mul_ss, shuffle_xxxx, shuffle_xzwy};
+use crate::util::{f32x4_xor, hi_dp, mul_ss, shuffle_xxxx, shuffle_xzwy};
 
 pub fn dot00(a:f32x4, b:f32x4)->f32x4 {
   // a1 b1 + a2 b2 + a3 b3
@@ -38,6 +38,10 @@ pub fn dotpl<const F:bool>(_p0:f32x4,_p1:f32x4,_p2:f32x4)->f32x4 {
   todo!()
 }
 
-pub fn dotpil<const F:bool>(_p0:f32x4,_p2:f32x4)->f32x4 {
-  todo!()
+pub fn dotpil(a:f32x4, c:f32x4)->f32x4 {
+  f32x4_xor(dotilp(a, c), f32x4::from([-0.0, 0.0, 0.0, 0.0]))
+}
+
+pub fn dotilp(a:f32x4, c:f32x4)->f32x4 {
+  hi_dp(a, c)
 }

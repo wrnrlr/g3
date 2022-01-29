@@ -21,6 +21,13 @@ mod tests {
     assert_eq!([q.e0(), q.e1(), q.e2(), q.e3()], [-3.0, 7.0, -14.0, 7.0]);
   }
 
+  #[test] fn inner_ideal_line() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let i = ideal_line(-2.0, 1.0, 4.0);
+    let a = p | i;
+    assert_eq!(a.e0(), -12.0);
+  }
+
   #[test] fn inner_product_line_plane() {
     todo!();
   }

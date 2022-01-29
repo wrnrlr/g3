@@ -13,7 +13,7 @@ mod tests {
     let o = Origin::to_point();
     let a_to_b = (b.normalized() / a.normalized()).sqrt();
 
-    assert_eq!(a_to_b);
+    // assert_eq!(a_to_b);
 
     assert_eq!(a_to_b(a), b, "translate a to b");
     assert_eq!((a_to_b*0.5)(a), o, "translate halfway between a and b (origin)");
