@@ -49,6 +49,13 @@ mod tests {
     assert_eq!(f, -12.0);
   }
 
+  #[test] fn inner_line_point() {
+    let l = line(0.0, 0.0, 1.0, 3.0, 2.0, 1.0);
+    let a = point(-2.0, 1.0, 4.0);
+    let p = l | a;
+    assert_eq!([p.e0(), p.e1(), p.e2(), p.e3()], [0.0, -3.0, -2.0, -1.0]);
+  }
+
   #[test] fn inner_product_line_line() {
     todo!();
   }

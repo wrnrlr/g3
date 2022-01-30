@@ -2,7 +2,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,B
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
 use crate::util::{exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1, rsqrt_nr1, sqrt_nr1};
-use crate::inner::{dot11, dotpl, dotilp, dotlp};
+use crate::inner::{dot11, dotilp, dotlp};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 pub fn ideal_line(a:f32,b:f32,c:f32)->IdealLine { IdealLine::new(a,b,c) }

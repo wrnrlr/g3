@@ -28,8 +28,11 @@ pub fn dot33(a:f32x4, b:f32x4)->f32x4 {
   f32x4::from_array([-1.0, 0.0, 0.0, 0.0]) * mul_ss(a, b)
 }
 
-pub fn dotptl(_a:f32x4,_b:f32x4)->f32x4 {
-  todo!()
+pub fn dotptl(a:f32x4, b:f32x4)->f32x4 {
+  let dp = hi_dp_ss(a, b);
+  let p0 = shuffle_xxxx(a) * b;
+  let p0 = f32x4_xor(p0, f32x4::from([0.0, -0.0, -0.0, -0.0]));
+  add_ss(p0, dp)
 }
 
 pub fn dotpl(a:f32x4, b:f32x4, c:f32x4)->f32x4 {
