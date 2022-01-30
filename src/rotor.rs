@@ -138,7 +138,14 @@ impl Fn<(Plane,)> for Rotor {
 }
 
 // TODO operator()(plane* in, plane* out, size_t count) const noexcept
-// TODO operator()(branch const& b) const noexcept
+
+impl FnMut<(Branch,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Branch,))->Branch {self.call(args)} }
+impl FnOnce<(Branch,)> for Rotor { type Output = Branch; extern "rust-call" fn call_once(self, args: (Branch,))->Branch { self.call(args) }}
+impl Fn<(Branch,)> for Rotor {
+  extern "rust-call" fn call(&self, args: (Branch,))->Branch {
+    todo!()
+  }
+}
 
 impl FnMut<(Line,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Line,))->Line {self.call(args)} }
 impl FnOnce<(Line,)> for Rotor { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
