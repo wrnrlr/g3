@@ -42,6 +42,13 @@ mod tests {
     assert_eq!([p2.e0(), p2.e1(), p2.e2(), p2.e3()], [3.0, -7.0, 14.0, -7.0]);
   }
 
+  #[test] fn inner_line_line() {
+    let l1 = line(1.0, 0.0, 0.0, 3.0, 2.0, 1.0);
+    let l2 = line(0.0, 1.0, 0.0, 4.0, 1.0, -2.0);
+    let f = l1 | l2;
+    assert_eq!(f, -12.0);
+  }
+
   #[test] fn inner_product_line_line() {
     todo!();
   }

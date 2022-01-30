@@ -19,10 +19,8 @@ pub fn dot03(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   (p1_out, p2_out)
 }
 
-// p1_out = _mm_xor_ps(_mm_set_ss(-0.f), hi_dp_ss(a, b));
-pub fn dot11(_a:f32x4,_b:f32x4)->f32x4 {
-  //f32x4_flip_signs(a * b, Mask32::from_array([true,false,false,false]))
-  todo!()
+pub fn dot11(a:f32x4, b:f32x4)->f32x4 {
+  f32x4_xor(f32x4::from([-0.0, 0.0, 0.0, 0.0]), hi_dp_ss(a, b))
 }
 
 pub fn dot33(a:f32x4, b:f32x4)->f32x4 {
