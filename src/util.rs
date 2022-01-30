@@ -259,6 +259,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 { mask.select(-x, x) }
 
 #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a + b, a, [First(0), Second(1), Second(2), Second(3)]) }
+#[inline] pub fn sub_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a, [First(0), Second(1), Second(2), Second(3)]) }
 #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a * b, a, [First(0), Second(1), Second(2), Second(3)]) }
 
 #[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) }

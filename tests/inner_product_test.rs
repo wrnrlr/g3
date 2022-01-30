@@ -35,9 +35,13 @@ mod tests {
     assert_eq!([l.e01(), l.e02(), l.e03(), l.e12(), l.e31(), l.e23()], [-5.0, 10.0, -5.0, 3.0, 2.0, 1.0]);
   }
 
-  #[test] fn inner_product_line_plane() {
-    todo!();
+  #[test] fn inner_line_plane() {
+    let p1 = plane(1.0, 2.0, 3.0, 4.0);
+    let l = line(0.0, 0.0, 1.0, 4.0, 1.0, -2.0);
+    let p2 = l | p1;
+    assert_eq!([p2.e0(), p2.e1(), p2.e2(), p2.e3()], [3.0, -7.0, 14.0, -7.0]);
   }
+
   #[test] fn inner_product_line_line() {
     todo!();
   }

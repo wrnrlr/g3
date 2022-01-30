@@ -215,7 +215,7 @@ impl BitOr<Plane> for Plane {
 impl BitOr<Line> for Plane {
   type Output = Plane;
   fn bitor(self, l:Line) -> Plane {
-    let p0 = dotpl::<false>(self.p0,l.p1,l.p2);
+    let p0 = dotpl(self.p0,l.p1,l.p2);
     Plane{p0}
   }
 }
