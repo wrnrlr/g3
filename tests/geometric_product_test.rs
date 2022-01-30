@@ -64,6 +64,42 @@ mod tests {
     approx_eq([b3.x(), b3.y(), b3.z(), 0.0], [b3.x(), b3.y(), b3.z(), 0.0])
   }
 
+  #[test] fn div_branch_branch() {
+    let b = branch(2.0, 1.0, 3.0);
+    let r = b / b;
+    approx_eq([r.scalar(), r.e23(), r.e31(), r.e12()], [1.0, 0.0, 0.0, 0.0]);
+  }
+
+  #[test] fn mul_line_line() {}
+
+  #[test] fn div_line_line() {}
+
+  #[test] fn mul_point_plane() {}
+
+  #[test] fn mul_point_point() {}
+
+  #[test] fn div_point_point() {}
+
+  #[test] fn div_translator_translator() {}
+
+  #[test] fn mul_rotor_translator() {}
+
+  #[test] fn mul_translator_rotor() {}
+
+  #[test] fn mul_motor_rotor() {}
+
+  #[test] fn mul_rotor_motor() {}
+
+  #[test] fn mul_motor_translator() {}
+
+  #[test] fn mul_translator_motor() {}
+
+  #[test] fn mul_motor_motor() {}
+
+  #[test] fn div_motor_motor() {}
+
+
+
   // Does not exist in klein
   // #[test] fn geometric_product_plane_line() {
   //   let p1 = plane(1.0,2.0,3.0,4.0);
@@ -83,20 +119,4 @@ mod tests {
   // #[test] fn geometric_product_point_line() {
   //   todo!(); Does not exist
   // }
-
-  #[test] fn point_geometric_product_point() {
-    todo!();
-  }
-  #[test] fn point_inverse_geometric_product_point() {
-    todo!();
-  }
-  #[test] fn geometric_product_line_plane() {
-    todo!();
-  }
-  #[test] fn geometric_product_line_line() {
-    todo!();
-  }
-  #[test] fn geometric_product_line_point() {
-    todo!();
-  }
 }
