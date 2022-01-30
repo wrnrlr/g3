@@ -97,9 +97,18 @@ mod tests {
     approx_eq([m.e01(), m.e02(), m.e03(), m.e0123()], [3.0, 2.0, 1.0, -16.0]);
   }
 
-  #[test] fn mul_point_point() {}
+  #[test] fn mul_point_point() {
+    let a = point(1.0, 2.0, 3.0);
+    let b = point(-2.0, 1.0, 4.0);
+    let t = a * b;
+    approx_eq([m.e01(), m.e02(), m.e03(), 0.0], [-3.0, -1.0, 1.0, 0.0]);
+    let c = t.sqrt()(b);
+    approx_eq([m.x(), m.y(), m.z(), 0.0], [1.0, 2.0, 3.0, 0.0]);
+  }
 
-  #[test] fn div_point_point() {}
+  #[test] fn div_point_point() {
+
+  }
 
   #[test] fn div_translator_translator() {}
 
