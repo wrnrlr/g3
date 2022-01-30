@@ -2,7 +2,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,mask32x4,simd_swizzle};
 use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
 use crate::sandwich::{sw01, swrl};
-use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1};
+use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and};
 use crate::geometric::{gp11,gp12,gprt};
 
 
@@ -107,7 +107,7 @@ impl Rotor {
 
     let mut p1  = self.p1 * rcp_nr1(f32x4::splat(sin_ang));
     p1 = p1 * f32x4::splat(ang);
-    p1 = mask32x4::from_array([false, true, true, true]).select(p1, f32x4::splat(0.0));
+    p1 = f32x4_and(p1, f32x4::from([0.0, -1.0, -1.0, -1.0]));
     Branch{p1}
   }
 
