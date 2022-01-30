@@ -112,7 +112,11 @@ mod tests {
     approx_eq([m.e01(), m.e02(), m.e03(), 0.0], [0.0, 0.0, 0.0, 0.0]);
   }
 
-  #[test] fn div_translator_translator() {}
+  #[test] fn div_translator_translator() {
+    let t1 = translator(3.0, 1.0, -2.0, 3.0);
+    let t2 = t1 / t1;
+    approx_eq([m.e01(), m.e02(), m.e03(), 0.0], [0.0, 0.0, 0.0, 0.0]);
+  }
 
   #[test] fn mul_rotor_translator() {}
 
