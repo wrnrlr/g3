@@ -44,6 +44,14 @@ mod tests {
     approx_eq([m.e12(), m.e31(), m.e23(), m.e0123()], [3.0, 2.0, 1.0, 16.0]);
   }
 
+  #[test] fn line_normalization() {
+    let l = line(1.0, 2.0, 3.0, 3.0, 2.0, 1.0);
+    let l = l.normalized();
+    let m = l * l.reversed();
+    approx_eq([m.scalar(), m.e23(), m.e31(), m.e12()], [1.0, 0.0, 0.0, 0.0]);
+    approx_eq([m.e01(), m.e02(), m.e03(), m.e0123()], [0.0, 0.0, 0.0, 0.0]);
+  }
+
   // Does not exist in klein
   // #[test] fn geometric_product_plane_line() {
   //   let p1 = plane(1.0,2.0,3.0,4.0);
