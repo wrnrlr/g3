@@ -82,7 +82,12 @@ mod tests {
     assert(l3.approx_eq(-l1, 0.001));
   }
 
-  #[test] fn div_line_line() {}
+  #[test] fn div_line_line() {
+    let l = line(1.0, -2.0, 2.0, -3.0, 3.0, -4.0);
+    let m = l / l;
+    approx_eq([m.scalar(), m.e12(), m.e31(), m.e23()], [1.0, 0.0, 0.0, 0.0]);
+    approx_eq([m.e01(), m.e02(), m.e03(), m.e0123()], [0.0, 0.0, 0.0, 0.0]);
+  }
 
   #[test] fn mul_point_plane() {}
 
