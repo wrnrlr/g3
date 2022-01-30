@@ -132,10 +132,8 @@ impl Motor {
   }
 
   pub fn sqrt(self)->Motor {
-    // TODO check if this is the fastest way to do this: m.p1_ = _mm_add_ss(m.p1_, _mm_set_ss(1.f))
-    let p1 = add_ss(self.p1, f32x4::splat(1.0));
-    // TODO avoid extra copy of Motor
-    Motor{p1:p1, p2:self.p2}.normalized()
+    let p1 = add_ss(self.p1, f32x4::from([1.0, 0.0, 0.0, 0.0]));
+    Motor{p1, p2:self.p2}.normalized()
   }
 
   pub fn reverse(self)->Motor {
