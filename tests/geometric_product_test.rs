@@ -152,7 +152,14 @@ mod tests {
     assert_eq!(m1, m2);
   }
 
-  #[test] fn mul_motor_translator() {}
+  #[test] fn mul_motor_translator() {
+    let r = Rotor(f32x4::from([1.0, 2.0, 3.0, 4.0]));
+    let t1 = Translator(f32x4::from([3.0, -2.0, 1.0, -3.0]));
+    let t3 = Translator(f32x4::from([-4.0, 2.0, -3.0, 1.0]));
+    let m1 = (r * t1) * t2;
+    let m2 = r * (t1 * t2);
+    assert_eq!(m1, m2);
+  }
 
   #[test] fn mul_translator_motor() {}
 
