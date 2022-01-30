@@ -89,7 +89,13 @@ mod tests {
     approx_eq([m.e01(), m.e02(), m.e03(), m.e0123()], [0.0, 0.0, 0.0, 0.0]);
   }
 
-  #[test] fn mul_point_plane() {}
+  #[test] fn mul_point_plane() {
+    let a = point(-2.0, 1.0, 4.0);
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let m = a * p;
+    approx_eq([m.scalar(), m.e12(), m.e31(), m.e23()], [0.0, -5.0, 10.0, -5.0]);
+    approx_eq([m.e01(), m.e02(), m.e03(), m.e0123()], [3.0, 2.0, 1.0, -16.0]);
+  }
 
   #[test] fn mul_point_point() {}
 
