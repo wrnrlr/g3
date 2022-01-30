@@ -118,7 +118,13 @@ mod tests {
     approx_eq([m.e01(), m.e02(), m.e03(), 0.0], [0.0, 0.0, 0.0, 0.0]);
   }
 
-  #[test] fn mul_rotor_translator() {}
+  #[test] fn mul_rotor_translator() {
+    let r = Rotor{p1: f32x4::from([1.0, 0.0, 0.0, 1.0])};
+    let t = Translator{p2: f32x4::from([1.0, 0.0, 0.0, 0.0])};
+    let m = r * t;
+    approx_eq([m.scalar(), m.e01(), m.e02(), m.e03()], [1.0, 0.0, 0.0, 1.0]);
+    approx_eq([m.e23(), m.e31(), m.e12(), m.e0123()], [0.0, 0.0, 1.0, 1.0]);
+  }
 
   #[test] fn mul_translator_rotor() {}
 
