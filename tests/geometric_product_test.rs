@@ -47,9 +47,21 @@ mod tests {
   #[test] fn line_normalization() {
     let l = line(1.0, 2.0, 3.0, 3.0, 2.0, 1.0);
     let l = l.normalized();
-    let m = l * l.reversed();
+    let m = l * l.reverse();
     approx_eq([m.scalar(), m.e23(), m.e31(), m.e12()], [1.0, 0.0, 0.0, 0.0]);
     approx_eq([m.e01(), m.e02(), m.e03(), m.e0123()], [0.0, 0.0, 0.0, 0.0]);
+  }
+
+  #[test] fn mul_branch_branch() {
+    let b1 = branch(2.0, 1.0, 3.0);
+    let b2 = branch(1.0, -2.0, -3.0);
+    let r = b1 * b2;
+    approx_eq([r.scalar(), r.e23(), r.e31(), r.e12()], [9.0, 3.0, 9.0, -5.0]);
+
+    let b1 = b1.normalized();
+    let b2 = b2.normalized();
+    let b3 = (b2 * b1).sqrt().inverse()(b1); // TODO maybe reverse?
+    approx_eq([b3.x(), b3.y(), b3.z(), 0.0], [b3.x(), b3.y(), b3.z(), 0.0])
   }
 
   // Does not exist in klein
