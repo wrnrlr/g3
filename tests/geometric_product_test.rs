@@ -16,7 +16,7 @@ mod tests {
     assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}", a, b);
   }
 
-  #[test] fn geometric_product_plane_plane() {
+  #[test] fn mul_plane_plane() {
     let p1 = plane(1.0,2.0,3.0,4.0);
     let p2 = plane(2.0,3.0,-1.0,-2.0);
     let m = p1 * p2;
@@ -27,6 +27,21 @@ mod tests {
     let p1 = p1.normalized();
     let m = p1 * p2;
     approx_eq1(m.scalar(), 1.0);
+  }
+
+  #[test] fn div_plane_plane() {
+    let p1 = plane(1.0, 2.0, 3.0, 4.0);
+    let m = p1 / p1;
+    approx_eq([m.scalar(), m.e12(), m.e31(), m.e23()], [1.0, 0.0, 0.0, 0.0]);
+    approx_eq([m.e01(), m.e02(), m.e02(), m.e0123()], [0.0, 0.0, 0.0, 0.0]);
+  }
+
+  #[test] fn div_plane_point() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let a = point(-2.0, 1.0, 4.0);
+    let m = p * a;
+    approx_eq([m.scalar(), m.e01(), m.e02(), m.e03()], [0.0, -5.0, 10.0, -5.0]);
+    approx_eq([m.e12(), m.e31(), m.e23(), m.e0123()], [3.0, 2.0, 1.0, 16.0]);
   }
 
   // Does not exist in klein
