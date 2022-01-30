@@ -134,9 +134,23 @@ mod tests {
     approx_eq([m.e23(), m.e31(), m.e12(), m.e0123()], [0.0, 0.0, 1.0, 1.0]);
   }
 
-  #[test] fn mul_motor_rotor() {}
+  #[test] fn mul_motor_rotor() {
+    let r1 = Rotor{p1: f32x4::from([1.0, 2.0, 3.0, 4.0])};
+    let t = Translator{p2: f32x4::from([3.0, -2.0, 1.0, -3.0])};
+    let r2 = Rotor{p1: f32x4::from([-4.0, 2.0, -3.0, 1.0])};
+    let m1 = (t * r1) * r2;
+    let m2 = t * (r1 * r2);
+    assert_eq!(m1, m2);
+  }
 
-  #[test] fn mul_rotor_motor() {}
+  #[test] fn mul_rotor_motor() {
+    let r1 = Rotor{p1: f32x4::from([1.0, 2.0, 3.0, 4.0])};
+    let t = Translator{p2: f32x4::from([3.0, -2.0, 1.0, -3.0])};
+    let r2 = Rotor{p1: f32x4::from([-4.0, 2.0, -3.0, 1.0])};
+    let m1 = r2 * (r1 * t);
+    let m2 = (r2 * r1) * t;
+    assert_eq!(m1, m2);
+  }
 
   #[test] fn mul_motor_translator() {}
 
