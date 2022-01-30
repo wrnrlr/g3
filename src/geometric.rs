@@ -1,5 +1,5 @@
 use core_simd::{f32x4,mask32x4, simd_swizzle};
-use crate::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx, shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz, shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy, shuffle_zwyz, add_ss};
+use crate::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx, shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz, shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy, shuffle_zwyz, add_ss, f32x4_xor, sub_ss, mul_ss, shuffle_yzyw, shuffle_yywz, shuffle_wywz, shuffle_wzyw, shuffle_zzww};
 
 // plane * plane
 pub fn gp00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
@@ -133,6 +133,26 @@ pub fn gp21(a:f32x4, b:f32x4)->f32x4 {
   let p2 = gptr(a, b);
   let tmp = a * shuffle_xxxx(b);
   p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
+}
+
+pub fn gpll(a:f32x4, d:f32x4, b:f32x4, c:f32x4)->(f32x4, f32x4) {
+  let flip = f32x4::splat(-0.0);
+  let mut p1 = shuffle_yzyw(a) * shuffle_yywz(b);
+  p1 = f32x4_xor(p1, flip);
+  p1 -= shuffle_wywz(a) * shuffle_wzyw(b);
+  let a2 = shuffle_zzww(a);
+  let b2 = shuffle_zzww(b);
+  let p1 = sub_ss(p1, mul_ss(a2, b2));
+
+  let mut p2 = shuffle_ywyz(a) * shuffle_yzwy(c);
+  p2 -= f32x4_xor(flip, shuffle_wzwy(a) * shuffle_wwyz(c));
+  p2 += shuffle_yzwy(b) * shuffle_ywyz(d);
+  p2 -= f32x4_xor(flip, shuffle_wwyz(b) * shuffle_wzwy(d));
+  let c2 = shuffle_zzww(c);
+  let d2 = shuffle_zzww(d);
+  p2 = add_ss(p2, a2*c2);
+  p2 = add_ss(p2, b2*d2);
+  (p1, p2)
 }
 
 /// Motor * Motor Operation

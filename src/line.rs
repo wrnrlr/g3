@@ -1,6 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual, Plane, Point, Motor, Translator, Rotor};
+use crate::geometric::{gp11, gpll};
 use crate::util::{exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1, rsqrt_nr1, sqrt_nr1};
 use crate::inner::{dot11, dotilp, dotlp};
 
@@ -226,6 +227,16 @@ impl BitOr<Line> for Line {
 impl BitOr<Plane> for Line {
   type Output = Plane;
   fn bitor(self, p:Plane)->Plane { Plane{p0: dotlp(p.p0, self.p1, self.p2)} }
+}
+
+// Geometric Product
+
+impl Mul<Line> for Line {
+  type Output = Motor;
+  fn mul(self, other: Line) -> Motor {
+    let (p1,p2) = gpll(self.p1, self.p2, other.p1, other.p2);
+    Motor{ p1, p2 }
+  }
 }
 
 // An ideal line represents a line at infinity and corresponds to the multivector:
@@ -488,6 +499,15 @@ impl Mul<f32> for Branch {
 impl Mul<Branch> for Branch {
   type Output = Rotor;
   fn mul(self, other: Branch) -> Rotor {
+    let other = other.inverse();
+    let p1 = gp11(self.p1, other.p1);
+    return Rotor{p1}
+  }
+}
+
+impl Div<Branch> for Branch {
+  type Output = Rotor;
+  fn div(self, other: Branch) -> Rotor {
     let other = other.inverse();
     self * other
   }
