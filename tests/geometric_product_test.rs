@@ -107,7 +107,9 @@ mod tests {
   }
 
   #[test] fn div_point_point() {
-
+    let a = point(1.0, 2.0, 3.0);
+    let t = a / a;
+    approx_eq([m.e01(), m.e02(), m.e03(), 0.0], [0.0, 0.0, 0.0, 0.0]);
   }
 
   #[test] fn div_translator_translator() {}
