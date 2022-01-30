@@ -70,7 +70,17 @@ mod tests {
     approx_eq([r.scalar(), r.e23(), r.e31(), r.e12()], [1.0, 0.0, 0.0, 0.0]);
   }
 
-  #[test] fn mul_line_line() {}
+  #[test] fn mul_line_line() {
+    let l1 = line(1.0, 0.0, 0.0, 3.0, 2.0, 1.0);
+    let l2 = line(0.0, 1.0, 0.0, 4.0, 1.0, -2.0);
+    let m = l1 * l2;
+    approx_eq([m.scalar(), m.e12(), m.e31(), m.e23()], [-12.0, 5.0, -10.0, 5.0]);
+    approx_eq([m.e01(), m.e02(), m.e03(), m.e0123()], [1.0, -2.0, -4.0, 6.0]);
+    let l1 = l1.normalized();
+    let l2 = l2.normalized();
+    let l3:Line = (l1 * l2).sqrt()(l2);
+    assert(l3.approx_eq(-l1, 0.001));
+  }
 
   #[test] fn div_line_line() {}
 
