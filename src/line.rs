@@ -239,6 +239,14 @@ impl Mul<Line> for Line {
   }
 }
 
+impl Div<Line> for Line {
+  type Output = Motor;
+  fn div(self, other: Line) -> Motor {
+    let other = other.inverse();
+    self * other
+  }
+}
+
 // An ideal line represents a line at infinity and corresponds to the multivector:
 //
 // $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
