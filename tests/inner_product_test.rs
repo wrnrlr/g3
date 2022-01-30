@@ -77,6 +77,15 @@ mod tests {
     assert_eq!(f, -1.0)
   }
 
+  #[test] fn project_point_to_line() {
+    let a = point(2.0, 2.0, 0.0);
+    let b = point(0.0, 0.0, 0.0);
+    let c = point(1.0, 0.0, 0.0);
+    let l = b & c;
+    let d = ((l | a) ^ l).normalized();
+    assert_eq!([d.e123(), d.x(), d.y(), d.z()], [1.0, 2.0, 0.0, 0.0]);
+  }
+
   #[test] fn inner_product_line_line() {
     todo!();
   }
