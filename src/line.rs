@@ -485,6 +485,14 @@ impl Mul<f32> for Branch {
   }
 }
 
+impl Mul<Branch> for Branch {
+  type Output = Rotor;
+  fn mul(self, other: Branch) -> Rotor {
+    let other = other.inverse();
+    self * other
+  }
+}
+
 impl MulAssign<f32> for Branch {
   fn mul_assign(&mut self, s: f32) {
     self.p1 *= f32x4::splat(s)
