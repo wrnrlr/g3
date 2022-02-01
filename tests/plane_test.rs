@@ -32,14 +32,14 @@ mod tests {
     assert_eq!(p.e3(), 3.0);
     assert_eq!(p.e0(), 1.0);
   }
-  #[test] fn plane_reflect_plane() {
+  #[test] #[ignore] fn plane_reflect_plane() {
     let plane1 = Plane::new(1.0,2.0,3.0,4.0);
     let plane2 = plane1(Plane::new(1.0,2.0,3.0,4.0));
     println!("reflected plane: {plane2:?}", plane2=plane2);
     todo!();
   }
   #[test] #[ignore] fn plane_reflect_line() {}
-  #[test] fn plane_reflect_point() {
+  #[test] #[ignore] fn plane_reflect_point() {
     let plane1 = Plane::new(1.0,2.0,3.0,4.0);
     let point1 = plane1(Point::new(1.0,2.0,3.0));
     println!("reflected point: {point1:?}", point1=point1);
@@ -86,10 +86,23 @@ mod tests {
   #[test] fn plane_not() {
     assert_eq!(!plane(4.0, 3.0, 2.0, 1.0), point(1.0, 2.0, 3.0));
   }
+
+  #[test] fn planes() {
+    let p1 = plane(1.0, 3.0, 4.0, -5.0);
+    assert_ne!(p1 | p1, 1.0);
+    let p2 = p1.normalized();
+    approx_eq1(p2 | p2, 1.0);
+  }
+
   fn assert_plane(p:Plane,x:f32,y:f32,z:f32,d:f32) {
     assert_eq!(p.x(), x);
     assert_eq!(p.y(), y);
     assert_eq!(p.z(), z);
     assert_eq!(p.d(), d);
+  }
+
+  const EPSILON: f32 = 0.02;
+  fn approx_eq1(a: f32, b: f32) {
+    assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}", a, b);
   }
 }
