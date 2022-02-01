@@ -10,11 +10,17 @@ pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)
 }
 
-#[derive(Default,Debug,Clone,PartialEq)]
-pub struct EulerAngels {
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
+pub struct EulerAngles {
   pub roll:f32,
   pub pitch:f32,
   pub yaw:f32
+}
+
+impl From<Rotor> for EulerAngles {
+  fn from(_ea:Rotor)->Self {
+    todo!()
+  }
 }
 
 // The rotor is an entity that represents a rigid rotation about an axis.
@@ -123,8 +129,8 @@ impl Rotor {
   // TODO as_euler_angle
 }
 
-impl From<EulerAngels> for Rotor {
-  fn from(ea:EulerAngels)->Self {
+impl From<EulerAngles> for Rotor {
+  fn from(ea:EulerAngles)->Self {
     Rotor::from_euler_angles(ea.roll,ea.pitch,ea.pitch)
   }
 }

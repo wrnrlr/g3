@@ -28,7 +28,7 @@ pub use branch::{Branch, branch};
 pub use ideal_line::{IdealLine, ideal_line};
 pub use plane::*;
 pub use motor::{Motor,motor};
-pub use rotor::{Rotor,rotor};
+pub use rotor::{Rotor,rotor,EulerAngles};
 pub use direction::Direction;
 pub use translator::{Translator,translator};
 
