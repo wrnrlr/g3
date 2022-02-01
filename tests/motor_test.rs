@@ -37,4 +37,13 @@ mod tests {
     // assert_eq!(m(a), r(t(a)));
     // assert_eq!(m(a), t(r(a)));
   }
+
+  #[test] fn motor_constrained() {
+    let m1 = Motor::new(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
+    let m2 = m1.constrained();
+    assert_eq!(m1, m2);
+    let m3 = -m1;
+    let m4 = m1.constrained();
+    assert_eq!(m3, -m4);
+  }
 }
