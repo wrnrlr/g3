@@ -1,7 +1,7 @@
 #![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
-  use core_simd::{f32x4,mask32x4};
+  use core_simd::{f32x4,mask32x4, simd_swizzle as swizzle};
   use core::arch::x86_64::{_mm_mul_ps, __m128, _mm_set_ps, _mm_extract_ps, _mm_movelh_ps,
     _mm_xor_ps, _mm_set_ss, _mm_movehdup_ps, _mm_unpacklo_ps, _mm_movehl_ps, _mm_sub_ps,
     _mm_and_ps};
@@ -36,7 +36,7 @@ mod tests {
 
   #[test] fn test_swizzle() {
     let a = f32x4::from_array([0.0,1.0,2.0,3.0]);
-    let zzwy = a.shuffle::<{[3,3,0,1]}>(a);
+    let zzwy = swizzle!(a, [3,3,0,1]);
     assert_eq!(zzwy[0],3.0);
   }
 

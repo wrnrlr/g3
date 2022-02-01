@@ -7,6 +7,8 @@
 mod dual;
 mod point;
 mod line;
+mod branch;
+mod ideal_line;
 mod plane;
 mod motor;
 mod rotor;
@@ -21,7 +23,9 @@ pub mod sandwich;
 
 pub use dual::{Dual, dual};
 pub use point::*;
-pub use line::{Branch, branch, ideal_line, IdealLine, Line, line};
+pub use line::{Line, line};
+pub use branch::{Branch, branch};
+pub use ideal_line::{IdealLine, ideal_line};
 pub use plane::*;
 pub use motor::{Motor,motor};
 pub use rotor::{Rotor,rotor};

@@ -142,7 +142,7 @@ impl Fn<(Plane,)> for Rotor {
 impl FnMut<(Branch,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Branch,))->Branch {self.call(args)} }
 impl FnOnce<(Branch,)> for Rotor { type Output = Branch; extern "rust-call" fn call_once(self, args: (Branch,))->Branch { self.call(args) }}
 impl Fn<(Branch,)> for Rotor {
-  extern "rust-call" fn call(&self, args: (Branch,))->Branch {
+  extern "rust-call" fn call(&self, _args: (Branch,))->Branch {
     todo!()
   }
 }
