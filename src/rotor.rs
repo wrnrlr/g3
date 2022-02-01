@@ -88,8 +88,8 @@ impl Rotor {
 
   // Constrains the rotor to traverse the shortest arc
   pub fn constrained(&self)->Rotor {
-    let mask = simd_swizzle!(-self.p1, [0,0,0,0]); // TODO
-    let p1 =  f32x4_xor(mask,self.p1);
+    let mask = simd_swizzle!(f32x4_and(self.p1, f32x4::from([-0.0, 0.0, 0.0, 0.0])), [0,0,0,0]); // TODO: cleanup
+    let p1 = f32x4_xor(mask,self.p1);
     Rotor{p1}
   }
 

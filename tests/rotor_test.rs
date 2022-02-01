@@ -1,12 +1,13 @@
 #[cfg(test)]
 mod tests {
-  use std::f32::consts::PI;
-  use g3::{Point, Rotor};
+  use g3::*;
 
-  #[test] fn rotor_sandwich_point() {
-    // Rotate point 90 degrees
-    let r = Rotor::new(-PI/2.0, 0.0, 0.0, 1.0);
-    let a = Point::new(2.0, 0.0, 0.0);
-    assert_eq!(r(a).normalized(), Point::new(0.0, 2.0, 0.0));
+  #[test] fn rotor_constrained() {
+    let r1 = Rotor::new(1.0, 2.0, 3.0, 4.0);
+    let r2 = r1.constrained();
+    assert_eq!(r1, r2);
+    let r3 = -r1;
+    let r4 = r1.constrained();
+    assert_eq!(r3, -r4);
   }
 }
