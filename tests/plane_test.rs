@@ -32,19 +32,6 @@ mod tests {
     assert_eq!(p.e3(), 3.0);
     assert_eq!(p.e0(), 1.0);
   }
-  #[test] #[ignore] fn plane_reflect_plane() {
-    let plane1 = Plane::new(1.0,2.0,3.0,4.0);
-    let plane2 = plane1(Plane::new(1.0,2.0,3.0,4.0));
-    println!("reflected plane: {plane2:?}", plane2=plane2);
-    todo!();
-  }
-  #[test] #[ignore] fn plane_reflect_line() {}
-  #[test] #[ignore] fn plane_reflect_point() {
-    let plane1 = Plane::new(1.0,2.0,3.0,4.0);
-    let point1 = plane1(Point::new(1.0,2.0,3.0));
-    println!("reflected point: {point1:?}", point1=point1);
-    todo!();
-  }
   #[test] fn plane_add() {
     assert_plane(plane(1.0,2.0,3.0,4.0)+plane(1.0,2.0,3.0,4.0), 2.0,4.0,6.0,8.0)
   }
