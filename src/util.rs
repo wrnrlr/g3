@@ -248,6 +248,8 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
   shuffle_xxxx(out)
 }
 
+#[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) }
+
 #[inline] pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() ^ b.to_bits()) }
 #[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() & b.to_bits()) }
 

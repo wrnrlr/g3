@@ -1,5 +1,5 @@
 use core_simd::{f32x4};
-use crate::util::{add_ss, f32x4_and, f32x4_xor, hi_dp, hi_dp_ss, mul_ss, shuffle_xxxx, shuffle_xzwy, sub_ss};
+use crate::util::{add_ss, f32x4_xor, hi_dp, hi_dp_ss, mul_ss, shuffle_xxxx, shuffle_xzwy, sub_ss, zero_first};
 
 pub fn dot00(a:f32x4, b:f32x4)->f32x4 {
   // a1 b1 + a2 b2 + a3 b3
@@ -14,7 +14,7 @@ pub fn dot03(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // a2 b0 e31 +
   // a3 b0 e12
   let mut p1_out = a * shuffle_xxxx(b);
-  p1_out = f32x4_and(p1_out, f32x4::from([0.0, -1.0, -1.0, -1.0]));
+  p1_out = zero_first(p1_out);
   let p2_out = shuffle_xzwy(shuffle_xzwy(a)*b - a*shuffle_xzwy(b));
   (p1_out, p2_out)
 }
