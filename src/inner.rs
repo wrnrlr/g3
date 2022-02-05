@@ -1,5 +1,5 @@
 use core_simd::{f32x4};
-use crate::util::{add_ss, f32x4_xor, hi_dp, hi_dp_ss, mul_ss, shuffle_xxxx, shuffle_xzwy, sub_ss, zero_first};
+use crate::util::{add_ss, f32x4_xor, hi_dp, hi_dp_ss, mul_ss, shuffle_xxxx, shuffle_xzwy, sse_hi_dp_ss, sub_ss, zero_first};
 
 pub fn dot00(a:f32x4, b:f32x4)->f32x4 {
   // a1 b1 + a2 b2 + a3 b3

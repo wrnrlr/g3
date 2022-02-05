@@ -220,7 +220,7 @@ pub fn hi_dp_bc(a:f32x4, b:f32x4)->f32x4 {
 
 pub fn hi_dp_ss(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
-  let hi = shuffle_yyww(a);
+  let hi = shuffle_yyww(out);
   let sum = hi + out;
   out = sum + shuffle_xxyy(out);
   shuffle_zwzw(out)
@@ -301,30 +301,84 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn shuffle_wzwy(a:f32x4)->f32x4 { swizzle!(a, [3,2,3,1]) }
 #[inline] pub fn shuffle_wwyz(a:f32x4)->f32x4 { swizzle!(a, [3,3,1,2]) }
 
-
 #[inline] pub fn bits_wwww(a:u32x4)->u32x4 { swizzle!(a, [0,0,0,0]) }
+
+
+use std::arch::x86_64::*;
+
+unsafe fn into_m128(a:f32x4)->__m128 {
+  _mm_set_ps(a[3], a[2], a[1], a[0])
+}
+
+unsafe fn into_f32x4(a:__m128)->f32x4 {
+  f32x4::from(std::mem::transmute::<__m128, [f32; 4]>(a))
+}
+
+pub fn sse_hi_dp_ss(a:f32x4, b:f32x4)->f32x4 {
+  unsafe {
+    let a = into_m128(a);
+    let b = into_m128(b);
+    let mut out = _mm_mul_ps(a, b);
+    let hi = _mm_movehdup_ps(out);
+    let sum = _mm_add_ps(hi, out);
+    out = _mm_add_ps(sum, _mm_unpacklo_ps(out, out));
+    into_f32x4(_mm_movehl_ps(out, out))
+  }
+}
 
 #[cfg(test)]
 mod tests {
   use super::*;
   use core_simd::{f32x4};
 
-  #[test] fn dot_product() {
+  #[test] fn sse_test() {
+    let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
+    let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+    assert_eq!(unsafe{into_f32x4(into_m128(a))}, a);
+    // assert_eq!(hi_dp_ss(a, b), sse_hi_dp_ss(a,b));
+  }
+
+  #[test] fn dp_test() {
     let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
     let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
     assert_eq!(dp(a, b), f32x4::from([-21.0, 0.0, 0.0, 0.0]));
+  }
+
+  #[test] fn hi_dp_test() {
+    let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
+    let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
     assert_eq!(hi_dp(a, b), f32x4::from([-17.0, 0.0, 0.0, 0.0]));
+  }
+
+  #[test] fn hi_dp_bc_test() {
+    let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
+    let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
     assert_eq!(hi_dp_bc(a, b), f32x4::from([-17.0, -17.0, -17.0, -17.0]));
+  }
+
+  #[test] fn dp_bc_test() {
+    let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
+    let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
     assert_eq!(dp_bc(a, b), f32x4::from([-21.0, -21.0, -21.0, -21.0]));
   }
 
-  #[test] fn first_utils() {
+  #[test] fn hi_dp_ss_test() {
+    let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
+    let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+    assert_eq!(hi_dp_ss(a, b), f32x4::from([-17.0, -16.0, -17.0, -16.0]));
+  }
+
+  #[test] fn add_first() {
     let a = f32x4::from([2.0, 2.0, 3.0, 4.0]);
     assert_eq!(add_ss(a, a), f32x4::from([4.0, 2.0, 3.0, 4.0]));
+  }
+
+  #[test] fn multiply_first() {
+    let a = f32x4::from([2.0, 2.0, 3.0, 4.0]);
     assert_eq!(mul_ss(a, a), f32x4::from([4.0, 2.0, 3.0, 4.0]));
   }
 
-  #[test] fn rsqrt_test() {
+  #[test] fn inverse_sqrt() {
     let a = f32x4::from([4.0, 9.0, 16.0, 25.0]);
     assert_eq!(a.sqrt(), f32x4::from([2.0, 3.0, 4.0, 5.0]));
     assert_eq!(f32x4::splat(1.0)/a.sqrt(), f32x4::from([1.0/2.0, 1.0/3.0, 1.0/4.0, 1.0/5.0]));
