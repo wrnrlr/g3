@@ -201,7 +201,7 @@ pub fn log(p1:f32x4, p2:f32x4)->(f32x4,f32x4) {
 
 pub fn hi_dp(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
-  let hi = shuffle_odd(out);
+  let hi = shuffle_yyww(out);
 
   let sum  = hi + out;
   out = sum + shuffle_xxyy(out);
@@ -228,7 +228,7 @@ pub fn hi_dp_ss(a:f32x4, b:f32x4)->f32x4 {
 
 pub fn dp(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
-  let hi = shuffle_odd(out);
+  let hi = shuffle_yyww(out);
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
@@ -244,7 +244,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
   out = hi + out;
-  out = add_ss(hi, b2b3a2a3(hi, out));
+  out = add_ss(out, b2b3a2a3(hi, out));
   shuffle_xxxx(out)
 }
 
@@ -265,9 +265,6 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a * b, a, [First(0), Second(1), Second(2), Second(3)]) }
 
 #[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) }
-
-#[inline] pub fn shuffle_low(a:f32x4)->f32x4 { swizzle!(a, [0,0,1,1]) }
-#[inline] pub fn shuffle_odd(a:f32x4)->f32x4 { swizzle!(a, [1,1,3,3]) }
 
 #[inline] pub fn shuffle_xxxx(a:f32x4)->f32x4 { swizzle!(a, [0,0,0,0]) }
 #[inline] pub fn shuffle_xxyy(a:f32x4)->f32x4 { swizzle!(a, [0,0,1,1]) }
@@ -303,40 +300,94 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 
 #[inline] pub fn bits_wwww(a:u32x4)->u32x4 { swizzle!(a, [0,0,0,0]) }
 
-
-use std::arch::x86_64::*;
-
-unsafe fn into_m128(a:f32x4)->__m128 {
-  _mm_set_ps(a[3], a[2], a[1], a[0])
-}
-
-unsafe fn into_f32x4(a:__m128)->f32x4 {
-  f32x4::from(std::mem::transmute::<__m128, [f32; 4]>(a))
-}
-
-pub fn sse_hi_dp_ss(a:f32x4, b:f32x4)->f32x4 {
-  unsafe {
-    let a = into_m128(a);
-    let b = into_m128(b);
-    let mut out = _mm_mul_ps(a, b);
-    let hi = _mm_movehdup_ps(out);
-    let sum = _mm_add_ps(hi, out);
-    out = _mm_add_ps(sum, _mm_unpacklo_ps(out, out));
-    into_f32x4(_mm_movehl_ps(out, out))
-  }
-}
+// use std::arch::x86_64::*;
+//
+// unsafe fn into_m128(a:f32x4)->__m128 {
+//   _mm_set_ps(a[3], a[2], a[1], a[0])
+// }
+//
+// unsafe fn into_f32x4(a:__m128)->f32x4 {
+//   f32x4::from(std::mem::transmute::<__m128, [f32; 4]>(a))
+// }
+//
+// pub fn sse_hi_dp_ss(a:f32x4, b:f32x4)->f32x4 {
+//   unsafe {
+//     let a = into_m128(a);
+//     let b = into_m128(b);
+//     let mut out = _mm_mul_ps(a, b);
+//     let hi = _mm_movehdup_ps(out);
+//     let sum = _mm_add_ps(hi, out);
+//     out = _mm_add_ps(sum, _mm_unpacklo_ps(out, out));
+//     into_f32x4(_mm_movehl_ps(out, out))
+//   }
+// }
+//
+// pub fn sse_dp_bc(a:f32x4, b:f32x4)->f32x4 {
+//   unsafe {
+//     let a = into_m128(a);
+//     let b = into_m128(b);
+//     let mut out = _mm_mul_ps(a, b);
+//     let hi = _mm_movehdup_ps(out);
+//     out = _mm_add_ps(hi, out);
+//     out = _mm_add_ps(out, _mm_movehl_ps(hi, out));
+//     const index: i32 = _MM_SHUFFLE(0, 0, 0, 0);
+//     into_f32x4(_mm_shuffle_ps::<index>(out, out))
+//   }
+// }
+//
+// pub fn sse_hi_dp_bc(a:f32x4, b:f32x4)->f32x4 {
+//   unsafe {
+//     let a = into_m128(a);
+//     let b = into_m128(b);
+//     let mut out = _mm_mul_ps(a, b);
+//     let hi = _mm_movehdup_ps(out);
+//     let sum = _mm_add_ps(hi, out);
+//     out = _mm_add_ps(sum, _mm_unpacklo_ps(out, out));
+//     const index: i32 = _MM_SHUFFLE(2, 2, 2, 2);
+//     into_f32x4(_mm_shuffle_ps::<index>(out, out))
+//   }
+// }
+//
+// pub fn sse_dp(a:f32x4, b:f32x4)->f32x4 {
+//   unsafe {
+//     let a = into_m128(a);
+//     let b = into_m128(b);
+//     let mut out = _mm_mul_ps(a, b);
+//     let hi = _mm_movehdup_ps(out);
+//     out = _mm_add_ps(hi, out);
+//     out = _mm_add_ss(out, _mm_movehl_ps(hi, out));
+//     into_f32x4(_mm_and_ps(out, _mm_castsi128_ps(_mm_set_epi32(0, 0, 0, -1))))
+//   }
+// }
+//
+// pub fn sse_hi_dp(a:f32x4, b:f32x4)->f32x4 {
+//   unsafe {
+//     let a = into_m128(a);
+//     let b = into_m128(b);
+//     let mut out = _mm_mul_ps(a, b);
+//     let hi = _mm_movehdup_ps(out);
+//     let sum = _mm_add_ps(hi, out);
+//     out = _mm_add_ps(sum, _mm_unpacklo_ps(out, out));
+//     out = _mm_movehl_ps(out, out);
+//     into_f32x4(_mm_and_ps(out, _mm_castsi128_ps(_mm_set_epi32(0, 0, 0, -1))))
+//   }
+// }
 
 #[cfg(test)]
 mod tests {
   use super::*;
   use core_simd::{f32x4};
 
-  #[test] fn sse_test() {
-    let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
-    let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
-    assert_eq!(unsafe{into_f32x4(into_m128(a))}, a);
-    // assert_eq!(hi_dp_ss(a, b), sse_hi_dp_ss(a,b));
-  }
+  // #[test] fn sse_test() {
+  //   let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
+  //   let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+  //   assert_eq!(unsafe{into_f32x4(into_m128(a))}, a);
+  //   assert_eq!(dp(a, b), sse_dp(a,b));
+  //   assert_eq!(hi_dp_ss(a, b), sse_hi_dp_ss(a,b));
+  //   assert_eq!(hi_dp(a, b), sse_hi_dp(a,b));
+  //   assert_eq!(hi_dp_bc(a, b), sse_hi_dp_bc(a,b));
+  //   assert_eq!(dp_bc(a, b), sse_dp_bc(a,b));
+  // }
 
   #[test] fn dp_test() {
     let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
