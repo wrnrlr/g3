@@ -16,7 +16,7 @@ parser! {
         = s:$(['a'..='z' | 'A'..='Z']['a'..='z' | 'A'..='Z' | '0'..='9']*) { Expression::Symbol(s.parse().unwrap()) }
 
     rule list() -> Expression
-        = "{" s:expression() ** "," "}" { Expression::List(Box::new(s)) }
+        = "{" s:sequence() "}" { Expression::List(Box::new(s)) }
 
     rule sequence() -> Sequence
         = s:expression() ** "," { Sequence(s) }
@@ -43,7 +43,7 @@ parser! {
         / call()
 
     rule call() -> Expression
-        = h:symbol() "[" s:expression() ** "," "]" { Expression::Call(Box::new(h), Box::new(s)) }
+        = h:symbol() "[" s:sequence() "]" { Expression::Call(Box::new(h), Box::new(s)) }
         / atom()
 
     rule assignment() -> Expression
@@ -69,10 +69,10 @@ pub struct Sequence(Vec<Expression>);
 pub enum Expression {
   Number(f32),
   Symbol(String),
-  List(Box<Vec<Expression>>),
+  List(Box<Sequence>),
   Binary(Operator, Box<Expression>,Box<Expression>),
   Unary(Operator, Box<Expression>),
-  Call(Box<Expression>, Box<Vec<Expression>>)
+  Call(Box<Expression>, Box<Sequence>)
 }
 // https://corywalker.me/2018/06/03/introduction-to-computer-algebra.html
 fn main() {
