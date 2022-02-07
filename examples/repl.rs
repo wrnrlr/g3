@@ -18,6 +18,9 @@ parser! {
         / l:atom() _ "*"? _ r:atom() { Expression::Product(Box::new(l), Box::new(r)) }
         / atom()
 
+    rule call() -> Expression
+        = l:symbol() "[" r:expression() ** "," "]" { Expression::Call(Box::new(l), Box::new(r)) }
+
     rule atom() -> Expression
         = symbol()
         / number()
@@ -42,6 +45,7 @@ pub enum Expression {
   List(Box<Vec<Expression>>),
   Sum(Box<Expression>,Box<Expression>),
   Product(Box<Expression>,Box<Expression>),
+  Call(Box<Expression>, Box<Vec<Expression>>)
 }
 // https://corywalker.me/2018/06/03/introduction-to-computer-algebra.html
 fn main() {
@@ -66,7 +70,7 @@ fn main() {
       Box::new(Expression::Product(
           Box::new(Expression::Number(3.0)),
           Box::new(Expression::Number(4.0)))))));
-  assert_eq!(algebra::expression("(2+3) * 4"), Ok(Expression::Product(
+  assert_eq!(algebra::expression("(2+3)*4"), Ok(Expression::Product(
       Box::new(Expression::Sum(
           Box::new(Expression::Number(2.0)),
           Box::new(Expression::Number(3.0)))),
@@ -76,4 +80,8 @@ fn main() {
     Box::new(vec!(Expression::Number(1.0), Expression::Symbol("a".to_string()), Expression::Sum(
       Box::new(Expression::Symbol("b".to_string())),
       Box::new(Expression::Number(2.0))))))));
+  assert_eq!(algebra::expression("f[]"), Ok(
+    Expression::Call(
+      Box::new(Expression::Symbol("f".to_string())),
+      Box::new(Vec::new()))));
 }
