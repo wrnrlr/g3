@@ -16,7 +16,7 @@ mint = { version = "0.5.8", optional = true }
 pollster = { version = "0.2.4", optional =  true }
 
 [dev-dependencies]
-peg = "0.7.0"
+peg = "0.8.0"
 
 [[example]]
 name = "elements"
