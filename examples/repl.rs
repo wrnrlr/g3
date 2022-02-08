@@ -19,7 +19,7 @@ parser! {
         = "{" s:sequence() "}" { Expression::List(Box::new(s)) }
 
     rule sequence() -> Sequence
-        = s:expression() ** "," { Sequence(s) }
+        = _ s:(expression() ** ",") _ { Sequence(s) }
 
     rule sum() -> Expression
         = l:minus() _ "+" _ r:minus() { Expression::Binary(Operator::Plus, Box::new(l), Box::new(r)) }
@@ -34,8 +34,9 @@ parser! {
         / product()
 
     rule product() -> Expression
-        = l:number() r:atom() { Expression::Binary(Operator::Multiply, Box::new(l), Box::new(r)) }
-        / l:atom() _ "*"? _ r:atom() { Expression::Binary(Operator::Multiply, Box::new(l), Box::new(r)) }
+        = l:division() _ "*" _ r:division() { Expression::Binary(Operator::Multiply, Box::new(l), Box::new(r)) }
+        / l:division() [' ' | '\n']* r:division() { Expression::Binary(Operator::Multiply, Box::new(l), Box::new(r)) }
+        / l:division() [' ' | '\n']+ r:division() { Expression::Binary(Operator::Multiply, Box::new(l), Box::new(r)) }
         / division()
 
     rule division() -> Expression
@@ -43,11 +44,12 @@ parser! {
         / call()
 
     rule call() -> Expression
-        = h:symbol() "[" s:sequence() "]" { Expression::Call(Box::new(h), Box::new(s)) }
-        / atom()
+        = h:symbol() _ "[" s:sequence() "]" { Expression::Call(Box::new(h), Box::new(s)) }
+        / assignment()
 
     rule assignment() -> Expression
-        = l:symbol() "=" r:expression() { Expression::Binary(Operator::Assign, Box::new(l), Box::new(r)) }
+        = l:symbol() _ "=" _ r:atom() { Expression::Binary(Operator::Assign, Box::new(l), Box::new(r)) }
+        / atom()
 
     rule atom() -> Expression
         = symbol()
@@ -76,7 +78,7 @@ pub enum Expression {
 }
 // https://corywalker.me/2018/06/03/introduction-to-computer-algebra.html
 fn main() {
-  println!("g3 repl");
+  assert!(algebra::expression("f[]*1").is_ok());
   assert_eq!(algebra::expression("4"), Ok(Expression::Number(4.0)));
   assert!(algebra::expression("-1").is_ok());
   assert!(algebra::expression("1.2").is_ok());
@@ -96,4 +98,8 @@ fn main() {
   assert!(algebra::expression("{1,a,b+2.0}").is_ok());
   assert!(algebra::expression("f[]").is_ok());
   assert!(algebra::expression("f[1,a]").is_ok());
+  assert!(algebra::expression("f[]+g[]").is_ok());
+  assert!(algebra::expression("a=1+a").is_ok());
+  assert!(algebra::expression("a = 1 + a").is_ok());
+  // assert!(algebra::expression("{ 1 , a }").is_ok());
 }
