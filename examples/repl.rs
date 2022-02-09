@@ -1,5 +1,5 @@
-#[allow(unused_imports)]
-use g3::{point,line,plane,Point,Line,Plane};
+use std::hash::Hasher;
+use g3::{point, line, plane, Point, Line, Plane};
 use peg::{parser};
 
 parser! {
@@ -76,6 +76,7 @@ pub enum Expression {
   Unary(Operator, Box<Expression>),
   Call(Box<Expression>, Box<Sequence>)
 }
+
 // https://corywalker.me/2018/06/03/introduction-to-computer-algebra.html
 fn main() {
   assert!(algebra::expression("f[]*1").is_ok());
@@ -103,3 +104,65 @@ fn main() {
   assert!(algebra::expression("a = 1 + a").is_ok());
   // assert!(algebra::expression("{ 1 , a }").is_ok());
 }
+
+pub struct Ex {
+  parts:Vec<Atom>
+}
+
+pub struct Symbol {
+  name:String
+}
+
+pub struct Number {
+  value:f32
+}
+
+pub enum Atom {
+  Ex(Ex),
+  Symbol(Symbol),
+  Number(Number)
+}
+
+pub trait Expr {}
+
+pub struct State {
+
+}
+
+impl State {
+  fn get_def()->Option<Ex> {
+    todo!()
+  }
+
+  fn eval(&mut self, atom:Atom) {
+    match atom {
+      Atom::Ex(e) => e.eval(),
+      Atom::Symbol(s) => s.eval(),
+      Atom::Number(n) => n.eval()
+    }
+  }
+
+  fn eval_symbol(self, s:Symbol) {}
+
+}
+
+impl Ex {
+  fn eval(self) {}
+}
+
+impl Symbol {
+  fn eval(self) {}
+
+  fn hash(&self)->u64 {
+    let mut h = fxhash::FxHasher64::default();
+    h.write_u64(1);
+    h.write(self.name.as_bytes());
+    h.finish()
+  }
+}
+
+impl Number {
+  fn eval(self) {}
+}
+
+
