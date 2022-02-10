@@ -17,6 +17,7 @@ pollster = { version = "0.2.4", optional =  true }
 
 [dev-dependencies]
 peg = "0.8.0"
+fxhash = "0.2.1"
 
 [[example]]
 name = "elements"
