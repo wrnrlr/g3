@@ -3,10 +3,10 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,Bi
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
 use crate::util::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc, rsqrt_nr1, sqrt_nr1};
-use crate::sandwich::{sw00,sw10,sw20,sw30};
-use crate::exterior::{ext00,ext02,ext03,extpb};
-use crate::geometric::{gp00,gp03};
-use crate::inner::{dot00, dot03, dotpil, dotpl};
+use crate::sw::{sw00, sw10, sw20, sw30};
+use crate::ext::{ext00, ext02, ext03, extpb};
+use crate::gp::{gp00, gp03};
+use crate::dot::{dot00, dot03, dotpil, dotpl};
 
 pub const E0:Plane = Plane{p0:f32x4::from_array([1.0,0.0,0.0,0.0])};
 pub const E1:Plane = Plane{p0:f32x4::from_array([0.0,1.0,0.0,0.0])};

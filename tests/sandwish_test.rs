@@ -8,7 +8,7 @@
 #![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
-  use g3::{sandwich, plane, line, point, rotor, translator, motor, Point, Translator, Motor, PI, Rotor, Origin};
+  use g3::*;
   use core_simd::{f32x4};
 
   fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
@@ -23,7 +23,7 @@ mod tests {
   #[test] fn simd_sandwich() {
     let a = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
     let b = f32x4::from_array([-4.0, -3.0, -2.0, -1.0]);
-    let c = sandwich::sw02(a,b);
+    let c = sw::sw02(a, b);
     assert_eq!([c[0], c[1], c[2], c[3]], [9.0, 2.0, 3.0, 4.0]);
   }
 
@@ -107,7 +107,7 @@ mod tests {
   #[test] fn motor_plane() {
     let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
     let a = plane(3.0, 2.0, 1.0, -1.0);
-    let b = m(a);
+    let b:Plane = m(a);
     assert_eq!([b.x(), b.y(), b.z(), b.d()], [78.0, 60.0, 54.0, 358.0]);
   }
 
@@ -136,7 +136,7 @@ mod tests {
     let r = rotor(PI * 0.5, 0.0, 0.0, 1.0);
     let t = translator(1.0, 0.0, 0.0, 1.0);
     let m = r * t;
-    let p = m(Origin{});
+    let p:Point = m(Origin{});
     approx_eq([p.x(), p.y(), p.z()], [0.0, 0.0, 1.0]);
   }
 

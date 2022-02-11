@@ -3,9 +3,9 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,Bi
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual,Plane,Line,IdealLine,Branch,Motor,Translator};
 use crate::util::{flip_signs,rcp_nr1,shuffle_xxxx};
-use crate::geometric::{gp03,gp33};
-use crate::inner::{dotptl,dot33};
-use crate::exterior::{ext03};
+use crate::gp::{gp03, gp33};
+use crate::dot::{dotptl, dot33};
+use crate::ext::{ext03};
 
 pub struct Origin {}
 

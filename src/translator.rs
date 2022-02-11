@@ -3,8 +3,8 @@ use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, N
 use core_simd::{f32x4,mask32x4};
 use crate::{Plane,Line,Point,Motor,Rotor,IdealLine};
 use crate::util::{dp_bc, flip_signs, rsqrt_nr1};
-use crate::sandwich::{sw02,sw32,swl2};
-use crate::geometric::{gptr};
+use crate::sw::{sw02, sw32, swl2};
+use crate::gp::{gptr};
 
 pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
   Translator::new(delta,x,y,z)

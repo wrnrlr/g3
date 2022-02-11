@@ -16,10 +16,10 @@ mod direction;
 mod translator;
 
 pub mod util;
-pub mod inner;
-pub mod geometric;
-pub mod exterior;
-pub mod sandwich;
+pub mod dot;
+pub mod gp;
+pub mod ext;
+pub mod sw;
 
 pub use dual::{Dual, dual};
 pub use point::*;

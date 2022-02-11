@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-  use g3::{Plane,plane,Point,point};
+  use g3::*;
 
   #[test] fn plane_constructor() {
     assert_eq!(Plane::new(1.0,2.0,3.0,4.0), plane(1.0,2.0,3.0,4.0))

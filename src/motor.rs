@@ -4,8 +4,8 @@ use std::fmt::{Display,Formatter,Result};
 use core_simd::{f32x4,mask32x4};
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
 use crate::util::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss, exp};
-use crate::sandwich::{sw012, sw312, swml, swo12};
-use crate::geometric::{gp11, gprt, gpmm, gpdl, gp21};
+use crate::sw::{sw012, sw312, swml, swo12};
+use crate::gp::{gp11, gprt, gpmm, gpdl, gp21};
 
 pub fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
 

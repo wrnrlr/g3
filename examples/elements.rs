@@ -2,23 +2,27 @@
 
 use std::iter::Map;
 use std::ops::Range;
-use g3::{point, plane, Point, Translator, Motor, Mirror};
+use g3::{point, plane, Point, Translator, Motor, Rotor, Mirror, PI, E032, E023, E012};
 use baryon::{Color};
 
 // const BLACK:u32 = 0xFF000000;
 // const WHITE:u32 = 0xFFFFFFFF;
+const RED:Color = Color(0xFFFF0000);
+const GREEN:Color = Color(0xFF00FF00);
+const BLUE:Color = Color(0xFF0000FF);
 const PINK:Color = Color(0xFFCCBBFF);
 const GREY:Color = Color(0xFF888888);
-const CYAN:Color = Color(0xFFFFFF00);
+const CYAN:Color = Color(0xFF00FFFF);
 const MAGENTA:Color = Color(0xFFFF00FF);
+const YELLOW:Color = Color(0xFFFF00FF);
 
 fn align(p:Point, q:Point)->Translator {
   // sqrt(ab) = (1 + ab).Normalized
-  (q.normalized() / p.normalized()).sqrt()
+  (q/p).sqrt()
 }
 
 fn lerp(m:Translator, f:f32)->Translator {
-  (m*f + (1.0-f)) //.normalized()
+  m*f //.normalized()
 }
 
 /// Return iterator of n equally-spaced numbers between 0.0 to 1.0
@@ -30,47 +34,55 @@ fn path(m:Translator, n:u32, x:Point)->Vec<Point> {
   steps(n).map(|f| lerp(m, f) (x)).collect()
 }
 
+fn align2(p:Point, q:Point)->Motor {
+  // sqrt(ab) = (1 + ab).Normalized
+  (q.normalized() / p.normalized()).sqrt().into()
+}
+
+fn lerp2(m:Motor, f:f32)->Motor {
+  (f*m)
+}
+
+fn path2(m:Motor, n:u32, x:Point)->Vec<Point> {
+  steps(n).map(|f| lerp2(m, f) (x)).collect()
+}
+
+fn path3(n:u32, x:Point)->Vec<Point> {
+  steps(n).map(|f| Rotor::new(-PI*2.0*f,0.0,0.0,1.0) (x)).collect()
+}
+
 fn main() {
   let mut mr = Mirror::new();
 
-  let a = point(0.0, 0.0, 0.0);
-  let b = point(1.0, 1.0, 1.0);
-  let c = point(1.0, -1.0, 2.0);
-  let d = point(2.0, 0.0, 0.0);
-  let e = point(-2.0, 0.0, 0.0);
+  let a = point(0.0, 1.0, 0.0);
+  // let e1 = plane(1.0,-1.0,1.0,0.0);
+  let b = point(1.0,-1.0,-1.0);
 
-  let f = point(1.0, 0.0, 0.0);
-  let e1 = plane(1.0,0.0,0.0,0.0);
-  let f2 = e1(f);
+  // path(align(a, b), 8, a).iter().for_each(|x|  mr.vertex(*x, RED)); // Translator
+  path2(align2(a, b), 12, a).iter().for_each(|x|  mr.vertex(*x, CYAN)); // Motor
 
-  path(align(f, f2), 8, f).iter().for_each(|x|  mr.vertex(*x, Color::BLUE));
+  // path3(8, a).iter().for_each(|x|  mr.vertex(*x, GREY)); // Rotor
 
-  mr.vertex(a, Color::BLACK_OPAQUE);
-  // mr.vertex(b, Color(0xffff0000));
-  // mr.vertex(c, Color::GREEN);
-  // mr.vertex(d, Color::BLUE);
+  // mr.vertex(point(0.0, 0.0, 0.0), Color::BLACK_OPAQUE); // center
 
-  // mr.vertex(point(-1.0,0.0,0.0), GREY);
+  mr.vertex(((b/a).sqrt()*0.5)(a), YELLOW);
+  let t = (b/a).sqrt();
+  steps(4).for_each(|f| mr.vertex((t*f)(a), GREY));
+  mr.vertex(a, GREEN);
+  mr.vertex(b, BLUE);
 
-  mr.vertex(f, Color::GREEN);
-  mr.vertex(f2, Color::RED);
+  let a_to_b = align(a,b);
+  let at = a_to_b(a);
+  // mr.vertex(at, BLUE);
 
-  let t = align(f,f2);
-  let af = t(f);
-  mr.vertex(af, Color::BLUE);
+  println!("a: {}", a);
+  // println!("e1: {}", e1);
+  println!("b: {}", b);
+  println!("a_to_b: {:?}", a_to_b);
+  println!("a transformed :{}", at);
+  println!("true??? :{:?}", a_to_b(a) == b);
 
-  println!("f: {}", f);
-  println!("e1: {}", e1);
-  println!("f2: {}", f2);
-  println!("t: {:?}", t);
-  println!("af :{}", af);
-
-
-  // mr.face([a, b, c], PINK);
-
-  // mr.vertex(d, MAGENTA);
-  // mr.vertex(e, MAGENTA);
-  // mr.edge([d, e], CYAN);
+  // mr.face([E032,E023,E012], MAGENTA);
 
   mr.run();
 }
