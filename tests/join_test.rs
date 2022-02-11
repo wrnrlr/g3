@@ -39,6 +39,6 @@ mod tests {
 
   // TODO
   // * join_point_branch
-  // * join_point_ideal_line
+  // * join_point_horizon
   // * join_plane_point
 }

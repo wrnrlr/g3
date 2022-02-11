@@ -27,9 +27,9 @@ mod tests {
     assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [8.0, -5.0, -14.0, 0.0]);
   }
 
-  #[test] fn meet_plane_ideal_line() {
+  #[test] fn meet_plane_horizon() {
     let p = plane(1.0, 2.0, 3.0, 4.0);
-    let l = ideal_line(-2.0, 1.0, 4.0);
+    let l = horizon(-2.0, 1.0, 4.0);
     let a = p ^ l;
     assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [5.0, -10.0, 5.0, 0.0]);
   }
@@ -55,16 +55,16 @@ mod tests {
     assert_eq!(a.e0123(), 6.0);
   }
 
-  #[test] fn meet_line_ideal_line() {
+  #[test] fn meet_line_horizon() {
     let l = line(0.0, 0.0, 1.0, 3.0, 2.0, 1.0);
-    let i = ideal_line(-2.0, 1.0, 4.0);
+    let i = horizon(-2.0, 1.0, 4.0);
     let a = l ^ i;
     assert_eq!([a.e0123(), a.scalar()], [0.0, 0.0]);
   }
 
-  #[test] fn meet_ideal_line_plane() {
+  #[test] fn meet_horizon_plane() {
     let p = plane(1.0, 2.0, 3.0, 4.0);
-    let i = ideal_line(-2.0, 1.0, 4.0);
+    let i = horizon(-2.0, 1.0, 4.0);
     let a = i ^ p;
     assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [5.0, -10.0, 5.0, 0.0]);
   }

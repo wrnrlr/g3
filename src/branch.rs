@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd};
 use core_simd::{f32x4,mask32x4};
-use crate::{Dual, Plane, Point, Rotor, Line, IdealLine};
+use crate::{Dual, Plane, Point, Rotor, Line, Horizon};
 use crate::maths::{gp11, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rsqrt_nr1, sqrt_nr1};
 
 pub fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
@@ -175,8 +175,8 @@ impl Neg for Branch {
 }
 
 impl Not for Branch {
-  type Output = IdealLine;
-  fn not(self)->IdealLine { IdealLine{p2: self.p1} }
+  type Output = Horizon;
+  fn not(self)-> Horizon { Horizon {p2: self.p1} }
 }
 
 // Meet Operation, Exterior Product, ^
@@ -188,9 +188,9 @@ impl BitXor<Line> for Branch {
   type Output = Dual;
   fn bitxor(self, l:Line)->Dual { l ^ self }
 }
-impl BitXor<IdealLine> for Branch {
+impl BitXor<Horizon> for Branch {
   type Output = Dual;
-  fn bitxor(self, l:IdealLine)->Dual {
+  fn bitxor(self, l: Horizon) ->Dual {
     Dual::new(0.0, hi_dp_ss(self.p1, l.p2)[0])
   }
 }

@@ -1,7 +1,7 @@
 use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn};
 use core_simd::{f32x4,mask32x4};
-use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
+use crate::{Dual, Point, Line, Horizon, Branch, Motor};
 use crate::maths::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc, rsqrt_nr1, sqrt_nr1, sw00, sw10, sw20, sw30, ext00, ext02, ext03, extpb, gp00, gp03, dot00, dot03, dotpil, dotpl};
 
 pub const E0:Plane = Plane{p0:f32x4::from_array([1.0,0.0,0.0,0.0])};
@@ -215,9 +215,9 @@ impl BitOr<Line> for Plane {
     Plane{p0}
   }
 }
-impl BitOr<IdealLine> for Plane {
+impl BitOr<Horizon> for Plane {
   type Output = Plane;
-  fn bitor(self, l:IdealLine) -> Plane {
+  fn bitor(self, l: Horizon) -> Plane {
     let p0 = dotpil(self.p0,l.p2);
     Plane{p0}
   }
@@ -246,9 +246,9 @@ impl BitXor<Line> for Plane {
     Point{p3: tmp1+tmp2}
   }
 }
-impl BitXor<IdealLine> for Plane {
+impl BitXor<Horizon> for Plane {
   type Output = Point;
-  fn bitxor(self, l:IdealLine) -> Point {
+  fn bitxor(self, l: Horizon) -> Point {
     Point{p3: ext02(self.p0, l.p2)}
   }
 }

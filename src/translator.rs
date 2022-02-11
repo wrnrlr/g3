@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter, Result};
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn};
 use core_simd::{f32x4,mask32x4};
-use crate::{Plane,Line,Point,Motor,Rotor,IdealLine};
+use crate::{Plane, Line, Point, Motor, Rotor, Horizon};
 use crate::maths::{dp_bc, flip_signs, rsqrt_nr1, sw02, sw32, swl2, gptr};
 
 pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
@@ -54,18 +54,18 @@ impl Translator {
     Translator{p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))}
   }
 
-  // Compute the logarithm of the translator, producing an ideal line axis.
-  // In practice, the logarithm of a translator is simply the ideal partition
+  // Compute the logarithm of the translator, producing a horizon axis.
+  // In practice, the logarithm of a translator is simply the horizon partition
   // (without the scalar $1$).
   // pub fn log(&self)->IdealLine { IdealLine{p2: self.p2} } TODO
 
   // Compute the square root of the provided translator $t$.
   #[inline] pub fn sqrt(self)->Translator { self * 0.5 }
 
-  // Compute the logarithm of the translator, producing an ideal line axis.
-  // In practice, the logarithm of a translator is simply the ideal partition
+  // Compute the logarithm of the translator, producing an horizon axis.
+  // In practice, the logarithm of a translator is simply the horizon partition
   // (without the scalar $1$).
-  pub fn log(self)->IdealLine { IdealLine{p2: self.p2} }
+  pub fn log(self)-> Horizon { Horizon {p2: self.p2} }
 }
 
 impl Display for Translator {

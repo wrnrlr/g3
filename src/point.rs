@@ -1,7 +1,7 @@
 use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
 use core_simd::{f32x4,mask32x4};
-use crate::{Dual,Plane,Line,IdealLine,Branch,Motor,Translator};
+use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator};
 use crate::maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp03, gp33, dotptl, dot33, ext03};
 
 pub struct Origin {}
@@ -195,9 +195,9 @@ impl BitAnd<Line> for Point {
   type Output = Plane;
   fn bitand(self, l: Line) -> Plane { !(!self ^ !l) }
 }
-impl BitAnd<IdealLine> for Point {
+impl BitAnd<Horizon> for Point {
   type Output = Plane;
-  fn bitand(self, l: IdealLine) -> Plane { !(!self ^ !l) }
+  fn bitand(self, l: Horizon) -> Plane { !(!self ^ !l) }
 }
 impl BitAnd<Branch> for Point {
   type Output = Plane;

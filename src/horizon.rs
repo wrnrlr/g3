@@ -3,17 +3,17 @@ use core_simd::{f32x4,mask32x4};
 use crate::{Dual, Plane, Point, Line, Branch, Translator};
 use crate::maths::{flip_signs, hi_dp, dotilp};
 
-pub fn ideal_line(a:f32,b:f32,c:f32)->IdealLine { IdealLine::new(a,b,c) }
+pub fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 
-// An ideal line represents a line at infinity and corresponds to the multivector:
+// A horizon represents a line at infinity and corresponds to the multivector:
 //
 // $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct IdealLine {
+pub struct Horizon {
   pub p2:f32x4
 }
 
-impl IdealLine {
+impl Horizon {
   #[inline] pub fn e01(&self)->f32 { self.p2[1] }
   #[inline] pub fn e10(&self)->f32 { -self.e01() }
   #[inline] pub fn e02(&self)->f32 { self.p2[2] }
@@ -21,7 +21,7 @@ impl IdealLine {
   #[inline] pub fn e03(&self)->f32 { self.p2[3] }
   #[inline] pub fn e30(&self)->f32 { -self.e03() }
 
-  pub fn new(a:f32,b:f32,c:f32)->IdealLine { IdealLine{p2: f32x4::from_array([0.0, a, b, c])} }
+  pub fn new(a:f32,b:f32,c:f32)->Horizon { Horizon {p2: f32x4::from_array([0.0, a, b, c])} }
 
   pub fn squared_ideal_norm(self)->f32 {
     hi_dp(self.p2, self.p2)[0]
@@ -31,106 +31,106 @@ impl IdealLine {
     self.squared_ideal_norm().sqrt()
   }
 
-  // Exponentiate an ideal line to produce a translation.
+  // Exponentiate a horizon to produce a translation.
   //
-  // The exponential of an ideal line
+  // The exponential of an horizon
   // $a \mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$ is given as:
   //
   // $$\exp{\left[a\ee_{01} + b\ee_{02} + c\ee_{03}\right]} = 1 +\
   // a\ee_{01} + b\ee_{02} + c\ee_{03}$$
   #[inline] pub fn exp(self)->Translator { Translator{p2: self.p2} }
 
-  pub fn reverse(self)->IdealLine {
-    IdealLine{p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))}
+  pub fn reverse(self)-> Horizon {
+    Horizon {p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))}
   }
 }
 
-impl Add<IdealLine> for IdealLine {
-  type Output = IdealLine;
-  fn add(self, other: IdealLine) -> IdealLine {
-    IdealLine { p2: self.p2+other.p2 }
+impl Add<Horizon> for Horizon {
+  type Output = Horizon;
+  fn add(self, other: Horizon) -> Horizon {
+    Horizon { p2: self.p2+other.p2 }
   }
 }
 
-impl AddAssign for IdealLine {
+impl AddAssign for Horizon {
   fn add_assign(&mut self, other: Self) {
     self.p2 += other.p2;
   }
 }
 
-impl Sub<IdealLine> for IdealLine {
-  type Output = IdealLine;
-  fn sub(self, other: IdealLine) -> IdealLine {
-    IdealLine { p2: self.p2-other.p2 }
+impl Sub<Horizon> for Horizon {
+  type Output = Horizon;
+  fn sub(self, other: Horizon) -> Horizon {
+    Horizon { p2: self.p2-other.p2 }
   }
 }
 
-impl SubAssign for IdealLine {
+impl SubAssign for Horizon {
   fn sub_assign(&mut self, other: Self) {
     self.p2 -= other.p2;
   }
 }
 
-impl Mul<f32> for IdealLine {
-  type Output = IdealLine;
-  fn mul(self, s: f32) -> IdealLine {
-    IdealLine { p2:self.p2*f32x4::splat(s) }
+impl Mul<f32> for Horizon {
+  type Output = Horizon;
+  fn mul(self, s: f32) -> Horizon {
+    Horizon { p2:self.p2*f32x4::splat(s) }
   }
 }
 
-impl MulAssign<f32> for IdealLine {
+impl MulAssign<f32> for Horizon {
   fn mul_assign(&mut self, s: f32) {
     self.p2 *= f32x4::splat(s)
   }
 }
 
-impl Div<f32> for IdealLine {
-  type Output = IdealLine;
-  fn div(self, s: f32) -> IdealLine {
-    IdealLine { p2:self.p2/f32x4::splat(s) }
+impl Div<f32> for Horizon {
+  type Output = Horizon;
+  fn div(self, s: f32) -> Horizon {
+    Horizon { p2:self.p2/f32x4::splat(s) }
   }
 }
 
-impl DivAssign<f32> for IdealLine {
+impl DivAssign<f32> for Horizon {
   fn div_assign(&mut self, s: f32) {
     self.p2 /= f32x4::splat(s)
   }
 }
 
 // Unary minus
-impl Neg for IdealLine {
-  type Output = IdealLine;
-  fn neg(self)->IdealLine { IdealLine {p2: -self.p2} }
+impl Neg for Horizon {
+  type Output = Horizon;
+  fn neg(self)-> Horizon { Horizon {p2: -self.p2} }
 }
 
 // Dual operator
-impl Not for IdealLine {
+impl Not for Horizon {
   type Output = Branch;
   fn not(self)->Branch { Branch {p1: self.p2} }
 }
 
 // Meet Operation, Exterior Product, ^
-impl BitXor<Plane> for IdealLine {
+impl BitXor<Plane> for Horizon {
   type Output = Point;
   fn bitxor(self, p:Plane)->Point { p ^ self }
 }
-impl BitXor<Line> for IdealLine {
+impl BitXor<Line> for Horizon {
   type Output = Dual;
   fn bitxor(self, l:Line)->Dual { l ^ self }
 }
-impl BitXor<Branch> for IdealLine {
+impl BitXor<Branch> for Horizon {
   type Output = Dual;
   fn bitxor(self, b:Branch)->Dual { b ^ self }
 }
 
 // Join Operation, Regressive Product, &
-impl BitAnd<Point> for IdealLine {
+impl BitAnd<Point> for Horizon {
   type Output = Plane;
   fn bitand(self, a:Point)->Plane{ a & self }
 }
 
 // Inner Product, |
-impl BitOr<Plane> for IdealLine {
+impl BitOr<Plane> for Horizon {
   type Output = Plane;
   fn bitor(self, p:Plane)->Plane { Plane{p0: dotilp(p.p0, self.p2)} }
 }
