@@ -1,10 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,mask32x4,simd_swizzle};
 use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
-use crate::sw::{sw01, swrl};
-use crate::util::{add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and};
-use crate::gp::{gp11, gp12, gprt};
-
+use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt};
 
 pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)

@@ -9,7 +9,8 @@
 #[cfg(test)]
 mod tests {
   use g3::*;
-  use core_simd::{f32x4};
+  use core_simd::f32x4;
+  use g3::maths;
 
   fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
     const EPSILON:f32 = 0.02;
@@ -23,7 +24,7 @@ mod tests {
   #[test] fn simd_sandwich() {
     let a = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
     let b = f32x4::from_array([-4.0, -3.0, -2.0, -1.0]);
-    let c = sw::sw02(a, b);
+    let c = maths::sw02(a, b);
     assert_eq!([c[0], c[1], c[2], c[3]], [9.0, 2.0, 3.0, 4.0]);
   }
 

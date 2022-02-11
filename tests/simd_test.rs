@@ -2,7 +2,7 @@
 #[cfg(test)]
 mod tests {
   use core_simd::{f32x4, mask32x4};
-  use g3::util::{f32x4_xor, flip_signs, f32x4_andnot, f32x4_abs};
+  use g3::maths::{f32x4_xor, flip_signs, f32x4_andnot, f32x4_abs};
 
   #[test] fn test_f32_sign_flipping() {
     let v1 = f32x4::from_array([1.0,2.0,3.0,4.0]);

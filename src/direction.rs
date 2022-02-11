@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg};
 use core_simd::{f32x4,u32x4};
-use crate::util::{refined_reciprocal,hi_dp_bc,rsqrt_nr1};
+use crate::maths::{refined_reciprocal, hi_dp_bc, rsqrt_nr1};
 
 // Directions in are represented using points at infinity (homogeneous coordinate 0).
 // Having a homogeneous coordinate of zero ensures that directions are translation-invariant.

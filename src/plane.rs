@@ -2,11 +2,7 @@ use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn};
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual,Point,Line,IdealLine,Branch,Motor};
-use crate::util::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc, rsqrt_nr1, sqrt_nr1};
-use crate::sw::{sw00, sw10, sw20, sw30};
-use crate::ext::{ext00, ext02, ext03, extpb};
-use crate::gp::{gp00, gp03};
-use crate::dot::{dot00, dot03, dotpil, dotpl};
+use crate::maths::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc, rsqrt_nr1, sqrt_nr1, sw00, sw10, sw20, sw30, ext00, ext02, ext03, extpb, gp00, gp03, dot00, dot03, dotpil, dotpl};
 
 pub const E0:Plane = Plane{p0:f32x4::from_array([1.0,0.0,0.0,0.0])};
 pub const E1:Plane = Plane{p0:f32x4::from_array([0.0,1.0,0.0,0.0])};

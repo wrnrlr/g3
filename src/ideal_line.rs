@@ -1,8 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual, Plane, Point, Line, Branch, Translator};
-use crate::util::{flip_signs, hi_dp};
-use crate::dot::{dotilp};
+use crate::maths::{flip_signs, hi_dp, dotilp};
 
 pub fn ideal_line(a:f32,b:f32,c:f32)->IdealLine { IdealLine::new(a,b,c) }
 

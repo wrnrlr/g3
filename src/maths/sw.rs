@@ -1,5 +1,5 @@
 use core_simd::{f32x4,mask32x4};
-use crate::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, f32x4_and, shuffle_xwzy, shuffle_zwwy, shuffle_wzyz};
+use crate::maths::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, f32x4_and, shuffle_xwzy, shuffle_zwwy, shuffle_wzyz};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)

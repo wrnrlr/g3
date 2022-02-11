@@ -15,24 +15,20 @@ mod rotor;
 mod direction;
 mod translator;
 
-pub mod util;
-pub mod dot;
-pub mod gp;
-pub mod ext;
-pub mod sw;
-
 pub use dual::{Dual, dual};
 pub use point::*;
 pub use line::{Line, line};
 pub use branch::{Branch, branch};
-pub use ideal_line::{IdealLine, ideal_line};
+pub use ideal_line::{ideal_line, IdealLine};
 pub use plane::*;
-pub use motor::{Motor,motor};
-pub use rotor::{Rotor,rotor,EulerAngles};
+pub use motor::{Motor, motor};
+pub use rotor::{EulerAngles, Rotor, rotor};
 pub use direction::Direction;
-pub use translator::{Translator,translator};
+pub use translator::{Translator, translator};
 
 pub use std::f32::consts::PI;
+
+pub mod maths;
 
 #[cfg(feature = "mirror")] mod mirror;
 #[cfg(feature = "mirror")] pub use mirror::{*};

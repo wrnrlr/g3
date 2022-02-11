@@ -1,6 +1,6 @@
 use core_simd::{f32x4,mask32x4};
 
-use crate::util::{dp, flip_signs, shuffle_xxxx, shuffle_yxxx, shuffle_xzwy, add_ss, hi_dp};
+use crate::maths::util::{dp, flip_signs, shuffle_xxxx, shuffle_yxxx, shuffle_xzwy, add_ss, hi_dp};
 
 pub fn ext00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // (a1 b2 - a2 b1) e12 +
