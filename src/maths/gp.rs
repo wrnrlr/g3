@@ -13,7 +13,7 @@ pub fn gp00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   // (a0 b2 - a2 b0) e02 +
   // (a0 b3 - a3 b0) e03
   let mut p1_out = shuffle_yzwy(a) * shuffle_ywyz(b);
-  p1_out = p1_out - (-(shuffle_zwyz(a) * shuffle_zzwy(b)));
+  p1_out = p1_out - (f32x4_xor(f32x4::from([-0.0, 0.0, 0.0, 0.0]), shuffle_zwyz(a) * shuffle_zzwy(b)));
   // Add a3 b3 to the lowest component
   p1_out = add_ss(p1_out, shuffle_wxxx(a) * shuffle_wxxx(b));
   // (a0 b0, a0 b1, a0 b2, a0 b3)
