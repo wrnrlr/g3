@@ -443,4 +443,8 @@ mod tests {
     assert_eq!(b[2], 1.0/3.0);
     assert_eq!(b[3], 0.25);
   }
+
+  #[test] fn f32x4_abs_test() {
+    assert_eq!(f32x4_abs(f32x4::from([1.0, 0.0, -1.0, -0.0])), f32x4::from([1.0, 0.0, 1.0, 0.0]));
+  }
 }
