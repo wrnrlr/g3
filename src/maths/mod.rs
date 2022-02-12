@@ -3,6 +3,7 @@ mod dot;
 mod gp;
 mod ext;
 mod sw;
+mod playground;
 
 pub use util::*;
 pub use dot::*;
