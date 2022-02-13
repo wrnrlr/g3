@@ -43,7 +43,7 @@ impl Point {
     pub fn new(x:f32,y:f32,z:f32)->Point { Point{p3:f32x4::from_array([1.0,x,y,z])} }
 
     pub fn normalized(&self)->Point {
-        let tmp = rcp_nr1(self.p3);
+        let tmp = rcp_nr1(shuffle_xxxx(self.p3));
         Point{ p3: self.p3 * tmp }
     }
 
