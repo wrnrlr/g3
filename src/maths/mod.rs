@@ -4,6 +4,8 @@ mod gp;
 mod ext;
 mod sw;
 mod playground;
+mod exp;
+mod log;
 
 pub use util::*;
 pub use dot::*;
