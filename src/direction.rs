@@ -34,6 +34,12 @@ impl Direction {
   }
 }
 
+impl Into<[f32;3]> for Direction {
+  fn into(self) -> [f32; 3] {
+    [self.x(), self.y(), self.z()]
+  }
+}
+
 impl Add<Direction> for Direction {
   type Output = Direction;
   fn add(self, other: Direction) -> Direction { Direction { p3:self.p3+other.p3 } }

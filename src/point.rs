@@ -69,6 +69,12 @@ impl Display for Point {
   }
 }
 
+impl Into<[f32;3]> for Point {
+  fn into(self) -> [f32; 3] {
+    [self.x(), self.y(), self.z()]
+  }
+}
+
 impl Add<Point> for Point {
     type Output = Point;
     fn add(self, other: Point) -> Point { Point { p3:self.p3+other.p3 } }
