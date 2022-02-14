@@ -1,6 +1,4 @@
-use std_float::StdFloat as _;
-use core_simd::{f32x4,mask32x4,u32x4,simd_swizzle as swizzle};
-use core_simd::simd::Which::{First,Second};
+use core_simd::{f32x4};
 use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
 
 pub fn log(p1:f32x4, p2:f32x4)->(f32x4,f32x4) {

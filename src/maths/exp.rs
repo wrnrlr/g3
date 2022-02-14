@@ -1,6 +1,4 @@
-use std_float::StdFloat as _;
-use core_simd::{f32x4,mask32x4,u32x4,simd_swizzle as swizzle};
-use core_simd::simd::Which::{First,Second};
+use core_simd::{f32x4};
 use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
 
 // a + b is a general bivector but it is most likely *non-simple* meaning
@@ -19,7 +17,7 @@ pub fn exp(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   if a == f32x4::splat(0.0) {
     // When exponentiating an ideal line, the terms past the linear
     // term in the Taylor series expansion vanishes
-    return (f32x4::splat(1.0),b);
+    return (f32x4::from([1.0, 0.0, 0.0, 0.0]),b);
   }
 
   // First, we need to decompose the bivector into the sum of two
