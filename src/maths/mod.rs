@@ -12,3 +12,5 @@ pub use dot::*;
 pub use gp::*;
 pub use ext::*;
 pub use sw::*;
+pub use exp::exp;
+pub use log::log;
