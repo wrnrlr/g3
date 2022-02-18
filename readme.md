@@ -63,6 +63,8 @@ cargo +nightly run --example elements --features="mirror"
   * https://mattferraro.dev/posts/geometric-algebra
 * [Cheat Sheet](https://enki.ws/ganja.js/examples/coffeeshop.html#V3k2baxG2&fullscreen)
 * [May the forque be with you: Rigid body dynamics in PGA](https://enki.ws/ganja.js/examples/pga_dyn.html)
+* [The Geometry of 3DPGA products](https://enki.ws/ganja.js/examples/coffeeshop.html#ydDtaGu0a&fullscreen)
+* [Automatic differentiation](https://discourse.bivector.net/t/automatic-differentiation/289)
 
 ## Status
 
