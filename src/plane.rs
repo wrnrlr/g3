@@ -61,7 +61,8 @@ impl Plane {
   }
 
   pub fn approx_eq(&self, other:Plane, epsilon:f32)->bool {
-    f32x4_abs(self.p0 - other.p0) < f32x4::splat(epsilon)
+    let diff = f32x4_abs(self.p0 - other.p0);
+    diff < f32x4::splat(epsilon)
   }
 
   // Project a plane onto a point. Given a plane $p$ and point $P$, produces the

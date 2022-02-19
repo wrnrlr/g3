@@ -5,6 +5,7 @@ use crate::maths::{gpll, exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, 
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
+#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Line {
   pub p1:f32x4,

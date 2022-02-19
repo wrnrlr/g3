@@ -4,6 +4,7 @@ use crate::maths::{refined_reciprocal, hi_dp_bc, rsqrt_nr1};
 
 // Directions in are represented using points at infinity (homogeneous coordinate 0).
 // Having a homogeneous coordinate of zero ensures that directions are translation-invariant.
+#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,PartialEq)]
 pub struct Direction {
   pub p3:f32x4

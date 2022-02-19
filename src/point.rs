@@ -3,7 +3,10 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,Bi
 use core_simd::{f32x4,mask32x4};
 use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator};
 use crate::maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp03, gp33, dotptl, dot33, ext03};
+use bevy_ecs::prelude::Component;
 
+#[cfg_attr(feature="bevy",derive(Component))]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Origin {}
 
 impl Origin {
@@ -24,6 +27,7 @@ pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 // implementation detail.
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
+#[cfg_attr(feature="bevy", derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Point {
     pub p3:f32x4

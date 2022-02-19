@@ -4,6 +4,7 @@ use core_simd::{f32x2};
 pub fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 
 // A dual number is a multivector of the form p + e_0123.
+#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,PartialEq)]
 pub struct Dual {
   p:f32x2

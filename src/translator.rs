@@ -3,11 +3,13 @@ use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, N
 use core_simd::{f32x4,mask32x4};
 use crate::{Plane, Line, Point, Motor, Rotor, Horizon};
 use crate::maths::{dp_bc, flip_signs, rsqrt_nr1, sw02, sw32, swl2, gptr};
+use bevy_ecs::prelude::Component;
 
 pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
   Translator::new(delta,x,y,z)
 }
 
+#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Translator {
   pub p2:f32x4
@@ -144,7 +146,7 @@ impl SubAssign for Translator {
 impl Mul<Translator> for f32 {
   type Output = Translator;
   fn mul(self, t: Translator) -> Translator {
-    Translator{ p2: f32x4::splat(self)*t.p2 }
+    t*self
   }
 }
 

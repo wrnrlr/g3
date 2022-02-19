@@ -22,6 +22,7 @@ impl From<Rotor> for EulerAngles {
 
 // The rotor is an entity that represents a rigid rotation about an axis.
 // To apply the rotor to a supported entity, the call operator is available.
+#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Rotor {
   // p1: scalar, e12, e31, e23

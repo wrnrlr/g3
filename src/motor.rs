@@ -10,6 +10,7 @@ pub fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::ne
 /// A Motor is a combination of a translation along a line combined
 /// with a rotation about an axis parallel to that line.
 /// In other words, it is the geometric product of a Translator and a Rotor.
+#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 pub struct Motor {
   pub p1:f32x4,

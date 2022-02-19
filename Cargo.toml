@@ -7,6 +7,7 @@ resolver = "2"
 
 [features]
 mirror = ["baryon", "mint", "pollster"]
+bevy = ["bevy_ecs"]
 
 [dependencies]
 core_simd = { git = "https://github.com/rust-lang/stdsimd", package = "core_simd", rev = "cad7434" }
@@ -15,6 +16,7 @@ baryon = { git = "https://github.com/wrnrlr/baryon", rev = "887ced2", optional =
 mint = { version = "0.5.8", optional = true }
 pollster = { version = "0.2.4", optional =  true }
 glam = { version = "0.20.0", optional = true }
+bevy_ecs = { version = "0.6.1", optional = true }
 
 [dev-dependencies]
 peg = "0.8.0"
