@@ -1,9 +1,9 @@
 use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
 use core_simd::{f32x4,mask32x4};
+use bevy_ecs::prelude::Component;
 use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator};
 use crate::maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp03, gp33, dotptl, dot33, ext03};
-use bevy_ecs::prelude::Component;
 
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]

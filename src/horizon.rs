@@ -1,5 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
 use core_simd::{f32x4,mask32x4};
+use bevy_ecs::prelude::Component;
 use crate::{Dual, Plane, Point, Line, Branch, Translator};
 use crate::maths::{flip_signs, hi_dp, dotilp};
 

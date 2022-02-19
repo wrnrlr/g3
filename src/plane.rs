@@ -1,6 +1,7 @@
 use std::fmt::{Display,Formatter,Result};
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn};
 use core_simd::{f32x4,mask32x4};
+use bevy_ecs::prelude::Component;
 use crate::{Dual, Point, Line, Horizon, Branch, Motor};
 use crate::maths::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc, rsqrt_nr1, sqrt_nr1, sw00, sw10, sw20, sw30, ext00, ext02, ext03, extpb, gp00, gp03, dot00, dot03, dotpil, dotpl};
 
@@ -12,6 +13,7 @@ pub const E3:Plane = Plane{p0:f32x4::from_array([0.0,0.0,0.0,1.0])};
 // form: ax + by + cz + d
 pub fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
+#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Plane {
   // p0: (e0, e1, e2, e3)

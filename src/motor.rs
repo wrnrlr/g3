@@ -2,6 +2,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use std::convert::{From};
 use std::fmt::{Display,Formatter,Result};
 use core_simd::{f32x4,mask32x4};
+use bevy_ecs::prelude::Component;
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
 use crate::maths::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss, exp, gp11, gprt, gpmm, gpdl, gp21, sw012, sw312, swml, swo12};
 
