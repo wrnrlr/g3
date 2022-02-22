@@ -82,7 +82,8 @@ mod tests {
     let b = point(0.0, 0.0, 0.0);
     let c = point(1.0, 0.0, 0.0);
     let l = b & c;
-    let d = ((l | a) ^ l).normalized();
+    let mut d = ((l | a) ^ l);
+    d = d.normalized();
     assert_eq!([d.e123(), d.x(), d.y(), d.z()], [1.0, 2.0, 0.0, 0.0]);
   }
 }

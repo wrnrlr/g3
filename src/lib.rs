@@ -31,6 +31,3 @@ pub use matrix::*;
 pub use std::f32::consts::PI;
 
 pub mod maths;
-
-#[cfg(feature = "mirror")] mod mirror;
-#[cfg(feature = "mirror")] pub use mirror::{*};

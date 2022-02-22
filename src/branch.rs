@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd};
 use core_simd::{f32x4,mask32x4};
-use bevy_ecs::prelude::Component;
+#[cfg(feature = "bevy")] use bevy_ecs::prelude::Component;
 use crate::{Dual, Plane, Point, Rotor, Line, Horizon};
 use crate::maths::{gp11, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rsqrt_nr1, sqrt_nr1};
 

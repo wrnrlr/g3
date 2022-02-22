@@ -29,6 +29,13 @@ impl Into<glam::Vec3> for &Point {
   }
 }
 
+// #[cfg(feature = "glam")]
+// impl Into<glam::XYZ<f32>> for &Point {
+//   fn into(self)->glam::XYZ<f32> {
+//     [self.x(), self.y(), self.z()].into()
+//   }
+// }
+
 #[cfg(feature = "glam")]
 impl Into<glam::Vec3> for Point {
   fn into(self)->glam::Vec3 {
