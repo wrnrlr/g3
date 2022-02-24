@@ -31,10 +31,6 @@ impl Line {
     Line{p1:f32x4::from_array([0.0,d,e,f]), p2:f32x4::from_array([0.0,a,b,c])}
   }
 
-  pub fn from_branch(b:Branch)->Line { Line{p1: b.p1, p2: f32x4::splat(0.0)} }
-
-  pub fn from_ideal_line(l: Horizon) ->Line { Line{p1: f32x4::splat(0.0), p2: l.p2} }
-
   // Returns the square root of the quantity produced by `squared_norm`.
   pub fn norm(&self)->f32 { self.squared_norm().sqrt() }
 
@@ -113,6 +109,18 @@ impl Line {
 
   // Project a line onto a plane
   pub fn project_plane(self, p:Plane)->Line { (self | p) ^ p }
+}
+
+impl From<Branch> for Line {
+  fn from(b: Branch) -> Self {
+    Line{p1: b.p1, p2: f32x4::splat(0.0)}
+  }
+}
+
+impl From<Horizon> for Line {
+  fn from(h: Horizon) -> Self {
+    Line{p1: f32x4::splat(0.0), p2: h.p2}
+  }
 }
 
 impl Add<Line> for Line {
