@@ -54,7 +54,11 @@ mod tests {
   }
   #[test] fn point_negative() {
     let p = point(1.0, 2.0, 3.0);
-    assert_point(-p, -1.0, -2.0, -3.0, 1.0);
+    assert_point(-p, -1.0, -2.0, -3.0, -1.0);
+  }
+  #[test] fn point_reverse() {
+    let p = point(1.0, 2.0, 3.0);
+    assert_point(p.reverse(), -1.0, -2.0, -3.0, 1.0);
   }
   // this is become the dual operation
   // #[test] fn point_not() {
