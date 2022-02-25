@@ -1,5 +1,7 @@
+#![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
+  use core_simd::f32x4;
   use g3::*;
 
   #[test] fn plane_constructor() {
@@ -70,8 +72,10 @@ mod tests {
   }
   #[test] #[ignore] fn plane_normalized() {}
   #[test] #[ignore] fn plane_invserse() {}
+  #[test] #[ignore] fn plane_reverse() {}
   #[test] fn plane_not() {
-    assert_eq!(!plane(4.0, 3.0, 2.0, 1.0), point(1.0, 2.0, 3.0));
+    let a = !plane(4.0, 3.0, 2.0, 1.0);
+    assert_eq!(a.p3, f32x4::from([1.0,4.0,3.0,2.0]));
   }
 
   #[test] fn planes() {
