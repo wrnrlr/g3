@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-  use g3::{*, EulerAngles};
+  use g3::*;
 
   const EPSILON: f32 = 0.02;
 

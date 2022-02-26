@@ -10,7 +10,6 @@
 mod tests {
   use g3::*;
   use core_simd::f32x4;
-  use g3::maths;
 
   fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
     const EPSILON:f32 = 0.02;
