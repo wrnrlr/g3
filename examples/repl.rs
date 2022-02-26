@@ -166,3 +166,15 @@ impl Number {
 }
 
 
+/*
+=  Let[a,4]
+:= Yet[]
+
+Blockdoc[
+  Heading[Level->1,"Hello"],
+  Paragraph[Level->1,«Hello»]
+  Input[«a=1»]
+  Output[«a=1»]
+]
+
+ */
