@@ -29,5 +29,7 @@ pub use translator::{Translator, translator};
 pub use matrix::*;
 
 pub use std::f32::consts::PI;
+pub const PI2:f32 = PI/2.0;
+pub const TAU:f32 = PI*2.0;
 
 pub mod maths;
