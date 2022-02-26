@@ -1,7 +1,7 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,mask32x4,simd_swizzle};
 #[cfg(feature = "bevy")] use bevy_ecs::prelude::Component;
-use crate::{Motor,Translator,Point,Line,Plane,Branch,Direction};
+use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI2};
 use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt};
 
 pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
@@ -16,8 +16,24 @@ pub struct EulerAngles {
 }
 
 impl From<Rotor> for EulerAngles {
-  fn from(_ea:Rotor)->Self {
-    todo!()
+  fn from(r:Rotor)->Self {
+    let buf:[f32;4] = r.into();
+    let test = buf[1] * buf[2] * buf[3] * buf[0];
+    if test > 0.4999 {
+      return EulerAngles{roll: 2.0 * buf[1].atan2(buf[0]), pitch: PI2, yaw: 0.0};
+    } else if test < -0.4999 {
+      return EulerAngles{roll: -2.0 * buf[1].atan2(buf[0]), pitch: -PI2, yaw: 0.0};
+    }
+    let buf1_2 = buf[1] * buf[1];
+    let buf2_2 = buf[2] * buf[2];
+    let buf3_2 = buf[3] * buf[3];
+
+    let roll = (2.0 * (buf[0] * buf[1] + buf[2] * buf[3])).atan2(1.0 - 2.0 * (buf1_2 + buf2_2));
+    let sinp = 2.0 * (buf[0] * buf[2] - buf[1] * buf[3]);
+    let pitch = if sinp.abs() > 1.0 { PI2.copysign(sinp) } else { sinp.asin() };
+    let yaw = (2.0 * (buf[0] * buf[3] + buf[1] * buf[2])).atan2(1.0 - 2.0 * (buf2_2 + buf3_2));
+
+    EulerAngles{roll, pitch, yaw}
   }
 }
 
@@ -45,7 +61,7 @@ impl Rotor {
     let half = 0.5 * ang_rad;
     let sin_ang = half.sin();
     let scale = sin_ang * inv_norm;
-    let p1 = f32x4::from_array([half.cos(),x,y,z]) * f32x4::from_array([1.0,scale,scale,scale]);
+    let p1 = f32x4::from([half.cos(),x,y,z]) * f32x4::from([1.0,scale,scale,scale]);
     Rotor{p1}
   }
 
@@ -61,11 +77,14 @@ impl Rotor {
     let cos_r = half_roll.cos();
     let sin_r = half_roll.sin();
 
-    Rotor{p1:f32x4::from_array([
+    let r = Rotor{p1:f32x4::from([
       cos_r * cos_p * sin_y - sin_r * sin_p * cos_y,
       cos_r * sin_p * cos_y + sin_r * cos_p * sin_y,
       sin_r * cos_p * cos_y - cos_r * sin_p * sin_y,
-      cos_r * cos_p * cos_y + sin_r * sin_p * sin_y])}
+      cos_r * cos_p * cos_y + sin_r * sin_p * sin_y])};
+
+    // todo use normalize...
+    r.normalized()
   }
 
   pub fn load_normalized(data:[f32;4])->Rotor {
@@ -81,7 +100,7 @@ impl Rotor {
     let inv_norm = rsqrt_nr1(hi_dp_bc(self.p1, self.p1));
     let mut p1 = self.p1 * inv_norm;
     p1 = p1 * inv_norm;
-    p1 = flip_signs(p1, mask32x4::from_array([false,true,true,true]));
+    p1 = flip_signs(p1, mask32x4::from([false,true,true,true]));
     Rotor{p1}
   }
 
@@ -130,7 +149,14 @@ impl Rotor {
 
 impl From<EulerAngles> for Rotor {
   fn from(ea:EulerAngles)->Self {
-    Rotor::from_euler_angles(ea.roll,ea.pitch,ea.pitch)
+    Rotor::from_euler_angles(ea.roll,ea.pitch,ea.yaw)
+  }
+}
+
+impl From<Rotor> for [f32;4] {
+  fn from(r:Rotor) -> Self {
+    //TODO r.p1.as_array()
+    [r.p1[0], r.p1[1], r.p1[2], r.p1[3]]
   }
 }
 
@@ -237,7 +263,7 @@ impl DivAssign<f32> for Rotor {
 impl Neg for Rotor {
   type Output = Self;
   fn neg(self)->Self::Output {
-    Rotor { p1:flip_signs(self.p1, mask32x4::from_array([false,true,true,true])) }
+    Rotor { p1:flip_signs(self.p1, mask32x4::from([false,true,true,true])) }
   }
 }
 
