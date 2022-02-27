@@ -101,6 +101,9 @@ impl Branch {
   }
 }
 
+impl From<Line> for Branch { fn from(l:Line)->Self { Self{p1:l.p1} } }
+impl From<&Line> for Branch { fn from(l:&Line)->Self { Self{p1:l.p1} } }
+
 impl Add<Branch> for Branch {
   type Output = Branch;
   fn add(self, other: Branch) -> Branch {
