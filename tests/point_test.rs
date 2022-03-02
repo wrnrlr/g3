@@ -66,7 +66,7 @@ mod tests {
   //   assert_point(!p, -1.0,-2.0,-3.0,-1.0);
   // }
   #[test] #[ignore] fn point_normalized() {}
-  #[test] #[ignore] fn point_invserse() {}
+  #[test] #[ignore] fn point_inverse() {}
 
   fn assert_point(p:Point,x:f32,y:f32,z:f32,w:f32) {
     assert_eq!(p.x(),x);
