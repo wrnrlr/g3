@@ -55,8 +55,8 @@ mod tests {
 
   #[test] fn euler_angles_precision() {
     let ea1 = EulerAngles{roll: 0.2*PI, pitch: 0.2*PI, yaw: 0.0};
-    let r1:Rotor = ea1.into();
-    let ea2:EulerAngles = r1.into();
+    let r:Rotor = ea1.into();
+    let ea2:EulerAngles = r.into();
     approx_eq(ea1.roll, ea2.roll);
     approx_eq(ea1.pitch, ea2.pitch);
     approx_eq(ea1.yaw, ea2.yaw);
