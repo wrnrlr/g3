@@ -1,4 +1,6 @@
-use crate::{Point};
+use glam;
+use crate::{Point,Rotor};
+use crate::{maths::mat4x4_12};
 
 // #[derive(Default,Debug,Clone,PartialEq)]
 // pub struct Matrix4x4 (
@@ -22,7 +24,6 @@ use crate::{Point};
 //   pub cols:[f32x4;4]
 // }
 
-#[cfg(feature = "glam")]
 impl Into<glam::Vec3> for &Point {
   fn into(self)->glam::Vec3 {
     [self.x(), self.y(), self.z()].into()
@@ -36,16 +37,21 @@ impl Into<glam::Vec3> for &Point {
 //   }
 // }
 
-#[cfg(feature = "glam")]
 impl Into<glam::Vec3> for Point {
   fn into(self)->glam::Vec3 {
     [self.x(), self.y(), self.z()].into()
   }
 }
 
-#[cfg(feature = "glam")]
 impl Into<glam::Mat4> for &Point {
   fn into(self)->glam::Mat4 {
     glam::Mat4::from_translation(self.into())
+  }
+}
+
+impl Into<glam::Mat4> for Rotor {
+  fn into(self)->glam::Mat4 {
+    let m = mat4x4_12(self.p1);
+    glam::Mat4::from_cols_array_2d(&[m.0.into(),m.1.into(),m.2.into(),m.3.into()])
   }
 }

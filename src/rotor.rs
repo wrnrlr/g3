@@ -140,11 +140,6 @@ impl Rotor {
     let p1 = add_ss(self.p1, f32x4::from([1.0, 0.0, 0.0, 0.0]));
     Rotor{p1}.normalized() // TODO avoid extra by normalize...
   }
-
-  pub fn as_mat3x4() { todo!() }
-  pub fn as_mat4x4() { todo!() }
-
-  // TODO as_euler_angle
 }
 
 impl From<EulerAngles> for Rotor {

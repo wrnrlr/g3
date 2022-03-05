@@ -14,7 +14,10 @@ mod motor;
 mod rotor;
 mod direction;
 mod translator;
-mod matrix;
+
+pub use std::f32::consts::PI;
+pub const PI2:f32 = PI/2.0;
+pub const TAU:f32 = PI*2.0;
 
 pub use dual::{Dual, dual};
 pub use point::*;
@@ -26,10 +29,9 @@ pub use motor::{Motor, motor};
 pub use rotor::{EulerAngles, Rotor, rotor};
 pub use direction::Direction;
 pub use translator::{Translator, translator};
-pub use matrix::*;
-
-pub use std::f32::consts::PI;
-pub const PI2:f32 = PI/2.0;
-pub const TAU:f32 = PI*2.0;
-
 pub mod maths;
+
+#[cfg(feature = "glam")]
+pub use {matrix::*};
+#[cfg(feature = "glam")]
+mod matrix;
