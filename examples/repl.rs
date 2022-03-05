@@ -1,5 +1,5 @@
 use std::hash::Hasher;
-use g3::{point, line, plane, Point, Line, Plane};
+use g3::*;
 use peg::{parser};
 
 parser! {
@@ -142,7 +142,7 @@ impl State {
     }
   }
 
-  fn eval_symbol(self, s:Symbol) {}
+  fn eval_symbol(self, _s:Symbol) {}
 
 }
 
