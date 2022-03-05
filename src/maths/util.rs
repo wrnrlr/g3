@@ -118,6 +118,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn shuffle_xwzy(a:f32x4)->f32x4 { swizzle!(a, [0,3,2,1]) }
 
 #[inline] pub fn shuffle_yxxx(a:f32x4)->f32x4 { swizzle!(a, [1,0,0,0]) }
+#[inline] pub fn shuffle_yxwx(a:f32x4)->f32x4 { swizzle!(a, [1,0,3,0]) }
 #[inline] pub fn shuffle_yyzw(a:f32x4)->f32x4 { swizzle!(a, [1,1,2,3]) }
 #[inline] pub fn shuffle_yywz(a:f32x4)->f32x4 { swizzle!(a, [1,1,3,2]) }
 #[inline] pub fn shuffle_yyww(a:f32x4)->f32x4 { swizzle!(a, [1,1,3,3]) }
