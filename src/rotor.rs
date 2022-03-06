@@ -78,13 +78,14 @@ impl Rotor {
     let sin_r = half_roll.sin();
 
     let r = Rotor{p1:f32x4::from([
-      cos_r * cos_p * sin_y - sin_r * sin_p * cos_y,
-      cos_r * sin_p * cos_y + sin_r * cos_p * sin_y,
+      cos_r * cos_p * cos_y + sin_r * sin_p * sin_y,
       sin_r * cos_p * cos_y - cos_r * sin_p * sin_y,
-      cos_r * cos_p * cos_y + sin_r * sin_p * sin_y])};
+      cos_r * sin_p * cos_y + sin_r * cos_p * sin_y,
+      cos_r * cos_p * sin_y - sin_r * sin_p * cos_y,
+    ])};
 
     // todo use normalize...
-    r.normalized()
+    r //.normalized()
   }
 
   pub fn load_normalized(data:[f32;4])->Rotor {
