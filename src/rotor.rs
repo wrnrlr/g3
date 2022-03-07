@@ -84,8 +84,7 @@ impl Rotor {
       cos_r * cos_p * sin_y - sin_r * sin_p * cos_y,
     ])};
 
-    // todo use normalize...
-    r //.normalized()
+    r.normalized()
   }
 
   pub fn load_normalized(data:[f32;4])->Rotor {
