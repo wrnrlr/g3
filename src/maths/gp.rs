@@ -1,4 +1,5 @@
 use core_simd::{f32x4,mask32x4, simd_swizzle};
+use crate::maths::{f32x4_and, shuffle_xxzz, shuffle_xyxy};
 use crate::maths::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx, shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz, shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy, shuffle_zwyz, add_ss, f32x4_xor, sub_ss, mul_ss, shuffle_yzyw, shuffle_yywz, shuffle_wywz, shuffle_wzyw, shuffle_zzww};
 
 // plane * plane
@@ -89,10 +90,16 @@ pub fn gp33(a:f32x4, b:f32x4)->f32x4 {
   // -a0b0         | -a0b1 + a1b0 | -a0b2 + a2b0 | -a0b3 + a3b0
   tmp += a * shuffle_xxxx(b);
 
-  let ss = shuffle_xxxx(tmp);
-
+  // (0, 1, 2, 3) -> (0, 0, 2, 2)
+  let mut ss = shuffle_xxzz(tmp);
+  ss = shuffle_xyxy(ss);
   tmp = tmp * rcp_nr1(ss);
-  mask32x4::from_array([false, true, true, true]).select(tmp, f32x4::splat(0.0))
+
+  // TODO, in klein their is an extra `and`
+  // flip_signs(tmp, mask32x4::from([false, true, true, true]))
+  // mask32x4::from_array([false, true, true, true]).select(tmp, f32x4::splat(0.0))
+  // f32x4_and(tmp, f32x4::from([0.0, -1.0, -1.0, -1.0]))
+  tmp
 }
 
 // pub fn gpDL()->(f32x4,f32x4) { todo!() }

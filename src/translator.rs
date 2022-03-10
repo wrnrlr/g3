@@ -17,11 +17,12 @@ pub struct Translator {
 
 impl Translator {
 
+  #[inline] pub fn scalar(&self)->f32 { 1.0 }
   #[inline] pub fn e01(&self)->f32 { self.p2[1] }
   #[inline] pub fn e10(&self)->f32 { -self.e01() }
-  #[inline] pub fn e02(&self)->f32 { self.p2[1] }
+  #[inline] pub fn e02(&self)->f32 { self.p2[2] }
   #[inline] pub fn e20(&self)->f32 { -self.e02() }
-  #[inline] pub fn e03(&self)->f32 { self.p2[1] }
+  #[inline] pub fn e03(&self)->f32 { self.p2[3] }
   #[inline] pub fn e30(&self)->f32 { -self.e03() }
 
   pub fn new(delta:f32,x:f32,y:f32,z:f32)->Translator {
