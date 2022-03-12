@@ -1,5 +1,5 @@
-use core_simd::{f32x4,mask32x4, simd_swizzle};
-use crate::maths::{shuffle_xxzz, shuffle_xyxy};
+use core_simd::{f32x4,mask32x4, simd_swizzle as swizzle};
+use crate::maths::{b0a1a2a3, f32x4_and, shuffle_xxzz, shuffle_xyxy};
 use crate::maths::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx, shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz, shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy, shuffle_zwyz, add_ss, f32x4_xor, sub_ss, mul_ss, shuffle_yzyw, shuffle_yywz, shuffle_wywz, shuffle_wzyw, shuffle_zzww};
 
 // plane * plane
@@ -25,34 +25,33 @@ pub fn gp00(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   return (p1_out, p2_out);
 }
 
-pub fn gp03<const F:bool>(a:f32x4, b:f32x4)->(f32x4,f32x4) {
-  // a1 b0 e23 +
-  // a2 b0 e31 +
-  // a3 b0 e12 +
-  // (a0 b0 + a1 b1 + a2 b2 + a3 b3) e0123 +
-  // (a3 b2 - a2 b3) e01 +
-  // (a1 b3 - a3 b1) e02 +
-  // (a2 b1 - a1 b2) e03
-  //
-  // With flip:
-  //
-  // a1 b0 e23 +
-  // a2 b0 e31 +
-  // a3 b0 e12 +
-  // -(a0 b0 + a1 b1 + a2 b2 + a3 b3) e0123 +
-  // (a3 b2 - a2 b3) e01 +
-  // (a1 b3 - a3 b1) e02 +
-  // (a2 b1 - a1 b2) e03
+// point * plane
+pub fn gp30(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   let mut p1 = a * shuffle_xxxx(b);
-  p1 = mask32x4::from_array([false, true, true, true]).select(p1, f32x4::splat(0.0));
+  p1 = b0a1a2a3(p1, f32x4::splat(0.0));
+
   // (_, a3 b2, a1 b3, a2 b1)
   let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
   p2 -= shuffle_xzwy(a) * shuffle_xwyz(b);
   // Compute a0 b0 + a1 b1 + a2 b2 + a3 b3 and store it in the low component
   let mut tmp = dp(a, b);
-  if F { tmp = -tmp}
-  p2 = p2 - tmp;
-  return (p1,p2);
+  tmp = flip_signs(tmp, mask32x4::from([true, false, false, false]));
+  p2 = b0a1a2a3(p2, tmp);
+  (p1,p2)
+}
+
+// plane * point
+pub fn gp03(a:f32x4, b:f32x4)->(f32x4,f32x4) {
+  let mut p1 = a * shuffle_xxxx(b);
+  p1 = b0a1a2a3(p1, f32x4::splat(0.0));
+
+  // (_, a3 b2, a1 b3, a2 b1)
+  let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
+  p2 -= shuffle_xzwy(a) * shuffle_xwyz(b);
+  // Compute a0 b0 + a1 b1 + a2 b2 + a3 b3 and store it in the low component
+  let tmp = dp(a, b);
+  p2 = p2 + tmp;
+  (p1,p2)
 }
 
 // p1: (1, e23, e31, e12)
@@ -174,32 +173,32 @@ pub fn gpmm(a:f32x4, b:f32x4, c:f32x4, d:f32x4)->(f32x4,f32x4) {
   // (a0 d2 + b2 c0 + a1 d3 + b1 c3 - a2 d0 - a3 d1 - b0 c2 - b3 c1) e02 +
   // (a0 d3 + b3 c0 + a2 d1 + b2 c1 - a3 d0 - a1 d2 - b0 c3 - b1 c2) e03
 
-  let a_xxxx = simd_swizzle!(a, [0,0,0,0]);
-  let a_zyzw = simd_swizzle!(a, [2,1,2,3]);
-  let a_ywyz = simd_swizzle!(a, [1,3,1,2]);
-  let a_wzwy = simd_swizzle!(a, [3,2,3,1]);
-  let c_wwyz = simd_swizzle!(c, [3,3,1,2]);
-  let c_yzwy = simd_swizzle!(c, [1,2,3,1]);
+  let a_xxxx = swizzle!(a, [0,0,0,0]);
+  let a_zyzw = swizzle!(a, [2,1,2,3]);
+  let a_ywyz = swizzle!(a, [1,3,1,2]);
+  let a_wzwy = swizzle!(a, [3,2,3,1]);
+  let c_wwyz = swizzle!(c, [3,3,1,2]);
+  let c_yzwy = swizzle!(c, [1,2,3,1]);
   let s_flip = mask32x4::from_array([false, false, false, true]);
 
   let mut e = a_xxxx * c;
   let mut t = a_ywyz * c_yzwy;
 
-  t = t + (a_zyzw * simd_swizzle!(c, [2,0,0,0]));
+  t = t + (a_zyzw * swizzle!(c, [2,0,0,0]));
   t = flip_signs(t, s_flip);
 
   e = e + t;
   e = e - a_wzwy * c_wwyz;
 
   let mut f = a_xxxx * d;
-  f = f + b * simd_swizzle!(c, [0,0,0,0]);
-  f = f + a_ywyz * simd_swizzle!(d, [1,2,3,1]);
-  f = f + simd_swizzle!(b, [1,2,1,2]) + c_yzwy;
+  f = f + b * swizzle!(c, [0,0,0,0]);
+  f = f + a_ywyz * swizzle!(d, [1,2,3,1]);
+  f = f + swizzle!(b, [1,2,1,2]) + c_yzwy;
 
-  t = a_zyzw * simd_swizzle!(d, [2,0,0,0]);
-  t = t + a_wzwy * simd_swizzle!(d, [3,3,1,2]);
-  t = t + simd_swizzle!(b, [2,0,0,0]) * simd_swizzle!(c, [2,1,2,3]);
-  t = t + simd_swizzle!(b, [3,2,3,1]) * c_wwyz;
+  t = a_zyzw * swizzle!(d, [2,0,0,0]);
+  t = t + a_wzwy * swizzle!(d, [3,3,1,2]);
+  t = t + swizzle!(b, [2,0,0,0]) * swizzle!(c, [2,1,2,3]);
+  t = t + swizzle!(b, [3,2,3,1]) * c_wwyz;
   t = flip_signs(t, s_flip);
 
   f = f - t;

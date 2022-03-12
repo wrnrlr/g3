@@ -3,7 +3,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,Bi
 use core_simd::{f32x4,mask32x4};
 #[cfg(feature = "bevy")] use bevy_ecs::prelude::Component;
 use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator};
-use crate::maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp03, gp33, dotptl, dot33, ext03};
+use crate::maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp33, dotptl, dot33, ext03, gp30};
 
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
@@ -137,7 +137,7 @@ impl Mul<Point> for Point {
 impl Mul<Plane> for Point {
   type Output = Motor;
   fn mul(self, p: Plane) -> Motor {
-      let (p1,p2) = gp03::<false>(p.p0, self.p3);
+      let (p1,p2) = gp30(p.p0, self.p3);
       Motor{p1,p2}
   }
 }

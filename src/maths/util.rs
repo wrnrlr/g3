@@ -109,6 +109,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a * b, a, [First(0), Second(1), Second(2), Second(3)]) }
 
 #[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) }
+#[inline] pub fn b0a1a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(0),First(1),First(2),First(3)]) }
 
 #[inline] pub fn shuffle_xxxx(a:f32x4)->f32x4 { swizzle!(a, [0,0,0,0]) }
 #[inline] pub fn shuffle_xyxy(a:f32x4)->f32x4 { swizzle!(a, [0,1,0,1]) }

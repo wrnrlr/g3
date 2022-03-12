@@ -177,7 +177,7 @@ impl Neg for Plane {
 impl Mul<Point> for Plane {
   type Output = Motor;
   fn mul(self, a: Point) -> Motor {
-    let (p1,p2) = gp03::<false>(self.p0,a.p3);
+    let (p1,p2) = gp03(self.p0,a.p3);
     Motor{p1,p2}
   }
 }
