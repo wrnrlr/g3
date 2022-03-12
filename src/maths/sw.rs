@@ -162,8 +162,9 @@ pub fn sw01(a:f32x4, b:f32x4)->f32x4 {
   out
 }
 
-// // motor(plane), motor(point)
+// motor(plane), motor(point)
 pub fn sw012(a:f32x4, b:f32x4, c:f32x4)->f32x4 {
+  // Double-cover scale
   let dc_scale = f32x4::from_array([1.0,2.0,2.0,2.0]);
   let b_xwyz = shuffle_xwyz(b);
   let b_xzwy = shuffle_xzwy(b);
@@ -171,12 +172,15 @@ pub fn sw012(a:f32x4, b:f32x4, c:f32x4)->f32x4 {
 
   let mut tmp1 = shuffle_zxxx(b) * shuffle_zwyz(b);
   tmp1 += shuffle_yzwy(b) * shuffle_yyzw(b);
+  // Scale later with (a0, a2, a3, a1)
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
   tmp2 -= f32x4_xor(f32x4::from([-0.0, 0.0, 0.0, 0.0]), shuffle_wxxx(b) * shuffle_wzwy(b));
+  // Scale later with (a0, a3, a1, a2)
   tmp2 *= dc_scale;
 
+  // Alternately add and subtract to improve low component stability
   let mut tmp3 = b * b;
   tmp3 -= b_xwyz * b_xwyz;
   tmp3 += b_xxxx * b_xxxx;
@@ -185,15 +189,18 @@ pub fn sw012(a:f32x4, b:f32x4, c:f32x4)->f32x4 {
   let mut tmp4 = b_xxxx * c;
   tmp4 += b_xzwy * shuffle_xwyz(c);
   tmp4 += b * shuffle_xxxx(c);
+
+  // NOTE: The high component of tmp4 is meaningless here
   tmp4 -= b_xwyz * shuffle_xzwy(c);
   tmp4 *= dc_scale;
 
-  let mut out = tmp1 * shuffle_xzwy(a);
-  out += tmp2 * shuffle_xwzy(a);
-  out += tmp3 * a;
+  let mut p = tmp1 * shuffle_xzwy(a); // TODO a[1]...
+  p += tmp2 * shuffle_xwyz(a);
+  p += tmp3 * a; // TODO should be a[1]
 
   let tmp5 = hi_dp(tmp4, a);
-  out + tmp5
+  let out = p + tmp5;
+  out
 }
 
 // motor(line), swmm<false, true, true>
