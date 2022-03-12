@@ -20,6 +20,15 @@ mod tests {
     }
   }
 
+  fn approx_eq4(result:[f32; 4], expected:[f32; 4]) {
+    const EPSILON:f32 = 0.02;
+    assert_eq!(result.len(), expected.len());
+    for (i, a) in result.iter().enumerate() {
+      let b = expected[i];
+      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+    }
+  }
+
   #[test] fn simd_sandwich() {
     let a = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
     let b = f32x4::from_array([-4.0, -3.0, -2.0, -1.0]);
@@ -165,7 +174,7 @@ mod tests {
     let r = rotor(PI * 0.5, 1.0, 2.0, 3.0);
     let s = r.sqrt();
     let s = s * s;
-    assert_eq!([s.scalar(), s.e23(), s.e31(), s.e12()], [r.scalar(), r.e23(), r.e31(), r.e12()]);
+    approx_eq4([s.scalar(), s.e23(), s.e31(), s.e12()], [r.scalar(), r.e23(), r.e31(), r.e12()]);
   }
 
   #[test] fn normalize_rotor() {
