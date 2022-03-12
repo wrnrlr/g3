@@ -1,5 +1,5 @@
 use core_simd::{f32x4,mask32x4, simd_swizzle as swizzle};
-use crate::maths::{b0a1a2a3, f32x4_and, shuffle_xxzz, shuffle_xyxy};
+use crate::maths::{b0a1a2a3, shuffle_xxzz, shuffle_xyxy};
 use crate::maths::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx, shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz, shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy, shuffle_zwyz, add_ss, f32x4_xor, sub_ss, mul_ss, shuffle_yzyw, shuffle_yywz, shuffle_wywz, shuffle_wzyw, shuffle_zzww};
 
 // plane * plane
@@ -142,7 +142,7 @@ pub fn gp21(a:f32x4, b:f32x4)->f32x4 {
 }
 
 pub fn gpll(a:f32x4, d:f32x4, b:f32x4, c:f32x4)->(f32x4, f32x4) {
-  let flip = f32x4::splat(-0.0);
+  let flip = f32x4::from([-0.0,0.0,0.0,0.0]);
   let mut p1 = shuffle_yzyw(a) * shuffle_yywz(b);
   p1 = f32x4_xor(p1, flip);
   p1 -= shuffle_wywz(a) * shuffle_wzyw(b);
