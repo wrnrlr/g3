@@ -136,8 +136,10 @@ mod tests {
     let r = rotor(PI * 0.5, 0.0, 0.0, 1.0);
     let t = translator(1.0, 0.0, 0.0, 1.0);
     let m = r * t;
-    let p:Point = m(Origin{});
-    approx_eq([p.x(), p.y(), p.z()], [0.0, 0.0, 1.0]);
+    let p1:Point = m(point(0.0,0.0,0.0));
+    let p2:Point = m(Origin{});
+    approx_eq([p1.x(), p1.y(), p1.z()], [0.0, 0.0, 1.0]);
+    approx_eq([p2.x(), p2.y(), p2.z()], [0.0, 0.0, 1.0]);
   }
 
   // #[test] fn motor_to_matrix() {todo!()}

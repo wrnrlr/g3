@@ -421,7 +421,7 @@ pub fn swo12(b:f32x4, c:f32x4)->f32x4 {
   let mut tmp = b * shuffle_xxxx(c);
   tmp += shuffle_xxxx(b) * c;
   tmp += shuffle_xwyz(b) * shuffle_xzwy(c);
-  tmp -= shuffle_xzwy(b) * shuffle_xwyz(c);
+  tmp = (shuffle_xzwy(b) * shuffle_xwyz(c)) - tmp;
   tmp *= f32x4::from([0.0, 2.0, 2.0, 2.0]);
   // b0^2 + b1^2 + b2^2 + b3^2 assumed to equal 1
   // Set the low component to unity
