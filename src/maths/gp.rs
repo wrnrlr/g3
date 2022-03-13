@@ -1,4 +1,4 @@
-use core_simd::{f32x4,mask32x4, simd_swizzle as swizzle};
+use core_simd::{f32x4,mask32x4};
 use crate::maths::{b0a1a2a3, shuffle_xxzz, shuffle_xyxy};
 use crate::maths::util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx, shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz, shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy, shuffle_zwyz, add_ss, f32x4_xor, sub_ss, mul_ss, shuffle_yzyw, shuffle_yywz, shuffle_wywz, shuffle_wzyw, shuffle_zzww};
 
@@ -173,32 +173,32 @@ pub fn gpmm(a:f32x4, b:f32x4, c:f32x4, d:f32x4)->(f32x4,f32x4) {
   // (a0 d2 + b2 c0 + a1 d3 + b1 c3 - a2 d0 - a3 d1 - b0 c2 - b3 c1) e02 +
   // (a0 d3 + b3 c0 + a2 d1 + b2 c1 - a3 d0 - a1 d2 - b0 c3 - b1 c2) e03
 
-  let a_xxxx = swizzle!(a, [0,0,0,0]);
-  let a_zyzw = swizzle!(a, [2,1,2,3]);
-  let a_ywyz = swizzle!(a, [1,3,1,2]);
-  let a_wzwy = swizzle!(a, [3,2,3,1]);
-  let c_wwyz = swizzle!(c, [3,3,1,2]);
-  let c_yzwy = swizzle!(c, [1,2,3,1]);
-  let s_flip = mask32x4::from_array([false, false, false, true]);
+  let a_xxxx = shuffle_xxxx(a);
+  let a_zyzw = shuffle_zyzw(a);
+  let a_ywyz = shuffle_ywyz(a);
+  let a_wzwy = shuffle_wzwy(a);
+  let c_wwyz = shuffle_wwyz(c);
+  let c_yzwy = shuffle_yzwy(c);
+  let s_flip = mask32x4::from_array([true, false, false, false]);
 
   let mut e = a_xxxx * c;
   let mut t = a_ywyz * c_yzwy;
 
-  t = t + (a_zyzw * swizzle!(c, [2,0,0,0]));
+  t += a_zyzw * shuffle_zxxx(c);
   t = flip_signs(t, s_flip);
 
   e = e + t;
   e = e - a_wzwy * c_wwyz;
 
   let mut f = a_xxxx * d;
-  f = f + b * swizzle!(c, [0,0,0,0]);
-  f = f + a_ywyz * swizzle!(d, [1,2,3,1]);
-  f = f + swizzle!(b, [1,2,1,2]) + c_yzwy;
+  f += b * shuffle_xxxx(c);
+  f += a_ywyz * shuffle_yzwy(d);
+  f += shuffle_ywyz(b) + c_yzwy;
 
-  t = a_zyzw * swizzle!(d, [2,0,0,0]);
-  t = t + a_wzwy * swizzle!(d, [3,3,1,2]);
-  t = t + swizzle!(b, [2,0,0,0]) * swizzle!(c, [2,1,2,3]);
-  t = t + swizzle!(b, [3,2,3,1]) * c_wwyz;
+  t = a_zyzw * shuffle_zxxx(d);
+  t += a_wzwy * shuffle_wwyz(d);
+  t += shuffle_zxxx(b) * shuffle_zyzw(c);
+  t += shuffle_wzwy(b) * c_wwyz;
   t = flip_signs(t, s_flip);
 
   f = f - t;
