@@ -29,6 +29,7 @@ mod tests {
     approx_eq([m.scalar(), m.e12(), m.e31(), m.e23()], [5.0, -1.0, 7.0, -11.0]);
     approx_eq([m.e01(), m.e02(), m.e03(), m.e0123()], [10.0, 16.0, 2.0, 0.0]);
     let p3:Plane = (p1/p2).sqrt()(p2);
+    approx_eq([p3.e0(),p3.e1(),p3.e2(),p3.e3()], [p1.e0(),p1.e1(),p1.e2(),p1.e3()]);
     assert!(p3.approx_eq(p1, 0.001));
     let p1 = p1.normalized();
     let m = p1 * p2;
