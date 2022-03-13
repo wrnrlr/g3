@@ -309,7 +309,7 @@ impl Mul<Rotor> for Motor {
   type Output = Self;
   fn mul(self, r:Rotor)->Motor {
     let p1 = gp11(self.p1, r.p1);
-    let p2 = gp21(r.p1, self.p1);
+    let p2 = gp21(r.p1, self.p2);
     Motor{p1,p2}
   }
 }
@@ -317,7 +317,7 @@ impl Mul<Rotor> for Motor {
 impl MulAssign<Rotor> for Motor {
   fn mul_assign(&mut self, r: Rotor) {
     self.p1 = gp11(self.p1, r.p1);
-    self.p2 = gp21(r.p1, self.p1);
+    self.p2 = gp21(r.p1, self.p2);
   }
 }
 
@@ -339,7 +339,7 @@ impl Mul<Motor> for Motor {
   type Output = Motor;
   fn mul(self, other:Motor)->Motor {
     let (p1,p2) = gpmm(self.p1, self.p2, other.p1, other.p2);
-    Motor{p1:p1, p2:p2}
+    Motor{p1, p2}
   }
 }
 

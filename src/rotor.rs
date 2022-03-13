@@ -288,7 +288,7 @@ impl Mul<Translator> for Rotor {
 impl Mul<Motor> for Rotor {
   type Output = Motor;
   fn mul(self,m:Motor)->Self::Output {
-    Motor{p1: gp11(m.p1,self.p1), p2: gp12(self.p1,m.p2)}
+    Motor{p1: gp11(self.p1,m.p1), p2: gp12(self.p1,m.p2)}
   }
 }
 
