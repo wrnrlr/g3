@@ -36,14 +36,12 @@ impl Translator {
 
   /// Fast load operation for packed data that is already normalized. The
   /// argument `data` should point to a set of 4 float values with layout
-  /// `(0.f, a, b, c)` corresponding to the multivector $a\mathbf{e}_{01} +
-  /// b\mathbf{e}_{02} + c\mathbf{e}_{03}$.
+  /// `(0.f, a, b, c)` corresponding to the multivector
+  /// $`a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}`$.
   ///
-  /// !!! danger
-  ///
-  ///     The translator data loaded this way *must* be normalized. That is,
-  ///     the quantity $-\sqrt{a^2 + b^2 + c^2}$ must be half the desired
-  ///     displacement.
+  /// The translator data loaded this way *must* be normalized. That is,
+  /// the quantity $`-\sqrt{a^2 + b^2 + c^2}`$ must be half the desired
+  /// displacement.
   pub fn load_normalized(data:[f32;4])->Translator {
     Translator{ p2: f32x4::from(data)}
   }
