@@ -108,7 +108,7 @@ impl Motor {
     // (s c3 - t b3) e03
     let tmp = self.p2 * s;
     let p2 = tmp - (flip_signs(self.p1 * t, neg));
-    let p1 = self.p1 * t;
+    let p1 = self.p1 * s;
     Motor{p1,p2}
   }
 
