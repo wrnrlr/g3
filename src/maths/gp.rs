@@ -101,8 +101,6 @@ pub fn gp33(a:f32x4, b:f32x4)->f32x4 {
   tmp
 }
 
-// pub fn gpDL()->(f32x4,f32x4) { todo!() }
-
 pub fn gp133()->(f32x4,f32x4) {
   todo!()
 }
