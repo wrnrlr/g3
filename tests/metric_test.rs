@@ -32,7 +32,7 @@ mod tests {
 
   #[test] fn measure_point_to_line() {
     let l = line(0.0, 1.0, 0.0, 1.0, 0.0, 0.0);
-    let a = point(0.0, 1.0, 1.0);
+    let a = point(0.0, 1.0, 2.0);
     let d = (l & a).norm();
     approx_eq(d, 2f32.sqrt());
   }
