@@ -26,18 +26,6 @@ mod tests {
     assert_eq!(m(a).normalized(), point(0.0,2.0,0.0));
   }
 
-  #[test] fn motor_product_of_rotor_translator() {
-    // FIXME
-    let r = Rotor::new(-PI/2.0,0.0,0.0,1.0);
-    let t = Translator::new(2.0,1.0,0.0,0.0);
-    let a = point(2.0,2.0,0.0);
-    let m = r*t;
-    assert_ne!((r*t)(a), (t*r)(a));
-    assert_eq!(m(a), point(2.0,2.0,0.0));
-    // assert_eq!(m(a), r(t(a)));
-    // assert_eq!(m(a), t(r(a)));
-  }
-
   #[test] fn motor_constrained() {
     let m1 = Motor::new(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0);
     let m2 = m1.constrained();
