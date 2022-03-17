@@ -315,7 +315,7 @@ pub fn swrb(a:f32x4,b:f32x4)->f32x4 {
 
   let mut tmp = b * b;
   tmp += b_yxxx_2;
-  let mut b_tmp = shuffle_zwyz(b);
+  let b_tmp = shuffle_zwyz(b);
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
