@@ -71,7 +71,7 @@ pub fn gp11(a:f32x4, b:f32x4)->f32x4 {
   // negate the lower single-precision element with a single instruction
   let tmp1 = shuffle_zyzw(a) * shuffle_zxxx(b);
   let tmp2 = shuffle_wwyz(a) * shuffle_wzwy(b);
-  let tmp = flip_signs(tmp1 + tmp2, mask32x4::from([true, false, false, false]));
+  let tmp = f32x4_xor(tmp1 + tmp2, f32x4::from([-0.0, 0.0, 0.0, 0.0]));
   p1_out + tmp
 }
 
@@ -99,10 +99,6 @@ pub fn gp33(a:f32x4, b:f32x4)->f32x4 {
   // mask32x4::from_array([false, true, true, true]).select(tmp, f32x4::splat(0.0))
   // f32x4_and(tmp, f32x4::from([0.0, -1.0, -1.0, -1.0]))
   tmp
-}
-
-pub fn gp133()->(f32x4,f32x4) {
-  todo!()
 }
 
 pub fn gptr(a:f32x4, b:f32x4)->f32x4 {
