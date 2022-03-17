@@ -67,7 +67,7 @@ mod tests {
 
     let b1 = b1.normalized();
     let b2 = b2.normalized();
-    let b3 = (b2 * b1).sqrt().inverse()(b1); // TODO maybe reverse?
+    let b3 = (b2 * b1).sqrt().reverse()(b1);
     approx_eq([b3.x(), b3.y(), b3.z(), 0.0], [b3.x(), b3.y(), b3.z(), 0.0])
   }
 
