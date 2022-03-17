@@ -140,9 +140,7 @@ impl Mul<f32> for Branch {
 impl Mul<Branch> for Branch {
   type Output = Rotor;
   fn mul(self, other: Branch) -> Rotor {
-    let other = other.inverse();
-    let p1 = gp11(self.p1, other.p1);
-    return Rotor{p1}
+    Rotor{p1: gp11(self.p1, other.p1)}
   }
 }
 

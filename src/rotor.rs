@@ -2,7 +2,7 @@ use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,mask32x4,simd_swizzle};
 #[cfg(feature = "bevy")] use bevy_ecs::prelude::Component;
 use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI2};
-use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt};
+use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb};
 
 pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)
@@ -104,6 +104,10 @@ impl Rotor {
     Rotor{p1}
   }
 
+  pub fn reverse(&self)->Rotor {
+    Rotor{p1: f32x4_xor(self.p1, f32x4::from([0.0, -0.0, -0.0, -0.0]))}
+  }
+
   // Constrains the rotor to traverse the shortest arc
   pub fn constrained(&self)->Rotor {
     let mask = simd_swizzle!(f32x4_and(self.p1, f32x4::from([-0.0, 0.0, 0.0, 0.0])), [0,0,0,0]); // TODO: cleanup
@@ -168,8 +172,8 @@ impl Fn<(Plane,)> for Rotor {
 impl FnMut<(Branch,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Branch,))->Branch {self.call(args)} }
 impl FnOnce<(Branch,)> for Rotor { type Output = Branch; extern "rust-call" fn call_once(self, args: (Branch,))->Branch { self.call(args) }}
 impl Fn<(Branch,)> for Rotor {
-  extern "rust-call" fn call(&self, _args: (Branch,))->Branch {
-    todo!()
+  extern "rust-call" fn call(&self, args: (Branch,))->Branch {
+    Branch{p1: swrb(args.0.p1, self.p1)}
   }
 }
 
