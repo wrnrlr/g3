@@ -15,30 +15,14 @@ mod tests {
   #[test] fn line_getters() {
     let _l1 = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
   }
-  #[test] #[ignore] fn line_add() {
-    todo!()
-  }
-  #[test] #[ignore] fn line_add_assign() {
-    todo!()
-  }
-  #[test] #[ignore] fn line_sub() {
-    todo!()
-  }
-  #[test] #[ignore] fn line_sub_assign() {
-    todo!()
-  }
-  #[test] #[ignore] fn line_mul_scalar() {
-    todo!()
-  }
-  #[test] #[ignore] fn line_mul_assign_scalar() {
-    todo!()
-  }
-  #[test] #[ignore] fn line_div_scalar() {
-    todo!()
-  }
-  #[test] #[ignore] fn line_div_assign_scalar() {
-    todo!()
-  }
+  #[test] #[ignore] fn line_add() {}
+  #[test] #[ignore] fn line_add_assign() {}
+  #[test] #[ignore] fn line_sub() {}
+  #[test] #[ignore] fn line_sub_assign() {}
+  #[test] #[ignore] fn line_mul_scalar() {}
+  #[test] #[ignore] fn line_mul_assign_scalar() {}
+  #[test] #[ignore] fn line_div_scalar() {}
+  #[test] #[ignore] fn line_div_assign_scalar() {}
   #[test] fn line_dual() {
     assert_eq!(!line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0), line(4.0, 5.0, 6.0, 1.0, 2.0, 3.0));
   }
