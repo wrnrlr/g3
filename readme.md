@@ -67,6 +67,8 @@ cargo +nightly run --example elements --features="mirror"
 * [PGA Easy](https://enki.ws/PGAEasy/PGAEasy%20GAppendix.html)
 * [Automatic differentiation](https://discourse.bivector.net/t/automatic-differentiation/289)
 * [Paper with CGA](https://www.researchgate.net/profile/Leo-Dorst/publication/266149530_Total_Least_Squares_Fitting_of_k-Spheres_in_n-D_Euclidean_Space_Using_an_n2-D_Isometric_Representation/links/561431ce08ae4ce3cc6391ac/Total-Least-Squares-Fitting-of-k-Spheres-in-n-D-Euclidean-Space-Using-an-n-2-D-Isometric-Representation.pdf)
+* [New Developments in Projective Geometric Algebra](http://terathon.com/gdc21_lengyel.pdf)
+* [Flectors](https://projectivegeometricalgebra.org/wiki/index.php?title=Flector)
 
 ## Status
 
