@@ -59,7 +59,7 @@ impl Plane {
 
   pub fn inverse(&self)->Plane {
     let inv_norm = rsqrt_nr1(hi_dp_bc(self.p0, self.p0));
-    Plane{p0: inv_norm * self.p0 * self.p0}
+    Plane{p0: inv_norm * inv_norm * self.p0}
   }
 
   pub fn approx_eq(&self, other:Plane, epsilon:f32)->bool {
