@@ -187,13 +187,13 @@ pub fn gpmm(a:f32x4, b:f32x4, c:f32x4, d:f32x4)->(f32x4,f32x4) {
   let mut f = a_xxxx * d;
   f += b * shuffle_xxxx(c);
   f += a_ywyz * shuffle_yzwy(d);
-  f += shuffle_ywyz(b) + c_yzwy;
+  f += shuffle_ywyz(b) * c_yzwy;
 
-  t = a_zyzw * shuffle_zxxx(d);
+  let mut t = a_zyzw * shuffle_zxxx(d);
   t += a_wzwy * shuffle_wwyz(d);
   t += shuffle_zxxx(b) * shuffle_zyzw(c);
   t += shuffle_wzwy(b) * c_wwyz;
-  t = flip_signs(t, s_flip);
+  t = f32x4_xor(t, f32x4::from([-0.0,0.0,0.0,0.0]));
 
   f = f - t;
 
