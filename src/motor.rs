@@ -71,7 +71,7 @@ impl Motor {
     // (the scalar component above needs to be negated)
     // p2 * (s + t e0123)^2 = s^2 p2 NOTE: s^2 = b2_inv
     let st = s * t * self.p1;
-    let mut p2 = self.p2 * b2_inv - (flip_signs(st*st, mask32x4::from_array([true,false,false,false])));
+    let mut p2 = self.p2 * b2_inv - (flip_signs(st+st, mask32x4::from_array([true,false,false,false])));
     p2 = flip_signs(p2, neg);
     let p1 = flip_signs(self.p1 * b2_inv, neg);
     Motor{p1,p2}
