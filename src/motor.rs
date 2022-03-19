@@ -63,7 +63,7 @@ impl Motor {
     let bc = dp_bc(flip_signs(self.p1, mask32x4::from_array([true,false,false,false])), self.p2);
     let b2_inv = rcp_nr1(b2);
     let t = bc * b2_inv * s;
-    let neg = mask32x4::from_array([true,false,false,false]);
+    let neg = mask32x4::from_array([false,true,true,true]);
 
     // p1 * (s + t e0123)^2 = (s * p1 - t p1_perp) * (s + t e0123)
     // = s^2 p1 - s t p1_perp - s t p1_perp
