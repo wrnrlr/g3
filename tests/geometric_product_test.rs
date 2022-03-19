@@ -32,15 +32,15 @@ mod tests {
     approx_eq([p3.e0(),p3.e1(),p3.e2(),p3.e3()], [p1.e0(),p1.e1(),p1.e2(),p1.e3()]);
     assert!(p3.approx_eq(p1, 0.001));
     let p1 = p1.normalized();
-    let m = p1 * p2;
+    let m = p1 * p1;
     approx_eq1(m.scalar(), 1.0);
   }
 
   #[test] fn div_plane_plane() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
     let m = p1 / p1;
-    approx_eq([m.scalar(), m.e12(), m.e31(), m.e23()], [1.0, 0.0, 0.0, 0.0]);
     approx_eq([m.e01(), m.e02(), m.e02(), m.e0123()], [0.0, 0.0, 0.0, 0.0]);
+    approx_eq([m.scalar(), m.e12(), m.e31(), m.e23()], [1.0, 0.0, 0.0, 0.0]);
   }
 
   #[test] fn div_plane_point() {
