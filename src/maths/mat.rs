@@ -63,7 +63,8 @@ pub fn mat4x4_12_m(b:f32x4, c:f32x4)->(f32x4,f32x4,f32x4,f32x4) {
   tmp = shuffle_zwyx(b) * shuffle_wyzx(c);
   c3 = f32x4::from([2.0,2.0,2.0,0.0]) * (tmp - c3);
 
-  c3 = c3 + f32x4::from([b0_2 + b1_2 + b2_2 + b3_2, 0.0, 0.0, 0.0]);
+  // c3 = _mm_add_ps(c3, _mm_set_ps(b0_2 + b1_2 + b2_2 + b3_2, 0.f, 0.f, 0.f));
+  c3 = c3 + f32x4::from([0.0, 0.0, 0.0, b0_2 + b1_2 + b2_2 + b3_2]);
 
   (c0,c1,c2,c3)
 }
