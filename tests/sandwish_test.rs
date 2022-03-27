@@ -151,10 +151,6 @@ mod tests {
     approx_eq([p2.x(), p2.y(), p2.z()], [0.0, 0.0, 1.0]);
   }
 
-  // #[test] fn motor_to_matrix() {todo!()}
-
-  // #[test] fn motor_to_matrix_3x4() {todo!()}
-
   #[test] fn normalize_motor() {
     let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0).normalized();
     let norm = m * m.reverse();

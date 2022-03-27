@@ -149,9 +149,6 @@ impl Motor {
     let cmp2 = f32x4_abs(self.p2 - other.p2) < eps;
     cmp1 && cmp2
   }
-
-  pub fn as_mat3x4(&self) { todo!(); }
-  pub fn as_mat4x4(&self) { todo!(); }
 }
 
 impl Display for Motor {

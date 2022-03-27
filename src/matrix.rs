@@ -65,7 +65,7 @@ impl Into<Mat4> for Rotor {
 impl Into<Mat4> for Motor {
   fn into(self)->Mat4 {
     let cols = mat4x4_12_m(self.p1, self.p2);
-    Mat4(glam::Mat4::from_cols_array_2d(&[*cols.0.as_array(), *cols.1.as_array(), *cols.2.as_array(), *cols.2.as_array()]))
+    Mat4(glam::Mat4::from_cols_array_2d(&[*cols.0.as_array(), *cols.1.as_array(), *cols.2.as_array(), *cols.3.as_array()]))
   }
 }
 
@@ -87,7 +87,9 @@ mod tests {
   #[test] fn motor_to_matrix() {
     let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
     let m4:Mat4 = m.into();
-    let a = m4.call(f32x4::from([1.0,2.0,1.0,-1.0]));
+    let a = m4.call(f32x4::from([-1.0,1.0,2.0,1.0]));
     assert_eq!(a, f32x4::from([-12.0,-86.0,-86.0,30.0]));
   }
+
+  #[test] fn motor_to_matrix_3x4() {todo!()}
 }
