@@ -226,5 +226,7 @@ mod tests {
     assert_eq!(f32x4_abs(f32x4::from([1.0, 0.0, -1.0, -0.0])), f32x4::from([1.0, 0.0, 1.0, 0.0]));
   }
 
+  #[test] #[ignore] fn sqrt_nr1_test() {}
+
   #[test] #[ignore] fn rsqrt_nr1_test() {}
 }

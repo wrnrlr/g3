@@ -34,7 +34,7 @@ pub fn log(p1:f32x4, p2:f32x4)->(f32x4,f32x4) {
   let p = p1[0];
 
   // Store the pseudoscalar component
-  let q = p1[0];
+  let q = p2[0];
 
   let s_scalar = s[0];
   let t_scalar = minus_t[0] * -1.0;
@@ -43,7 +43,7 @@ pub fn log(p1:f32x4, p2:f32x4)->(f32x4,f32x4) {
   // s_scalar = sinu
   // t_scalar = v cosu
 
-  let p_zero = p.abs() < 0.000_0000_1;
+  let p_zero = p.abs() < 0.000_001;
   let u = if p_zero { (-q).atan2(t_scalar) } else { s_scalar.atan2(p) };
   let v = if p_zero { -q / s_scalar } else { t_scalar / p };
 
