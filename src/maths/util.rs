@@ -16,8 +16,7 @@ fn rsqrt(a:f32x4)->f32x4 {
 
 #[cfg(target_arch = "x86_64")]
 #[inline] fn rcp(a:f32x4)->f32x4 {
-  // unsafe { transmute::<__m128, f32x4>(_mm_rcp_ps(transmute::<f32x4,__m128>(a))) }
-  f32x4::splat(1.0) / a
+  unsafe { transmute::<__m128, f32x4>(_mm_rcp_ps(transmute::<f32x4,__m128>(a))) }
 }
 
 #[cfg(not(target_arch = "x86_64"))]
@@ -110,7 +109,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
   shuffle_xxxx(out)
 }
 
-#[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) }
+#[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) } // TODO find a faster way
 
 #[inline] pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() ^ b.to_bits()) }
 #[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() & b.to_bits()) }

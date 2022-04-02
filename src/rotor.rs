@@ -1,8 +1,8 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
-use core_simd::{f32x4,mask32x4,simd_swizzle};
+use core_simd::{f32x4,mask32x4,simd_swizzle as swizzle};
 #[cfg(feature = "bevy")] use bevy_ecs::prelude::Component;
 use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI2};
-use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb};
+use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb, zero_first};
 
 pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)
@@ -110,7 +110,7 @@ impl Rotor {
 
   // Constrains the rotor to traverse the shortest arc
   pub fn constrained(&self)->Rotor {
-    let mask = simd_swizzle!(f32x4_and(self.p1, f32x4::from([-0.0, 0.0, 0.0, 0.0])), [0,0,0,0]); // TODO: cleanup
+    let mask = swizzle!(f32x4_and(self.p1, f32x4::from([-0.0, 0.0, 0.0, 0.0])), [0,0,0,0]); // TODO: cleanup
     let p1 = f32x4_xor(mask,self.p1);
     Rotor{p1}
   }
@@ -135,7 +135,7 @@ impl Rotor {
 
     let mut p1  = self.p1 * rcp_nr1(f32x4::splat(sin_ang));
     p1 = p1 * f32x4::splat(ang);
-    p1 = f32x4_and(p1, f32x4::from([0.0, -1.0, -1.0, -1.0]));
+    p1 = zero_first(p1);
     Branch{p1}
   }
 
