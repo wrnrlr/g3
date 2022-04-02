@@ -2,6 +2,29 @@ use std_float::StdFloat as _;
 use core_simd::{f32x4,mask32x4,u32x4,simd_swizzle as swizzle};
 use core_simd::simd::Which::{First,Second};
 
+#[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_add_ss,_mm_mul_ss,__m128},mem::transmute};
+
+#[cfg(target_arch = "x86_64")]
+#[inline] fn rsqrt(a:f32x4)->f32x4 {
+  unsafe { transmute::<__m128, f32x4>(_mm_rsqrt_ps(transmute::<f32x4,__m128>(a))) }
+}
+
+#[cfg(not(target_arch = "x86_64"))]
+fn rsqrt(a:f32x4)->f32x4 {
+  f32x4::splat(1.0) / a
+}
+
+#[cfg(target_arch = "x86_64")]
+#[inline] fn rcp(a:f32x4)->f32x4 {
+  // unsafe { transmute::<__m128, f32x4>(_mm_rcp_ps(transmute::<f32x4,__m128>(a))) }
+  f32x4::splat(1.0) / a
+}
+
+#[cfg(not(target_arch = "x86_64"))]
+#[inline] fn rcp(a:f32x4)->f32x4 {
+  f32x4::splat(1.0) / a
+}
+
 pub fn refined_reciprocal(s:f32)->f32x4 {
   rcp_nr1(f32x4::splat(s))
 }
@@ -21,15 +44,10 @@ pub fn rsqrt_nr1(a:f32x4)->f32x4 {
   // TODO find portable version of _mm_rsqrt_ps in core_simd
   // From Intel optimization manual: expected performance is ~5.2x
   // baseline (sqrtps + divps) with ~22 bits of accuracy
-  let a_sqrt = a.sqrt();
-  let xn = f32x4::splat(1.0) / a_sqrt;
+  let xn = rsqrt(a);
   let axn2 = xn * xn * a;
   let xn3 = f32x4::splat(3.0) - axn2;
   f32x4::splat(0.5) * xn * xn3
-}
-
-#[inline] pub fn rcp(a:f32x4)->f32x4 {
-  f32x4::splat(1.0) / a
 }
 
 // Reciprocal with an additional single Newton-Raphson refinement
@@ -104,9 +122,11 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 
 #[inline] pub fn flip_signs(x:f32x4, mask:mask32x4)->f32x4 { mask.select(-x, x) }
 
-#[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a + b, a, [First(0), Second(1), Second(2), Second(3)]) }
+#[cfg(target_arch = "x86_64")] #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_add_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
+#[cfg(not(target_arch = "x86_64"))] #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a + b, a, [First(0), Second(1), Second(2), Second(3)]) }
 #[inline] pub fn sub_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a, [First(0), Second(1), Second(2), Second(3)]) }
-#[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a * b, a, [First(0), Second(1), Second(2), Second(3)]) }
+#[cfg(target_arch = "x86_64")] #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_mul_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
+#[cfg(not(target_arch = "x86_64"))] #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a * b, a, [First(0), Second(1), Second(2), Second(3)]) }
 
 #[inline] pub fn b2b3a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) }
 #[inline] pub fn b0a1a2a3(a:f32x4,b:f32x4)->f32x4 { swizzle!(a, b, [Second(0),First(1),First(2),First(3)]) }
@@ -167,6 +187,15 @@ mod tests {
   use super::*;
   use core_simd::{f32x4};
 
+  fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
+    const EPSILON: f32 = 0.02;
+    assert_eq!(result.len(), expected.len());
+    for (i, a) in result.iter().enumerate() {
+      let b = expected[i];
+      assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+    }
+  }
+
   #[test] fn dp_test() {
     let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
     let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
@@ -202,6 +231,11 @@ mod tests {
     assert_eq!(add_ss(a, a), f32x4::from([4.0, 2.0, 3.0, 4.0]));
   }
 
+  #[test] fn rcp_test() {
+    let a = f32x4::from([2.0, 4.0, 8.0, 10.0]);
+    approx_eq(rcp(a).into(), f32x4::from([0.5, 0.25, 0.125, 0.1]).into());
+  }
+
   #[test] fn multiply_first() {
     let a = f32x4::from([2.0, 2.0, 3.0, 4.0]);
     assert_eq!(mul_ss(a, a), f32x4::from([4.0, 2.0, 3.0, 4.0]));
@@ -216,10 +250,7 @@ mod tests {
   #[test] fn rcp_nr1_test() {
     let a = f32x4::from([1.0, 2.0, 3.0, 4.0]);
     let b = rcp_nr1(a);
-    assert_eq!(b[0], 1.0);
-    assert_eq!(b[1], 0.5);
-    assert_eq!(b[2], 1.0/3.0);
-    assert_eq!(b[3], 0.25);
+    approx_eq(*b.as_array(), [1.0, 0.5, 1.0/3.0, 0.25]);
   }
 
   #[test] fn f32x4_abs_test() {

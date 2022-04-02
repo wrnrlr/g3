@@ -372,7 +372,7 @@ pub fn sw02(a:f32x4, b:f32x4)->f32x4 {
   let mut inv_b = rcp_nr1(b);
   // 2 / b0
   inv_b = add_ss(inv_b, inv_b);
-  inv_b = f32x4_and(inv_b, f32x4::from_array([-1.0, 0.0, 0.0, 0.0]));
+  inv_b = f32x4_and(inv_b, f32x4::from([-1.0, 0.0, 0.0, 0.0]));
   tmp = mul_ss(tmp, inv_b);
   a + tmp
 }

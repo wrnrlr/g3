@@ -7,6 +7,15 @@
 mod tests {
   use g3::*;
 
+  fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
+    const EPSILON: f32 = 0.02;
+    assert_eq!(result.len(), expected.len());
+    for (i, a) in result.iter().enumerate() {
+      let b = expected[i];
+      assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+    }
+  }
+
   #[test] fn inner_plane_plane() {
     let p1 = plane(1.0, 2.0, 3.0, 4.0);
     let p2 = plane(2.0, 3.0, -1.0, -2.0);
@@ -84,6 +93,6 @@ mod tests {
     let l = b & c;
     let mut d = (l | a) ^ l;
     d = d.normalized();
-    assert_eq!([d.e123(), d.x(), d.y(), d.z()], [1.0, 2.0, 0.0, 0.0]);
+    approx_eq([d.e123(), d.x(), d.y(), d.z()], [1.0, 2.0, 0.0, 0.0]);
   }
 }
