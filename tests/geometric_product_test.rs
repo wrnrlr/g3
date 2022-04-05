@@ -62,13 +62,13 @@ mod tests {
   #[test] fn mul_branch_branch() {
     let b1 = branch(2.0, 1.0, 3.0);
     let b2 = branch(1.0, -2.0, -3.0);
-    let r = b1 * b2;
+    let r = b2 * b1;
     approx_eq([r.scalar(), r.e23(), r.e31(), r.e12()], [9.0, 3.0, 9.0, -5.0]);
 
     let b1 = b1.normalized();
     let b2 = b2.normalized();
-    let b3 = (b2 * b1).sqrt().reverse()(b1);
-    approx_eq([b3.x(), b3.y(), b3.z(), 0.0], [b3.x(), b3.y(), b3.z(), 0.0])
+    let b3:Branch = (b2 * b1).sqrt().reverse()(b1);
+    approx_eq([b3.x(), b3.y(), b3.z(), 0.0], [b2.x(), b2.y(), b2.z(), 0.0])
   }
 
   #[test] fn div_branch_branch() {
