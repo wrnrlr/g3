@@ -2,7 +2,7 @@ use std_float::StdFloat as _;
 use core_simd::{f32x4,mask32x4,u32x4,simd_swizzle as swizzle};
 use core_simd::simd::Which::{First,Second};
 
-#[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_add_ss,_mm_mul_ss,__m128},mem::transmute};
+#[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_add_ss,_mm_mul_ss,_mm_xor_ps,_mm_dp_ps,__m128},mem::transmute};
 
 #[cfg(target_arch = "x86_64")]
 #[inline] fn rsqrt(a:f32x4)->f32x4 {
@@ -22,6 +22,16 @@ fn rsqrt(a:f32x4)->f32x4 {
 #[cfg(not(target_arch = "x86_64"))]
 #[inline] fn rcp(a:f32x4)->f32x4 {
   f32x4::splat(1.0) / a
+}
+
+#[cfg(target_arch = "x86_64")]
+#[inline] pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
+  unsafe { transmute::<__m128, f32x4>(_mm_xor_ps(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b))) }
+}
+
+#[cfg(not(target_arch = "x86_64"))]
+#[inline] pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 {
+  f32x4::from_bits(a.to_bits() ^ b.to_bits())
 }
 
 pub fn refined_reciprocal(s:f32)->f32x4 {
@@ -60,6 +70,12 @@ pub fn rsqrt_nr1(a:f32x4)->f32x4 {
   xn * (f32x4::splat(2.0) - axn)
 }
 
+#[cfg(target_arch = "x86_64")]
+#[inline] pub fn hi_dp(a:f32x4,b:f32x4)->f32x4 {
+  unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11100001>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b))) }
+}
+
+#[cfg(not(target_arch = "x86_64"))]
 pub fn hi_dp(a:f32x4, b:f32x4)->f32x4 {
   let mut out = a * b;
   let hi = shuffle_yyww(out);
@@ -111,7 +127,6 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 
 #[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) } // TODO find a faster way
 
-#[inline] pub fn f32x4_xor(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() ^ b.to_bits()) }
 #[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() & b.to_bits()) }
 
 #[inline] pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(!a.to_bits() & b.to_bits()) }
@@ -198,24 +213,28 @@ mod tests {
   #[test] fn dp_test() {
     let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
     let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+    assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11110001>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, dp(a, b));
     assert_eq!(dp(a, b), f32x4::from([-21.0, 0.0, 0.0, 0.0]));
   }
 
   #[test] fn hi_dp_test() {
     let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
     let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+    assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11100001>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, hi_dp(a, b));
     assert_eq!(hi_dp(a, b), f32x4::from([-17.0, 0.0, 0.0, 0.0]));
   }
 
   #[test] fn hi_dp_bc_test() {
     let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
     let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+    assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11101111>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, hi_dp_bc(a, b));
     assert_eq!(hi_dp_bc(a, b), f32x4::from([-17.0, -17.0, -17.0, -17.0]));
   }
 
   #[test] fn dp_bc_test() {
     let a = f32x4::from([1.0, 2.0, 3.0, 5.0]);
     let b = f32x4::from([-4.0, -3.0, -2.0, -1.0]);
+    assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0xff>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, dp_bc(a, b));
     assert_eq!(dp_bc(a, b), f32x4::from([-21.0, -21.0, -21.0, -21.0]));
   }
 

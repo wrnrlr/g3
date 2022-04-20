@@ -142,7 +142,7 @@ impl Rotor {
   // Compute the square root of the provided rotor $r$.
   pub fn sqrt(&self)->Rotor {
     let p1 = add_ss(self.p1, f32x4::from([1.0, 0.0, 0.0, 0.0]));
-    Rotor{p1}.normalized() // TODO avoid extra by normalize...
+    Rotor{p1}.normalized() // TODO avoid extra copy...
   }
 }
 

@@ -320,17 +320,17 @@ pub fn swrb(a:f32x4,b:f32x4)->f32x4 {
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
-  tmp += flip_signs(tmp2, mask32x4::from([true, false, false, false]));
+  tmp -= f32x4_xor(tmp2, f32x4::from([-0.0, 0.0, 0.0, 0.0]));
 
   let b_xxxx = shuffle_xxxx(b);
   let scale = f32x4::from([0.0, 2.0, 2.0, 2.0]);
   let mut tmp2 = b_xxxx * b_xwyz;
-  tmp2 += b + b_xzwy;
+  tmp2 += b * b_xzwy;
   tmp2 *= scale;
 
   let mut tmp3 = b * b_xwyz;
   tmp3 -= b_xxxx * b_xzwy;
-  tmp *= scale;
+  tmp3 *= scale;
 
   let a_xzwy = shuffle_xzwy(a);
   let a_xwyz = shuffle_xwyz(a);
