@@ -35,3 +35,11 @@ pub mod maths;
 pub use {matrix::*};
 #[cfg(feature = "glam")]
 mod matrix;
+
+#[cfg(feature = "bevy")]
+mod plot;
+#[cfg(feature = "bevy")]
+pub use plot::*;
+
+#[cfg(feature = "bevy")]
+pub use bevy::prelude::{Plugin,Res,Time,App,Query,Without,Handle,Quat,Changed,Vec3,AlphaMode,Entity,Commands,PbrBundle,Assets,Mesh,StandardMaterial,PointLight,PointLightBundle,ResMut,Added,Transform};

@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not};
 use core_simd::{f32x2};
-#[cfg(feature = "bevy")] use bevy_ecs::prelude::Component;
+#[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 pub fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 

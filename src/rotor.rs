@@ -1,6 +1,6 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
 use core_simd::{f32x4,mask32x4,simd_swizzle as swizzle};
-#[cfg(feature = "bevy")] use bevy_ecs::prelude::Component;
+#[cfg(feature = "bevy")] use bevy::prelude::Component;
 use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI2};
 use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb, zero_first};
 

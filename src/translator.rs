@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter, Result};
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn};
 use core_simd::{f32x4,mask32x4};
-#[cfg(feature = "bevy")] use bevy_ecs::prelude::Component;
+#[cfg(feature = "bevy")] use bevy::prelude::Component;
 use crate::{Plane, Line, Point, Motor, Rotor, Horizon};
 use crate::maths::{dp_bc, flip_signs, rsqrt_nr1, sw02, sw32, swl2, gptr};
 
