@@ -4,7 +4,7 @@ use std::fmt::{Display,Formatter,Result};
 use core_simd::{f32x4,mask32x4};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 use crate::{Rotor,Translator,Point,Line,Plane,Origin};
-use crate::maths::{flip_signs, log, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss, exp, gp11, gprt, gpmm, gpdl, gp21, sw012, sw312, swml, swo12, f32x4_xor};
+use crate::maths::{flip_signs, logarithm, rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss, exp, gp11, gprt, gpmm, gpdl, gp21, sw012, sw312, swml, swo12, f32x4_xor};
 
 pub fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
 
@@ -126,7 +126,7 @@ impl Motor {
   // produce this motor again. The logarithm presumes that the motor is
   // normalized.
   pub fn log(&self)->Line {
-    let (p1,p2) = log(self.p1,self.p2);
+    let (p1,p2) = logarithm(self.p1, self.p2);
     Line{p1,p2}
   }
 
