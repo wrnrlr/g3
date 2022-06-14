@@ -38,6 +38,10 @@ mod matrix;
 
 #[cfg(feature = "bevy")]
 mod plot;
+
+#[cfg(feature = "mirror")]
+pub mod mirror;
+
 #[cfg(feature = "bevy")]
 pub use plot::*;
 

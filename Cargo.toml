@@ -7,10 +7,56 @@ resolver = "2"
 
 [features]
 plot = ["bevy", "bevy_ecs", "glam"]
+#mirror = ["bevy", "bevy_core", "bevy_time", "bevy_app", "glam"]
+#mirror = ["winit", "glam", "cfg-if", "env_logger", "log", "wgpu", "pollster", "anyhow", "bytemuck", "cgmath", "image", "hecs"]
+mirror = ["winit", "glam", "env_logger", "rend3", "rend3-framework", "rend3-routine"]
 
 [dependencies]
 core_simd = { git = "https://github.com/rust-lang/stdsimd", package = "core_simd", rev = "cad7434" }
 std_float = { git = "https://github.com/rust-lang/stdsimd", package = "std_float", rev = "cad7434" }
+
 glam = { version = "0.20.0", optional = true }
-bevy_ecs = { version = "0.7", optional = true }
 bevy = { version = "0.7", optional = true }
+bevy_ecs = { version = "0.7", optional = true }
+
+winit = { version = "0.26.0", optional = true }
+#cfg-if = { version = "1", optional = true }
+#env_logger = { version = "0.9", optional = true }
+#log = { version = "0.4", optional = true }
+#wgpu = { version = "0.12", optional = true }
+#pollster = { version = "0.2", optional = true }
+#anyhow = { version = "1.0", optional = true }
+#bytemuck = { version = "1.4", features = [ "derive" ], optional = true }
+#cgmath = { version = "0.18", optional = true }
+#image = { version = "0.24", default-features = false, features = ["png", "jpeg"], optional = true }
+
+hecs = { version = "0.7.6", optional = true }
+
+env_logger = { version = "0.9", default-features = false, features = ["termcolor", "atty"], optional = true }
+rend3 = { version = "0.3.0", optional = true }
+rend3-routine = { version = "0.3.0", optional = true }
+rend3-framework = { version = "0.3.0", optional = true }
+
+#[target.'cfg(target_arch = "wasm32")'.dependencies]
+#console_log = "0.2"
+#console_error_panic_hook = "0.1"
+#js-sys = "0.3"
+#web-sys = "0.3"
+#wasm-bindgen = "=0.2.78"
+#wasm-bindgen-futures = "0.4"
+
+#bevy_core = { version = "0.7.0", optional = true }
+#bevy_time = { version = "0.7", optional = true }
+#bevy_app = { version = "0.7", optional = true }
+
+#[target.'cfg(target_arch = "wasm32")'.dependencies]
+#console_error_panic_hook = "0.1.6"
+#console_log = "0.2.0"
+#wgpu = { version = "0.12", features = ["webgl"]}
+#wasm-bindgen = "0.2.76"
+#wasm-bindgen-futures = "0.4.30"
+#web-sys = { version = "0.3.53", features = [
+#    "Document",
+#    "Window",
+#    "Element",
+#]}
