@@ -6,9 +6,7 @@ pub fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 // A dual number is a multivector of the form p + e_0123.
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Dual {
-  p:f32x2
-}
+pub struct Dual { p:f32x2 }
 
 impl Dual {
   #[inline] pub fn scalar(&self)->f32 { self.p[0] }
@@ -56,4 +54,57 @@ impl DivAssign<f32> for Dual {
 impl Not for Dual {
   type Output = Dual;
   fn not(self)->Dual { Dual::new(self.e0123(), self.scalar()) }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{Dual,dual};
+
+  #[test] fn dual_getters() {
+    assert_eq!(dual(1.0, 2.0).scalar(), 1.0);
+    assert_eq!(dual(1.0, 2.0).e0123(), 2.0)
+  }
+  #[test] fn dual_constructor() {
+    assert_eq!(Dual::new(1.0, 2.0), dual(1.0, 2.0))
+  }
+  #[test] fn dual_eq() {
+    assert_eq!(dual(1.0, 2.0), dual(1.0, 2.0));
+    assert_ne!(dual(1.0, 2.0), dual(2.0, 4.0))
+  }
+  #[test] fn dual_add() {
+    assert_eq!(dual(1.0, 2.0) + dual(1.0,2.0), dual(2.0, 4.0))
+  }
+  #[test] fn dual_add_assign() {
+    let mut d = dual(1.0, 2.0);
+    d += dual(1.0, 2.0);
+    assert_eq!(d, dual(2.0, 4.0))
+  }
+  #[test] fn dual_sub() {
+    assert_eq!(dual(2.0, 4.0) - dual(1.0,2.0), dual(1.0,2.0))
+  }
+  #[test] fn dual_sub_assign() {
+    let mut d = dual(2.0, 4.0);
+    d -= dual(1.0, 2.0);
+    assert_eq!(d, dual(1.0, 2.0))
+  }
+  #[test] fn dual_mul() {
+    assert_eq!(dual(1.0, 2.0) * 2.0, dual(2.0, 4.0))
+  }
+  #[test] fn dual_mul_assign() {
+    let mut d1 = dual(1.0, 2.0);
+    d1 *= 2.0;
+    assert_eq!(d1, dual(2.0, 4.0));
+  }
+  #[test] fn dual_div() {
+    assert_eq!(dual(2.0, 4.0) / 2.0, dual(1.0, 2.0))
+  }
+  #[test] fn dual_div_assign() {
+    let mut d = dual(2.0, 4.0);
+    d /= 2.0;
+    assert_eq!(d, dual(1.0, 2.0))
+  }
+
+  #[test] fn dual_dual() {
+    assert_eq!(!dual(1.0, 2.0), dual(2.0, 1.0))
+  }
 }
