@@ -1,9 +1,6 @@
-use std::fmt::{Display,Formatter,Result};
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg};
-use core_simd::{f32x4,mask32x4};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4},ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
+use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp33, dotptl, dot33, ext03, gp30}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
-use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator};
-use crate::maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp33, dotptl, dot33, ext03, gp30};
 
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
@@ -13,9 +10,9 @@ impl Origin {
   pub fn to_point()->Point { Point::new(0.0,0.0,0.0) }
 }
 
-pub const E032:Point = Point{p3:f32x4::from_array([1.0,1.0,0.0,0.0])};
-pub const E012:Point = Point{p3:f32x4::from_array([1.0,0.1,0.0,0.0])};
-pub const E023:Point = Point{p3:f32x4::from_array([1.0,0.0,0.1,0.0])};
+pub const E032:Point = Point(f32x4::from_array([1.0,1.0,0.0,0.0]));
+pub const E012:Point = Point(f32x4::from_array([1.0,0.1,0.0,0.0]));
+pub const E023:Point = Point(f32x4::from_array([1.0,0.0,0.1,0.0]));
 
 pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 
@@ -29,42 +26,40 @@ pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 // p3: (e123, e032, e013, e021)
 #[cfg_attr(feature="bevy", derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Point {
-    pub p3:f32x4
-}
+pub struct Point (f32x4);
 
 impl Point {
-    #[inline] pub fn w(&self)->f32 { self.p3[0] }
-    #[inline] pub fn e123(&self)->f32 { self.w() }
-    #[inline] pub fn x(&self)->f32 { self.p3[1] }
-    #[inline] pub fn e032(&self)->f32 { self.x() }
-    #[inline] pub fn y(&self)->f32 { self.p3[2] }
-    #[inline] pub fn e013(&self)->f32 { self.y() }
-    #[inline] pub fn z(&self)->f32 { self.p3[3] }
-    #[inline] pub fn e021(&self)->f32 { self.z() }
+  #[inline] pub fn w(&self)->f32 { self.p3[0] }
+  #[inline] pub fn e123(&self)->f32 { self.w() }
+  #[inline] pub fn x(&self)->f32 { self.p3[1] }
+  #[inline] pub fn e032(&self)->f32 { self.x() }
+  #[inline] pub fn y(&self)->f32 { self.p3[2] }
+  #[inline] pub fn e013(&self)->f32 { self.y() }
+  #[inline] pub fn z(&self)->f32 { self.p3[3] }
+  #[inline] pub fn e021(&self)->f32 { self.z() }
 
-    // Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
-    pub fn new(x:f32,y:f32,z:f32)->Point { Point{p3:f32x4::from_array([1.0,x,y,z])} }
+  // Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
+  pub fn new(x:f32,y:f32,z:f32)->Point { Point(f32x4::from_array([1.0,x,y,z])) }
 
-    pub fn normalized(&self)->Point {
-        let tmp = rcp_nr1(shuffle_xxxx(self.p3));
-        Point{ p3: self.p3 * tmp }
-    }
+  pub fn normalized(&self)->Point {
+      let tmp = rcp_nr1(shuffle_xxxx(self.0.into()));
+      Self(self.p3 * tmp)
+  }
 
-    pub fn inverse(&self)->Point {
-        let inv_norm = rcp_nr1(shuffle_xxxx(self.p3));
-        Point{p3:inv_norm * inv_norm * self.p3}
-    }
+  pub fn inverse(&self)->Point {
+      let inv_norm = &rcp_nr1(shuffle_xxxx(self.0.into()));
+      Self(inv_norm * inv_norm * self.p3)
+  }
 
-    pub fn reverse(&self)->Point {
-      Point{p3: flip_signs(self.p3, mask32x4::from_array([false,true,true,true]))}
-    }
+  pub fn reverse(&self)->Point {
+    Point(flip_signs(self.p3, mask32x4::from_array([false,true,true,true])))
+  }
 
-    // Project a point onto a line
-    pub fn project_line(self, l:Line)->Point { (self | l) ^ l }
+  // Project a point onto a line
+  pub fn project_line(self, l:Line)->Point { (self | l) ^ l }
 
-    // Project a point onto a plane
-    pub fn project_plane(self, p:Plane)->Point { (self | p) ^ p }
+  // Project a point onto a plane
+  pub fn project_plane(self, p:Plane)->Point { (self | p) ^ p }
 }
 
 impl Display for Point {
@@ -81,25 +76,25 @@ impl Into<[f32;3]> for Point {
 
 impl Add<Point> for Point {
     type Output = Point;
-    fn add(self, other: Point) -> Point { Point { p3:self.p3+other.p3 } }
+    fn add(self, other: Point) -> Point { Point(self.p3+other.p3) }
 }
 
 impl AddAssign for Point {
-    fn add_assign(&mut self, other: Self) { self.p3 = self.p3+other.p3 }
+    fn add_assign(&mut self, other: Self) { self.p3 += other.p3 }
 }
 
 impl Sub<Point> for Point {
     type Output = Point;
-    fn sub(self, other: Point) -> Point { Point { p3:self.p3-other.p3 } }
+    fn sub(self, other: Point) -> Point { Point(self.p3-other.p3) }
 }
 
 impl SubAssign for Point {
-    fn sub_assign(&mut self, other: Self) { self.p3 = self.p3-other.p3 }
+    fn sub_assign(&mut self, other: Self) { self.p3 -= other.p3 }
 }
 
 impl Mul<f32> for Point {
     type Output = Point;
-    fn mul(self, s: f32) -> Point { Point { p3:self.p3*f32x4::splat(s) } }
+    fn mul(self, s: f32) -> Point { Point(self.p3*f32x4::splat(s)) }
 }
 
 impl MulAssign<f32> for Point {
@@ -108,7 +103,7 @@ impl MulAssign<f32> for Point {
 
 impl Div<f32> for Point {
     type Output = Point;
-    fn div(self, s: f32) -> Point { Point { p3:self.p3/f32x4::splat(s) } }
+    fn div(self, s: f32) -> Point { Point(self.p3/f32x4::splat(s)) }
 }
 
 impl DivAssign<f32> for Point {
@@ -118,7 +113,7 @@ impl DivAssign<f32> for Point {
 // Reversion
 impl Neg for Point {
   type Output = Point;
-  fn neg(self)->Point { Point{ p3: -self.p3 } }
+  fn neg(self)->Point { Point( -self.p3 ) }
 }
 
 impl Not for Point {

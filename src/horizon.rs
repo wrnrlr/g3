@@ -1,8 +1,6 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
-use core_simd::{f32x4,mask32x4};
+use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
+use crate::{Dual, Plane, Point, Line, Branch, Translator,maths::{flip_signs, hi_dp, dotilp}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
-use crate::{Dual, Plane, Point, Line, Branch, Translator};
-use crate::maths::{flip_signs, hi_dp, dotilp};
 
 pub fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 
@@ -11,9 +9,7 @@ pub fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 // $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Horizon {
-  pub p2:f32x4
-}
+pub struct Horizon { pub p2:f32x4 }
 
 impl Horizon {
   #[inline] pub fn e01(&self)->f32 { self.p2[1] }
@@ -25,8 +21,8 @@ impl Horizon {
 
   pub fn new(a:f32,b:f32,c:f32)->Horizon { Horizon {p2: f32x4::from_array([0.0, a, b, c])} }
 
-  pub fn squared_ideal_norm(self)->f32 {
-    hi_dp(self.p2, self.p2)[0]
+  pub fn squared_ideal_norm(&self)->f32 {
+    hi_dp(&self.p2, &self.p2)[0]
   }
 
   pub fn ideal_norm(self)->f32 {
@@ -108,7 +104,7 @@ impl Neg for Horizon {
 // Dual operator
 impl Not for Horizon {
   type Output = Branch;
-  fn not(self)->Branch { Branch {p1: self.p2} }
+  fn not(self)->Branch { Branch(self.p2) }
 }
 
 // Meet Operation, Exterior Product, ^

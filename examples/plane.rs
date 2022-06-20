@@ -1,11 +1,13 @@
 use std::sync::Arc;
+use glam::Vec4;
+use rend3_routine::pbr::{AlbedoComponent, PbrMaterial};
 use g3::{Plane,E1,E2,E3,mirror::create_plane_mesh};
 
 const SAMPLE_COUNT: rend3::types::SampleCount = rend3::types::SampleCount::One;
 
 #[derive(Default)]
 struct CubeExample {
-  object_handle: Option<rend3::types::ObjectHandle>,
+  world: hecs::World,
   directional_light_handle: Option<rend3::types::DirectionalLightHandle>,
 }
 
@@ -23,34 +25,26 @@ impl rend3_framework::App for CubeExample {
     _routines: &Arc<rend3_framework::DefaultRoutines>,
     _surface_format: rend3::types::TextureFormat,
   ) {
-
-    // Create mesh and calculate smooth normals based on vertices
-    let mesh = create_plane_mesh(E3);
-
-    // Add mesh to renderer's world.
-    //
-    // All handles are refcounted, so we only need to hang onto the handle until we
-    // make an object.
-    let mesh_handle = renderer.add_mesh(mesh);
-
-    // Add PBR material with all defaults except a single color.
-    let material = rend3_routine::pbr::PbrMaterial {
-      albedo: rend3_routine::pbr::AlbedoComponent::Value(glam::Vec4::new(0.0, 0.5, 0.5, 1.0)),
-      ..rend3_routine::pbr::PbrMaterial::default()
+    let red: Vec4 = Vec4::new(1.0, 0.0, 0.0, 0.5);
+    let green: Vec4 = Vec4::new(0.0, 1.0, 0.0, 0.5);
+    let blue: Vec4 = Vec4::new(0.0, 0.0, 1.0, 0.5);
+    let mut add_plane = |p:Plane,color:Vec4| {
+      let mesh = create_plane_mesh(p);
+      let mesh_handle = renderer.add_mesh(mesh);
+      let material = PbrMaterial{albedo: AlbedoComponent::Value(color), ..PbrMaterial::default()};
+      let material_handle = renderer.add_material(material);
+      let object = rend3::types::Object {
+        mesh_kind: rend3::types::ObjectMeshKind::Static(mesh_handle),
+        material: material_handle,
+        transform: glam::Mat4::IDENTITY,
+      };
+      let handle = renderer.add_object(object);
+      self.world.spawn((handle,));
     };
-    let material_handle = renderer.add_material(material);
 
-    // Combine the mesh and the material with a location to give an object.
-    let object = rend3::types::Object {
-      mesh_kind: rend3::types::ObjectMeshKind::Static(mesh_handle),
-      material: material_handle,
-      transform: glam::Mat4::IDENTITY,
-    };
-    // Creating an object will hold onto both the mesh and the material
-    // even if they are deleted.
-    //
-    // We need to keep the object handle alive.
-    self.object_handle = Some(renderer.add_object(object));
+    add_plane(E1,red);
+    add_plane(E2,green);
+    add_plane(E3,blue);
 
     let view_location = glam::Vec3::new(3.0, 3.0, -5.0);
     let view = glam::Mat4::from_euler(glam::EulerRot::XYZ, -0.55, 0.5, 0.0);
@@ -121,7 +115,7 @@ impl rend3_framework::App for CubeExample {
           &tonemapping_routine,
           resolution,
           SAMPLE_COUNT,
-          glam::Vec4::new(0.10, 0.05, 0.10, 1.0), // Nice scene-referred purple
+          Vec4::new(0.10, 0.05, 0.10, 1.0), // Nice scene-referred purple
         );
 
         // Dispatch a render using the built up rendergraph!

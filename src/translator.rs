@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter, Result};
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn};
-use core_simd::{f32x4,mask32x4};
+use std::simd::{f32x4,mask32x4};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 use crate::{Plane, Line, Point, Motor, Rotor, Horizon};
 use crate::maths::{dp_bc, flip_signs, rsqrt_nr1, sw02, sw32, swl2, gptr};
@@ -31,7 +31,7 @@ impl Translator {
     let half_d = -0.5 * delta;
     let mut p2:f32x4 = f32x4::splat(half_d) * f32x4::from_array([0.0,x,y,z]);
     p2 = p2 * f32x4::from_array([0.0,inv_norm,inv_norm,inv_norm]);
-    Translator{p2:p2}
+    Translator{p2}
   }
 
   /// Fast load operation for packed data that is already normalized. The
@@ -43,16 +43,16 @@ impl Translator {
   /// the quantity $`-\sqrt{a^2 + b^2 + c^2}`$ must be half the desired
   /// displacement.
   pub fn load_normalized(data:[f32;4])->Translator {
-    Translator{ p2: f32x4::from(data)}
+    Translator{ p2: data.into()}
   }
 
   pub fn normalized(&self)->Translator {
-    let inv_norm = rsqrt_nr1(dp_bc(self.p2,self.p2));
-    Translator{p2: self.p2 * inv_norm}
+    let inv_norm = rsqrt_nr1(dp_bc(self.p2.into(),self.p2.into()));
+    Translator{p2: self.p2.into() * inv_norm}
   }
 
   pub fn inverse(&self)->Translator {
-    Translator{p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))}
+    Translator{p2: flip_signs(self.p2.into(), mask32x4::from_array([false,true,true,true]))}
   }
 
   // Compute the logarithm of the translator, producing a horizon axis.
@@ -80,7 +80,7 @@ impl FnOnce<(Plane,)> for Translator { type Output = Plane; extern "rust-call" f
 // Conjugates a plane $p$ with this translator and returns the result t*p*!t TODO check manual if this is right
 impl Fn<(Plane,)> for Translator {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    let tmp:f32x4 = self.p2 + f32x4::from_array([1.0,1.0,1.0,1.0]);
+    let tmp:f32x4 = self.p2.into() + f32x4::from_array([1.0,1.0,1.0,1.0]);
     Plane{p0:sw02(args.0.p0, tmp)}
   }
 }
@@ -89,7 +89,7 @@ impl FnMut<(Line,)> for Translator { extern "rust-call" fn call_mut(&mut self, a
 impl FnOnce<(Line,)> for Translator { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line {self.call(args)} }
 impl Fn<(Line,)> for Translator {
   extern "rust-call" fn call(&self, args: (Line,))->Line {
-    let (p1,p2) = swl2(args.0.p1, args.0.p2, self.p2); // TODO p1 is just a, isn't this unnecessary
+    let (p1,p2) = swl2(args.0.p1, args.0.p2, self.p2.into()); // TODO p1 is just a, isn't this unnecessary
     Line{p1:p1,p2:p2}
   }
 }
@@ -98,7 +98,7 @@ impl FnMut<(Point,)> for Translator { extern "rust-call" fn call_mut(&mut self, 
 impl FnOnce<(Point,)> for Translator { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point {self.call(args)} }
 impl Fn<(Point,)> for Translator {
   extern "rust-call" fn call(&self, args: (Point,))->Point {
-    Point{p3:sw32(args.0.p3, self.p2)}
+    Point(sw32(args.0.p3, self.p2.into()))
   }
 }
 
@@ -209,7 +209,7 @@ impl Mul<Motor> for Translator {
   type Output = Motor;
   fn mul(self, m: Motor) -> Self::Output {
     let p2 = gptr(m.p1, self.p2);
-    Motor{p1: m.p1, p2: p2 + m.p2}
+    Motor{p1: m.p1.into(), p2: p2 + m.p2}
   }
 }
 impl Div<Translator> for Translator {

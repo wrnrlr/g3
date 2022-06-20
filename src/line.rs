@@ -1,17 +1,12 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd,BitOr};
-use core_simd::{f32x4,mask32x4};
+use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
+use crate::{Dual, Plane, Point, Motor, Branch, Horizon,maths::{gpll, exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1, rsqrt_nr1, dot11, dotlp}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
-use crate::{Dual, Plane, Point, Motor, Branch, Horizon};
-use crate::maths::{gpll, exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1, rsqrt_nr1, dot11, dotlp};
 
 pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Line {
-  pub p1:f32x4,
-  pub p2:f32x4
-}
+pub struct Line {pub p1:f32x4, pub p2:f32x4}
 
 impl Line {
   #[inline] pub fn e12(&self)->f32 { self.p1[3] }
@@ -61,10 +56,10 @@ impl Line {
 
   pub fn inverse(&self)->Line {
     // s, t computed as in the normalization
-    let b2 = hi_dp_bc(self.p1, self.p1);
+    let b2 = hi_dp_bc(&self.p1, &self.p1);
     let s = rsqrt_nr1(b2);
-    let bc = hi_dp_bc(self.p1, self.p2);
-    let b2_inv = rcp_nr1(b2);
+    let bc = hi_dp_bc(&self.p1, &self.p2);
+    let b2_inv = rcp_nr1(&b2);
     let t = bc * b2_inv * s;
     let neg  = mask32x4::from_array([false, true, true, true]);
 
@@ -206,7 +201,7 @@ impl BitXor<Line> for Line {
 }
 impl BitXor<Horizon> for Line {
   type Output = Dual;
-  fn bitxor(self, b: Horizon) ->Dual { Branch{p1: self.p1} ^ b }
+  fn bitxor(self, b: Horizon) ->Dual { Branch(self.p1) ^ b }
 }
 impl BitXor<Branch> for Line {
   type Output = Dual;

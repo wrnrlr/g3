@@ -1,5 +1,5 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
-use core_simd::{f32x4,mask32x4,simd_swizzle as swizzle};
+use std::simd::{f32x4,mask32x4,simd_swizzle as swizzle};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI2};
 use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb, zero_first};
@@ -39,12 +39,10 @@ impl From<Rotor> for EulerAngles {
 
 // The rotor is an entity that represents a rigid rotation about an axis.
 // To apply the rotor to a supported entity, the call operator is available.
+// p1: scalar, e12, e31, e23
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Rotor {
-  // p1: scalar, e12, e31, e23
-  pub p1:f32x4
-}
+pub struct Rotor(f32x4);
 
 impl Rotor {
   #[inline] pub fn scalar(&self)->f32 { self.p1[0] }
@@ -61,8 +59,7 @@ impl Rotor {
     let half = 0.5 * ang_rad;
     let sin_ang = half.sin();
     let scale = sin_ang * inv_norm;
-    let p1 = f32x4::from([half.cos(),x,y,z]) * f32x4::from([1.0,scale,scale,scale]);
-    Rotor{p1}
+    Rotor([half.cos(),x,y,z].into() * [1.0,scale,scale,scale].into())
   }
 
   pub fn from_euler_angles(roll:f32,pitch:f32,yaw:f32)->Rotor {
@@ -77,42 +74,37 @@ impl Rotor {
     let cos_r = half_roll.cos();
     let sin_r = half_roll.sin();
 
-    let r = Rotor{p1:f32x4::from([
+    Rotor([
       cos_r * cos_p * cos_y + sin_r * sin_p * sin_y,
       sin_r * cos_p * cos_y - cos_r * sin_p * sin_y,
       cos_r * sin_p * cos_y + sin_r * cos_p * sin_y,
-      cos_r * cos_p * sin_y - sin_r * sin_p * cos_y,
-    ])};
-
-    r.normalized()
+      cos_r * cos_p * sin_y - sin_r * sin_p * cos_y]
+      .into()).normalized()
   }
 
-  pub fn load_normalized(data:[f32;4])->Rotor {
-    Rotor{ p1: f32x4::from(data) }
-  }
+  pub fn load_normalized(data:[f32;4])->Rotor {Rotor(data.into())}
 
   pub fn normalized(&self)->Rotor {
     let inv_norm = rsqrt_nr1(dp_bc(self.p1,self.p1));
-    Rotor{p1: self.p1 * inv_norm}
+    Rotor(self.0 * inv_norm)
   }
 
   pub fn inverse(&self)->Rotor {
     let inv_norm = rsqrt_nr1(hi_dp_bc(self.p1, self.p1));
     let mut p1 = self.p1 * inv_norm;
     p1 = p1 * inv_norm;
-    p1 = flip_signs(p1, mask32x4::from([false,true,true,true]));
-    Rotor{p1}
+    Rotor(flip_signs(p1, [false,true,true,true].into()))
   }
 
   pub fn reverse(&self)->Rotor {
-    Rotor{p1: f32x4_xor(self.p1, f32x4::from([0.0, -0.0, -0.0, -0.0]))}
+    Rotor(f32x4_xor(&self.0, [0.0,-0.0,-0.0,-0.0].into()))
   }
 
   // Constrains the rotor to traverse the shortest arc
   pub fn constrained(&self)->Rotor {
     let mask = swizzle!(f32x4_and(self.p1, f32x4::from([-0.0, 0.0, 0.0, 0.0])), [0,0,0,0]); // TODO: cleanup
     let p1 = f32x4_xor(mask,self.p1);
-    Rotor{p1}
+    Rotor(p1)
   }
 
   pub fn approx_eq(&self, other:Rotor, epsilon:f32)->bool {
@@ -136,13 +128,13 @@ impl Rotor {
     let mut p1  = self.p1 * rcp_nr1(f32x4::splat(sin_ang));
     p1 = p1 * f32x4::splat(ang);
     p1 = zero_first(p1);
-    Branch{p1}
+    Branch(p1)
   }
 
   // Compute the square root of the provided rotor $r$.
   pub fn sqrt(&self)->Rotor {
-    let p1 = add_ss(self.p1, f32x4::from([1.0, 0.0, 0.0, 0.0]));
-    Rotor{p1}.normalized() // TODO avoid extra copy...
+    let p1 = add_ss(self.p1, [1.0, 0.0, 0.0, 0.0].into());
+    Rotor(p1).normalized() // TODO avoid extra copy...
   }
 }
 
@@ -173,7 +165,7 @@ impl FnMut<(Branch,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args
 impl FnOnce<(Branch,)> for Rotor { type Output = Branch; extern "rust-call" fn call_once(self, args: (Branch,))->Branch { self.call(args) }}
 impl Fn<(Branch,)> for Rotor {
   extern "rust-call" fn call(&self, args: (Branch,))->Branch {
-    Branch{p1: swrb(args.0.p1, self.p1)}
+    Branch(swrb(args.0.p1, self.p1))
   }
 }
 
@@ -192,7 +184,7 @@ impl FnMut<(Point,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Point,)> for Rotor { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
 impl Fn<(Point,)> for Rotor {
   extern "rust-call" fn call(&self, args: (Point,))->Point {
-    Point{p3:sw01(args.0.p3, self.p1)}
+    Point(sw01(args.0.p3, self.p1))
   }
 }
 
@@ -202,7 +194,7 @@ impl FnMut<(Direction,)> for Rotor { extern "rust-call" fn call_mut(&mut self, a
 impl FnOnce<(Direction,)> for Rotor { type Output = Direction; extern "rust-call" fn call_once(self, args: (Direction,))->Direction { self.call(args) }}
 impl Fn<(Direction,)> for Rotor {
   extern "rust-call" fn call(&self, args: (Direction,))->Direction {
-    Direction{p3: sw01(args.0.p3, self.p1)}
+    Direction(sw01(args.0.p3, self.p1))
   }
 }
 
@@ -211,20 +203,20 @@ impl Fn<(Direction,)> for Rotor {
 impl Add<f32> for Rotor {
   type Output = Rotor;
   fn add(self, s:f32) -> Rotor {
-    Rotor{ p1: self.p1+f32x4::splat(s) }
+    Rotor(self.0+f32x4::splat(s))
   }
 }
 
 impl Add<Rotor> for f32 {
   type Output = Rotor;
   fn add(self, t:Rotor) -> Rotor {
-    Rotor{ p1: t.p1+f32x4::splat(self) }
+    Rotor(t.p1+f32x4::splat(self))
   }
 }
 
 impl Add<Rotor> for Rotor {
   type Output = Rotor;
-  fn add(self, other: Rotor) -> Rotor { Rotor { p1:self.p1+other.p1 } }
+  fn add(self, other: Rotor) -> Rotor { Rotor(self.p1+other.p1) }
 }
 
 impl AddAssign for Rotor {
@@ -233,7 +225,7 @@ impl AddAssign for Rotor {
 
 impl Sub<Rotor> for Rotor {
   type Output = Rotor;
-  fn sub(self, other:Rotor) -> Rotor { Rotor { p1:self.p1-other.p1 } }
+  fn sub(self, other:Rotor) -> Rotor { Rotor(self.p1-other.p1) }
 }
 
 impl SubAssign for Rotor {
@@ -242,7 +234,7 @@ impl SubAssign for Rotor {
 
 impl Mul<f32> for Rotor {
   type Output = Rotor;
-  fn mul(self, s: f32) -> Rotor { Rotor { p1:self.p1*f32x4::splat(s) } }
+  fn mul(self, s: f32) -> Rotor { Rotor(self.p1*f32x4::splat(s)) }
 }
 
 impl MulAssign<f32> for Rotor {
@@ -251,7 +243,7 @@ impl MulAssign<f32> for Rotor {
 
 impl Div<f32> for Rotor {
   type Output = Rotor;
-  fn div(self, s: f32) -> Rotor { Rotor { p1:self.p1/f32x4::splat(s) } }
+  fn div(self, s: f32) -> Rotor { Rotor(self.p1/f32x4::splat(s)) }
 }
 
 impl DivAssign<f32> for Rotor {
@@ -262,7 +254,7 @@ impl DivAssign<f32> for Rotor {
 impl Neg for Rotor {
   type Output = Self;
   fn neg(self)->Self::Output {
-    Rotor { p1:flip_signs(self.p1, mask32x4::from([false,true,true,true])) }
+    Rotor(flip_signs(self.p1, [false,true,true,true].into()))
   }
 }
 
@@ -278,7 +270,7 @@ impl Neg for Rotor {
 impl Mul<Rotor> for Rotor {
   type Output = Rotor;
   fn mul(self,other:Rotor)->Self::Output {
-    Rotor{p1: gp11(self.p1, other.p1)}
+    Rotor(gp11(self.p1, other.p1))
   }
 }
 
