@@ -1,12 +1,11 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not};
-use core_simd::{f32x2};
+use std::{simd::{f32x2},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 pub fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 
 // A dual number is a multivector of the form p + e_0123.
 #[cfg_attr(feature="bevy",derive(Component))]
-#[derive(Default,Debug,Clone,PartialEq)]
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Dual {
   p:f32x2
 }
@@ -24,7 +23,7 @@ impl Add<Dual> for Dual {
 }
 
 impl AddAssign for Dual {
-  fn add_assign(&mut self, other: Self) { self.p = self.p+other.p }
+  fn add_assign(&mut self, other: Self) { self.p += other.p }
 }
 
 impl Sub<Dual> for Dual {
@@ -33,7 +32,7 @@ impl Sub<Dual> for Dual {
 }
 
 impl SubAssign for Dual {
-  fn sub_assign(&mut self, other: Self) { self.p = self.p-other.p }
+  fn sub_assign(&mut self, other: Self) { self.p -= other.p }
 }
 
 impl Mul<f32> for Dual {
@@ -42,7 +41,7 @@ impl Mul<f32> for Dual {
 }
 
 impl MulAssign<f32> for Dual {
-  fn mul_assign(&mut self, s: f32) { self.p = self.p*f32x2::splat(s) }
+  fn mul_assign(&mut self, s: f32) { self.p *= f32x2::splat(s) }
 }
 
 impl Div<f32> for Dual {
@@ -51,7 +50,7 @@ impl Div<f32> for Dual {
 }
 
 impl DivAssign<f32> for Dual {
-  fn div_assign(&mut self, s: f32) { self.p = self.p/f32x2::splat(s) }
+  fn div_assign(&mut self, s: f32) { self.p /= f32x2::splat(s) }
 }
 
 impl Not for Dual {
