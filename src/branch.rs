@@ -1,8 +1,6 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Not,Neg,BitXor,BitAnd};
-use core_simd::{f32x4,mask32x4};
+use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd}};
+use crate::{Dual, Plane, Point, Rotor, Line, Horizon,maths::{gp11, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rsqrt_nr1, sqrt_nr1};};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
-use crate::{Dual, Plane, Point, Rotor, Line, Horizon};
-use crate::maths::{gp11, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rsqrt_nr1, sqrt_nr1};
 
 pub fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 
@@ -32,9 +30,7 @@ pub fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 //     efficiency.
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Branch {
-  pub p1:f32x4
-}
+pub struct Branch(f32x4);
 
 impl Branch {
   #[inline] pub fn e12(&self)->f32 { self.p1[3] }
@@ -54,7 +50,7 @@ impl Branch {
   // To convince yourself this is a line through the origin, remember that
   // such a line can be generated using the geometric product of two planes
   // through the origin.
-  pub fn new(a:f32, b:f32, c:f32)->Branch { Branch{p1: f32x4::from_array([0.0, a, b, c])} }
+  pub fn new(a:f32, b:f32, c:f32)->Branch { Branch(f32x4::from_array([0.0, a, b, c])) }
 
   // If a line is constructed as the regressive product (join) of
   // two points, the squared norm provided here is the squared
@@ -68,7 +64,7 @@ impl Branch {
   // TODO normalize
 
   pub fn normalized(self)->Branch {
-    Branch{p1: self.p1 * rsqrt_nr1(hi_dp_bc(self.p1, self.p1))}
+    Branch(self.0 * rsqrt_nr1(hi_dp_bc(self.0, self.0)))
   }
 
   // TODO invert
@@ -77,7 +73,7 @@ impl Branch {
     let inv_norm = rsqrt_nr1(hi_dp_bc(self.p1, self.p1));
     let mut p1 = self.p1 * inv_norm * inv_norm;
     p1 = flip_signs(p1, mask32x4::from_array([false, true, true, true]));
-    Branch{p1}
+    Branch(p1)
   }
 
   // Exponentiate a branch to produce a rotor.
@@ -87,27 +83,27 @@ impl Branch {
     let sin_ang = ang.sin() / ang;
     let mut p1 = f32x4::splat(sin_ang) * self.p1;
     p1 = p1 + f32x4::from_array([cos_ang, 0.0, 0.0, 0.0]);
-    Rotor{p1}
+    Rotor(p1)
   }
 
   pub fn sqrt(self)->Rotor {
     let p1 = self.p1 + f32x4::from_array([1.0, 0.0, 0.0, 0.0]);
-    Rotor{p1}.normalized()
+    Rotor(p1).normalized()
   }
 
   // Reversion
   pub fn reverse(self)->Branch {
-    Branch{p1: flip_signs(self.p1, mask32x4::from_array([false,true,true,true]))}
+    Branch(flip_signs(self.p1, mask32x4::from_array([false,true,true,true])))
   }
 }
 
-impl From<Line> for Branch { fn from(l:Line)->Self { Self{p1:l.p1} } }
-impl From<&Line> for Branch { fn from(l:&Line)->Self { Self{p1:l.p1} } }
+impl From<Line> for Branch { fn from(l:Line)->Self { Self(l.p1) } }
+impl From<&Line> for Branch { fn from(l:&Line)->Self { Self(l.p1) } }
 
 impl Add<Branch> for Branch {
   type Output = Branch;
   fn add(self, other: Branch) -> Branch {
-    Branch { p1: self.p1+other.p1 }
+    Branch(self.p1+other.p1)
   }
 }
 
@@ -120,7 +116,7 @@ impl AddAssign for Branch {
 impl Sub<Branch> for Branch {
   type Output = Branch;
   fn sub(self, other: Branch) -> Branch {
-    Branch { p1: self.p1-other.p1 }
+    Branch(self.p1-other.p1)
   }
 }
 
@@ -133,22 +129,21 @@ impl SubAssign for Branch {
 impl Mul<f32> for Branch {
   type Output = Branch;
   fn mul(self, s: f32) -> Branch {
-    Branch { p1:self.p1*f32x4::splat(s) }
+    Branch(self.p1*f32x4::splat(s))
   }
 }
 
 impl Mul<Branch> for Branch {
   type Output = Rotor;
-  fn mul(self, other: Branch) -> Rotor {
-    Rotor{p1: gp11(self.p1, other.p1)}
+  fn mul(self, b: Branch) -> Rotor {
+    Rotor(gp11(self.0, b.0))
   }
 }
 
 impl Div<Branch> for Branch {
   type Output = Rotor;
   fn div(self, other: Branch) -> Rotor {
-    let other = other.inverse();
-    self * other
+    self * other.inverse()
   }
 }
 
@@ -160,9 +155,7 @@ impl MulAssign<f32> for Branch {
 
 impl Div<f32> for Branch {
   type Output = Branch;
-  fn div(self, s: f32) -> Branch {
-    Branch { p1:self.p1/f32x4::splat(s) }
-  }
+  fn div(self, s: f32) -> Branch { Branch(self.p1/f32x4::splat(s)) }
 }
 
 impl DivAssign<f32> for Branch {
@@ -174,7 +167,7 @@ impl DivAssign<f32> for Branch {
 // Unary minus
 impl Neg for Branch {
   type Output = Branch;
-  fn neg(self)->Branch { Branch{p1: -self.p1} }
+  fn neg(self)->Branch { Branch(-self.p1) }
 }
 
 impl Not for Branch {
