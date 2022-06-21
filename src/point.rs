@@ -26,7 +26,7 @@ pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 // p3: (e123, e032, e013, e021)
 #[cfg_attr(feature="bevy", derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Point (f32x4);
+pub struct Point (pub f32x4);
 
 impl Point {
   #[inline] pub fn w(&self)->f32 { self.p3[0] }

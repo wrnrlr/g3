@@ -42,7 +42,7 @@ impl From<Rotor> for EulerAngles {
 // p1: scalar, e12, e31, e23
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Rotor(f32x4);
+pub struct Rotor(pub f32x4);
 
 impl Rotor {
   #[inline] pub fn scalar(&self)->f32 { self.p1[0] }

@@ -7,7 +7,7 @@ use crate::maths::{refined_reciprocal, hi_dp_bc, rsqrt_nr1};
 // Having a homogeneous coordinate of zero ensures that directions are translation-invariant.
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,PartialEq)]
-pub struct Direction(f32x4);
+pub struct Direction(pub f32x4);
 
 impl Direction {
   pub fn x(&self)->f32 { self.p3[1] }

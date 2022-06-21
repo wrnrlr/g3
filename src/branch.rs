@@ -30,7 +30,7 @@ pub fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 //     efficiency.
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Branch(f32x4);
+pub struct Branch(pub f32x4);
 
 impl Branch {
   #[inline] pub fn e12(&self)->f32 { self.p1[3] }
