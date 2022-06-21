@@ -51,8 +51,8 @@ impl Motor {
 
   pub fn inverse(&self)->Motor {
     // s, t computed as in the normalization
-    let b2 = dp_bc(self.p1.into(), self.p1.into());
-    let s = &rsqrt_nr1(b2.into());
+    let b2 = dp_bc(&self.p1.into(), &self.p1.into());
+    let s = &rsqrt_nr1(&b2.into());
     let bc = dp_bc(&flip_signs(self.p1.into(), mask32x4::from_array([true,false,false,false])), self.p2.into());
     let b2_inv = &rcp_nr1(b2.into());
     let t = bc * b2_inv * s;
@@ -107,8 +107,8 @@ impl Motor {
   // Constrains the motor to traverse the shortest arc
   pub fn constrained(&self)->Motor {
     let mask = bits_wwww(self.p1.to_bits() & f32x4::from_array([-0.0, 0.0, 0.0, 0.0]).to_bits());
-    let p1 = f32x4::from_bits(mask ^ self.p1.to_bits());
-    let p2 = f32x4::from_bits(mask.into() ^ self.p2.to_bits());
+    let p1 = f32x4::from_bits(&mask ^ self.p1.to_bits());
+    let p2 = f32x4::from_bits(&mask ^ self.p2.to_bits());
     Motor{p1,p2}
   }
 

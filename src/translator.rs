@@ -45,12 +45,12 @@ impl Translator {
   }
 
   pub fn normalized(&self)->Translator {
-    let inv_norm = rsqrt_nr1(&dp_bc(self.p2.into(),self.p2.into()));
+    let inv_norm = rsqrt_nr1(&dp_bc(&self.p2,&self.p2));
     Translator{p2: self.p2.into() * inv_norm}
   }
 
   pub fn inverse(&self)->Translator {
-    Translator{p2: flip_signs(self.p2.into(), mask32x4::from_array([false,true,true,true]))}
+    Translator{p2: flip_signs(&self.p2, mask32x4::from_array([false,true,true,true]))}
   }
 
   // Compute the logarithm of the translator, producing a horizon axis.
@@ -78,7 +78,7 @@ impl FnOnce<(Plane,)> for Translator { type Output = Plane; extern "rust-call" f
 // Conjugates a plane $p$ with this translator and returns the result t*p*!t TODO check manual if this is right
 impl Fn<(Plane,)> for Translator {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    let tmp:f32x4 = self.p2.into() + f32x4::from_array([1.0,1.0,1.0,1.0]);
+    let tmp:f32x4 = &self.p2 + f32x4::from_array([1.0,1.0,1.0,1.0]);
     Plane(sw02(&args.0.0, &tmp))
   }
 }
@@ -87,7 +87,7 @@ impl FnMut<(Line,)> for Translator { extern "rust-call" fn call_mut(&mut self, a
 impl FnOnce<(Line,)> for Translator { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line {self.call(args)} }
 impl Fn<(Line,)> for Translator {
   extern "rust-call" fn call(&self, args: (Line,))->Line {
-    let (p1,p2) = swl2(&args.0.p1, &args.0.p2, self.p2.into()); // TODO p1 is just a, isn't this unnecessary
+    let (p1,p2) = swl2(&args.0.p1, &args.0.p2, &self.p2); // TODO p1 is just a, isn't this unnecessary
     Line{p1,p2 }
   }
 }

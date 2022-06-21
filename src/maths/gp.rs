@@ -13,7 +13,7 @@ pub fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   // (a0 b2 - a2 b0) e02 +
   // (a0 b3 - a3 b0) e03
   let mut p1_out = shuffle_yzwy(a) * shuffle_ywyz(b);
-  p1_out = p1_out - (f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), &(shuffle_zwyz(a) * shuffle_zzwy(b))));
+  p1_out = p1_out - (f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(shuffle_zwyz(a) * shuffle_zzwy(b))));
   // Add a3 b3 to the lowest component
   p1_out = add_ss(&p1_out, &(shuffle_wxxx(a) * shuffle_wxxx(b)));
   // (a0 b0, a0 b1, a0 b2, a0 b3)
@@ -27,7 +27,7 @@ pub fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
 // point * plane
 pub fn gp30(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let mut p1 = a * shuffle_xxxx(b);
-  p1 = b0a1a2a3(&p1, f32x4::splat(0.0));
+  p1 = b0a1a2a3(&p1, &f32x4::splat(0.0));
 
   // (_, a3 b2, a1 b3, a2 b1)
   let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
@@ -35,14 +35,14 @@ pub fn gp30(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   // Compute a0 b0 + a1 b1 + a2 b2 + a3 b3 and store it in the low component
   let mut tmp = &dp(a, b);
   tmp = &flip_signs(tmp, [true, false, false, false].into());
-  p2 = b0a1a2a3(p2, tmp);
+  p2 = b0a1a2a3(&p2, tmp);
   (p1,p2)
 }
 
 // plane * point
 pub fn gp03(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let mut p1 = a * shuffle_xxxx(b);
-  p1 = b0a1a2a3(&p1, f32x4::splat(0.0));
+  p1 = b0a1a2a3(&p1, &f32x4::splat(0.0));
 
   // (_, a3 b2, a1 b3, a2 b1)
   let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
@@ -70,7 +70,7 @@ pub fn gp11(a:&f32x4, b:&f32x4)->f32x4 {
   // negate the lower single-precision element with a single instruction
   let tmp1 = shuffle_zyzw(a) * shuffle_zxxx(b);
   let tmp2 = shuffle_wwyz(a) * shuffle_wzwy(b);
-  let tmp = f32x4_xor(&tmp1 + tmp2, [-0.0, 0.0, 0.0, 0.0].into());
+  let tmp = f32x4_xor(&(tmp1 + tmp2), [-0.0, 0.0, 0.0, 0.0].into());
   p1_out + tmp
 }
 
@@ -141,10 +141,10 @@ pub fn gpll(a:&f32x4, d:&f32x4, b:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   p1 -= shuffle_wywz(a) * shuffle_wzyw(b);
   let a2 = &shuffle_zzww(a);
   let b2 = &shuffle_zzww(b);
-  let p1 = sub_ss(p1, mul_ss(a2, b2));
+  let p1 = sub_ss(&p1, mul_ss(a2, b2));
 
   let mut p2 = shuffle_ywyz(a) * shuffle_yzwy(c);
-  p2 -= f32x4_xor(flip, shuffle_wzwy(a) * shuffle_wwyz(c));
+  p2 -= f32x4_xor(&flip, &(shuffle_wzwy(a) * shuffle_wwyz(c)));
   p2 += shuffle_yzwy(b) * shuffle_ywyz(d);
   p2 -= f32x4_xor(flip, shuffle_wwyz(b) * shuffle_wzwy(d));
   let c2 = shuffle_zzww(c);
@@ -192,7 +192,7 @@ pub fn gpmm(a:&f32x4, b:&f32x4, c:&f32x4, d:&f32x4)->(f32x4,f32x4) {
   t += a_wzwy * shuffle_wwyz(d);
   t += shuffle_zxxx(b) * shuffle_zyzw(c);
   t += shuffle_wzwy(b) * c_wwyz;
-  t = f32x4_xor(t, [-0.0,0.0,0.0,0.0].into());
+  t = f32x4_xor(t, &[-0.0,0.0,0.0,0.0].into());
 
   f = f - t;
 
