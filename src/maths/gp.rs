@@ -13,9 +13,9 @@ pub fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   // (a0 b2 - a2 b0) e02 +
   // (a0 b3 - a3 b0) e03
   let mut p1_out = shuffle_yzwy(a) * shuffle_ywyz(b);
-  p1_out = p1_out - (f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), shuffle_zwyz(a) * shuffle_zzwy(b)));
+  p1_out = p1_out - (f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), &(shuffle_zwyz(a) * shuffle_zzwy(b))));
   // Add a3 b3 to the lowest component
-  p1_out = add_ss(&p1_out, shuffle_wxxx(a) * shuffle_wxxx(b));
+  p1_out = add_ss(&p1_out, &(shuffle_wxxx(a) * shuffle_wxxx(b)));
   // (a0 b0, a0 b1, a0 b2, a0 b3)
   let mut p2_out = shuffle_xxxx(a) * b;
   // Sub (a0 b0, a1 b0, a2 b0, a3 b0)
@@ -27,22 +27,22 @@ pub fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
 // point * plane
 pub fn gp30(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let mut p1 = a * shuffle_xxxx(b);
-  p1 = b0a1a2a3(p1, f32x4::splat(0.0));
+  p1 = b0a1a2a3(&p1, f32x4::splat(0.0));
 
   // (_, a3 b2, a1 b3, a2 b1)
   let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
   p2 -= shuffle_xzwy(a) * shuffle_xwyz(b);
   // Compute a0 b0 + a1 b1 + a2 b2 + a3 b3 and store it in the low component
-  let mut tmp = dp(a, b);
-  tmp = flip_signs(tmp, [true, false, false, false].into());
-  p2 = b0a1a2a3(p2, &tmp);
+  let mut tmp = &dp(a, b);
+  tmp = &flip_signs(tmp, [true, false, false, false].into());
+  p2 = b0a1a2a3(p2, tmp);
   (p1,p2)
 }
 
 // plane * point
 pub fn gp03(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let mut p1 = a * shuffle_xxxx(b);
-  p1 = b0a1a2a3(p1, f32x4::splat(0.0));
+  p1 = b0a1a2a3(&p1, f32x4::splat(0.0));
 
   // (_, a3 b2, a1 b3, a2 b1)
   let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
@@ -70,7 +70,7 @@ pub fn gp11(a:&f32x4, b:&f32x4)->f32x4 {
   // negate the lower single-precision element with a single instruction
   let tmp1 = shuffle_zyzw(a) * shuffle_zxxx(b);
   let tmp2 = shuffle_wwyz(a) * shuffle_wzwy(b);
-  let tmp = f32x4_xor(tmp1 + tmp2, [-0.0, 0.0, 0.0, 0.0].into());
+  let tmp = f32x4_xor(&tmp1 + tmp2, [-0.0, 0.0, 0.0, 0.0].into());
   p1_out + tmp
 }
 
@@ -89,7 +89,7 @@ pub fn gp33(a:&f32x4, b:&f32x4)->f32x4 {
   tmp += a * shuffle_xxxx(b);
 
   // (0, 1, 2, 3) -> (0, 0, 2, 2)
-  let mut ss = shuffle_xxzz(tmp);
+  let mut ss = shuffle_xxzz(&tmp);
   ss = shuffle_xyxy(&ss);
   tmp = tmp * rcp_nr1(&ss);
 
@@ -108,7 +108,7 @@ pub fn gptr(a:&f32x4, b:&f32x4)->f32x4 {
   let mut p2 = shuffle_yxxx(a) * shuffle_yyzw(b);
   p2 += shuffle_zzwy(a) * shuffle_zwyz(b);
   let tmp = shuffle_wwyz(a) * shuffle_wzwy(b);
-  p2 - flip_signs(tmp, [true,false,false,false].into())
+  p2 - flip_signs(&tmp, [true,false,false,false].into())
 }
 
 pub fn gprt(a:&f32x4, b:&f32x4)->f32x4 {
@@ -119,25 +119,25 @@ pub fn gprt(a:&f32x4, b:&f32x4)->f32x4 {
   let mut p2 = shuffle_yxxx(a) * shuffle_yyzw(b);
   p2 += shuffle_zwyz(a) * shuffle_zzwy(b);
   let tmp = shuffle_wzwy(a) * shuffle_wwyz(b);
-  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
+  p2 - flip_signs(&tmp, mask32x4::from_array([true,false,false,false]))
 }
 
 pub fn gp12(a:&f32x4, b:&f32x4)->f32x4 {
   let p2 = gprt(a, b);
   let tmp = a * shuffle_xxxx(b);
-  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
+  p2 - flip_signs(&tmp, mask32x4::from_array([true,false,false,false]))
 }
 
 pub fn gp21(a:&f32x4, b:&f32x4)->f32x4 {
   let p2 = gptr(a, b);
   let tmp = a * shuffle_xxxx(b);
-  p2 - flip_signs(tmp, mask32x4::from_array([true,false,false,false]))
+  p2 - flip_signs(&tmp, mask32x4::from_array([true,false,false,false]))
 }
 
 pub fn gpll(a:&f32x4, d:&f32x4, b:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   let flip = [-0.0,0.0,0.0,0.0].into();
   let mut p1 = shuffle_yzyw(a) * shuffle_yywz(b);
-  p1 = f32x4_xor(p1, flip);
+  p1 = f32x4_xor(&p1, flip);
   p1 -= shuffle_wywz(a) * shuffle_wzyw(b);
   let a2 = &shuffle_zzww(a);
   let b2 = &shuffle_zzww(b);

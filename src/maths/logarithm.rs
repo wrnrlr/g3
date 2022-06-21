@@ -1,7 +1,7 @@
 use std::simd::{f32x4};
 use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
 
-pub fn logarithm(p1:f32x4, p2:f32x4) ->(f32x4, f32x4) {
+pub fn logarithm(p1:&f32x4, p2:&f32x4) ->(f32x4, f32x4) {
   // The logarithm follows from the derivation of the exponential. Working
   // backwards, we ended up computing the exponential like so:
   //
@@ -14,18 +14,18 @@ pub fn logarithm(p1:f32x4, p2:f32x4) ->(f32x4, f32x4) {
 
   // The first thing we need to do is extract only the bivector components
   // from the motor.
-  let bv_mask = f32x4::from([0.0, 1.0, 1.0, 1.0]);
+  let bv_mask = [0.0, 1.0, 1.0, 1.0].into();
   let a = bv_mask * p1;
 
   // Early out if we're taking the log of a motor without any rotation
-  if a == f32x4::splat(0.0) { return (a, p2); }
+  if a == f32x4::splat(0.0) { return (a, p2.into()); }
 
   let b = bv_mask * p2;
 
   // Next, we need to compute the norm as in the exponential.
-  let a2 = hi_dp_bc(a, b);
-  let ab = hi_dp_bc(a, b);
-  let a2_sqrt_rcp = rsqrt_nr1(a2);
+  let a2 = &hi_dp_bc(&a, &b);
+  let ab = hi_dp_bc(&a, &b);
+  let a2_sqrt_rcp = &rsqrt_nr1(a2);
   let s = a2 * a2_sqrt_rcp;
   let minus_t = ab * a2_sqrt_rcp;
   // s + t e0123 is the norm of our bivector.
@@ -52,7 +52,7 @@ pub fn logarithm(p1:f32x4, p2:f32x4) ->(f32x4, f32x4) {
   // the normalized bivector.
   let norm_real = a * a2_sqrt_rcp;
   let mut norm_ideal = b * a2_sqrt_rcp;
-  norm_ideal -= a * ab * a2_sqrt_rcp * rcp_nr1(a2);
+  norm_ideal -= &a * &ab * a2_sqrt_rcp * rcp_nr1(a2);
 
   let uvec = f32x4::splat(u);
   let p1_out = uvec * norm_real;

@@ -30,21 +30,21 @@ pub fn dot33(a:&f32x4, b:&f32x4)->f32x4 {
 
 pub fn dotptl(a:&f32x4, b:&f32x4)->f32x4 {
   let dp = &hi_dp_ss(a, b);
-  let p0 = shuffle_xxxx(a) * b;
-  let p0 = &f32x4_xor(p0, [0.0, -0.0, -0.0, -0.0].into());
+  let p0 = &shuffle_xxxx(a) * b;
+  let p0 = &f32x4_xor(&p0, [0.0, -0.0, -0.0, -0.0].into());
   add_ss(p0, dp)
 }
 
 pub fn dotpl(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   let mut p0 = shuffle_xzwy(a) * b;
   p0 -= a * shuffle_xzwy(b);
-  sub_ss(shuffle_xzwy(p0), hi_dp_ss(a, c))
+  sub_ss(&shuffle_xzwy(&p0), hi_dp_ss(a, c))
 }
 
 pub fn dotlp(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   let mut p0 = a * shuffle_xzwy(b);
   p0 -= shuffle_xzwy(a) * b;
-  add_ss(&shuffle_xzwy(p0), &hi_dp_ss(a, c))
+  add_ss(&shuffle_xzwy(&p0), &hi_dp_ss(a, c))
 }
 
 pub fn dotpil(a:&f32x4, c:&f32x4)->f32x4 {

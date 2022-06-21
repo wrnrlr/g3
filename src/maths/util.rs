@@ -24,7 +24,7 @@ fn rsqrt(a:f32x4)->f32x4 { f32x4::splat(1.0) / a }
 
 pub fn refined_reciprocal(s:f32)->f32x4 { rcp_nr1(&f32x4::splat(s)) }
 
-pub fn sqrt_nr1(a:f32x4)->f32x4 {
+pub fn sqrt_nr1(a:&f32x4)->f32x4 {
   a * rsqrt_nr1(&a) // TODO either write faster rsqrt_nr1, or derive sqrt_nr1 yourself...
 }
 
@@ -95,7 +95,7 @@ pub fn dp(a:&f32x4, b:&f32x4)->f32x4 {
   mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
 }
 
-pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
+pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
   let mut out = a * b;
   let hi = shuffle_yyww(out);
 
@@ -120,7 +120,7 @@ pub fn dp_bc(a:f32x4, b:f32x4)->f32x4 {
 // #[cfg(target_arch = "x86_64")] #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_add_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
 // #[cfg(not(target_arch = "x86_64"))] #[inline]
 pub fn add_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a + b, a, [First(0), Second(1), Second(2), Second(3)]) }
-#[inline] pub fn sub_ss(a:f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a, [First(0), Second(1), Second(2), Second(3)]) }
+#[inline] pub fn sub_ss(a:&f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a, [First(0), Second(1), Second(2), Second(3)]) }
 // #[cfg(target_arch = "x86_64")] #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_mul_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
 // #[cfg(not(target_arch = "x86_64"))] #[inline]
 pub fn mul_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a * b, a, [First(0), Second(1), Second(2), Second(3)]) }

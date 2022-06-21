@@ -85,15 +85,15 @@ impl Rotor {
   pub fn load_normalized(data:[f32;4])->Rotor {Rotor(data.into())}
 
   pub fn normalized(&self)->Rotor {
-    let inv_norm = rsqrt_nr1(dp_bc(self.0,self.0));
-    Rotor(self.0 * inv_norm)
+    let inv_norm = rsqrt_nr1(&dp_bc(&self.0,&self.0));
+    Rotor(&self.0 * inv_norm)
   }
 
   pub fn inverse(&self)->Rotor {
-    let inv_norm = rsqrt_nr1(hi_dp_bc(self.0, self.0));
-    let mut p1 = self.0 * inv_norm;
+    let inv_norm = &rsqrt_nr1(&hi_dp_bc(&self.0, &self.0));
+    let mut p1 = &self.0 * inv_norm;
     p1 = p1 * inv_norm;
-    Rotor(flip_signs(p1, [false,true,true,true].into()))
+    Rotor(flip_signs(&p1, [false,true,true,true].into()))
   }
 
   pub fn reverse(&self)->Rotor {
@@ -103,13 +103,13 @@ impl Rotor {
   // Constrains the rotor to traverse the shortest arc
   pub fn constrained(&self)->Rotor {
     let mask = swizzle!(f32x4_and(self.0, f32x4::from([-0.0, 0.0, 0.0, 0.0])), [0,0,0,0]); // TODO: cleanup
-    let p1 = f32x4_xor(mask,self.0);
+    let p1 = f32x4_xor(&mask,&self.0);
     Rotor(p1)
   }
 
   pub fn approx_eq(&self, other:Rotor, epsilon:f32)->bool {
     let eps = f32x4::splat(epsilon);
-    f32x4_abs(self.0 - other.p1) < eps
+    f32x4_abs(&self.0 - other.p1) < eps
   }
 
   // Returns the principal branch of this rotor's logarithm. Invoking
@@ -125,7 +125,7 @@ impl Rotor {
     let ang = cos_ang.acos();
     let sin_ang = ang.sin();
 
-    let mut p1  = self.0 * rcp_nr1(f32x4::splat(sin_ang));
+    let mut p1  = &self.0 * rcp_nr1(&f32x4::splat(sin_ang));
     p1 = p1 * f32x4::splat(ang);
     p1 = zero_first(p1);
     Branch(p1)
@@ -133,7 +133,7 @@ impl Rotor {
 
   // Compute the square root of the provided rotor $r$.
   pub fn sqrt(&self)->Rotor {
-    let p1 = add_ss(self.0, [1.0, 0.0, 0.0, 0.0].into());
+    let p1 = add_ss(&self.0, [1.0, 0.0, 0.0, 0.0].into());
     Rotor(p1).normalized() // TODO avoid extra copy...
   }
 }
@@ -147,7 +147,7 @@ impl From<EulerAngles> for Rotor {
 impl From<Rotor> for [f32;4] {
   fn from(r:Rotor) -> Self {
     //TODO r.p1.as_array()
-    [r.p1[0], r.p1[1], r.p1[2], r.p1[3]]
+    [r.0[0], r.0[1], r.0[2], r.0[3]]
   }
 }
 
@@ -155,7 +155,7 @@ impl FnMut<(Plane,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Plane,)> for Rotor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
 impl Fn<(Plane,)> for Rotor {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0: sw01(args.0.p0, self.0)}
+    Plane(sw01(&args.0.0, &self.0))
   }
 }
 
@@ -209,27 +209,27 @@ impl Add<f32> for Rotor {
 
 impl Add<Rotor> for f32 {
   type Output = Rotor;
-  fn add(self, t:Rotor) -> Rotor {
-    Rotor(t.p1+f32x4::splat(self))
+  fn add(self, r:Rotor) -> Rotor {
+    Rotor(r.0+f32x4::splat(self))
   }
 }
 
 impl Add<Rotor> for Rotor {
   type Output = Rotor;
-  fn add(self, other: Rotor) -> Rotor { Rotor(self.0+other.p1) }
+  fn add(self, r: Rotor) -> Rotor { Rotor(self.0+r.0) }
 }
 
 impl AddAssign for Rotor {
-  fn add_assign(&mut self, other: Self) { self.0 = self.0+other.p1 }
+  fn add_assign(&mut self, r: Self) { self.0 = &self.0+r.0 }
 }
 
 impl Sub<Rotor> for Rotor {
   type Output = Rotor;
-  fn sub(self, other:Rotor) -> Rotor { Rotor(self.0-other.p1) }
+  fn sub(self, r:Rotor) -> Rotor { Rotor(self.0-r.0) }
 }
 
 impl SubAssign for Rotor {
-  fn sub_assign(&mut self, other: Self) { self.0 = self.0-other.p1 }
+  fn sub_assign(&mut self, r: Self) { self.0 = &self.0-r.0 }
 }
 
 impl Mul<f32> for Rotor {
@@ -238,7 +238,7 @@ impl Mul<f32> for Rotor {
 }
 
 impl MulAssign<f32> for Rotor {
-  fn mul_assign(&mut self, s: f32) { self.0 = self.0*f32x4::splat(s) }
+  fn mul_assign(&mut self, s: f32) { self.0 = &self.0*f32x4::splat(s) }
 }
 
 impl Div<f32> for Rotor {
@@ -247,14 +247,14 @@ impl Div<f32> for Rotor {
 }
 
 impl DivAssign<f32> for Rotor {
-  fn div_assign(&mut self, s: f32) { self.0 = self.0/f32x4::splat(s) }
+  fn div_assign(&mut self, s: f32) { self.0 = &self.0/f32x4::splat(s) }
 }
 
 // Reversion
 impl Neg for Rotor {
   type Output = Self;
   fn neg(self)->Self::Output {
-    Rotor(flip_signs(self.0, [false,true,true,true].into()))
+    Rotor(flip_signs(&self.0, [false,true,true,true].into()))
   }
 }
 
@@ -269,22 +269,22 @@ impl Neg for Rotor {
 
 impl Mul<Rotor> for Rotor {
   type Output = Rotor;
-  fn mul(self,other:Rotor)->Self::Output {
-    Rotor(gp11(self.0, other.p1))
+  fn mul(self,r:Rotor)->Self::Output {
+    Rotor(gp11(&self.0, r.0))
   }
 }
 
 impl Mul<Translator> for Rotor {
   type Output = Motor;
   fn mul(self,t:Translator)->Self::Output {
-    Motor{p1: self.0, p2: gprt(self.0, t.p2)}
+    Motor{p1: self.0, p2: gprt(&self.0, &t.p2)}
   }
 }
 
 impl Mul<Motor> for Rotor {
   type Output = Motor;
   fn mul(self,m:Motor)->Self::Output {
-    Motor{p1: gp11(self.0,m.p1), p2: gp12(self.0,m.p2)}
+    Motor{p1: gp11(&self.0,&m.p1), p2: gp12(&self.0, &m.p2)}
   }
 }
 

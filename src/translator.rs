@@ -11,9 +11,7 @@ pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
 
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Translator {
-  pub p2:f32x4
-}
+pub struct Translator { pub p2:f32x4 }
 
 impl Translator {
 
@@ -47,7 +45,7 @@ impl Translator {
   }
 
   pub fn normalized(&self)->Translator {
-    let inv_norm = rsqrt_nr1(dp_bc(self.p2.into(),self.p2.into()));
+    let inv_norm = rsqrt_nr1(&dp_bc(self.p2.into(),self.p2.into()));
     Translator{p2: self.p2.into() * inv_norm}
   }
 
@@ -81,7 +79,7 @@ impl FnOnce<(Plane,)> for Translator { type Output = Plane; extern "rust-call" f
 impl Fn<(Plane,)> for Translator {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
     let tmp:f32x4 = self.p2.into() + f32x4::from_array([1.0,1.0,1.0,1.0]);
-    Plane{p0:sw02(args.0.p0, tmp)}
+    Plane(sw02(&args.0.0, &tmp))
   }
 }
 
@@ -89,8 +87,8 @@ impl FnMut<(Line,)> for Translator { extern "rust-call" fn call_mut(&mut self, a
 impl FnOnce<(Line,)> for Translator { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line {self.call(args)} }
 impl Fn<(Line,)> for Translator {
   extern "rust-call" fn call(&self, args: (Line,))->Line {
-    let (p1,p2) = swl2(args.0.p1, args.0.p2, self.p2.into()); // TODO p1 is just a, isn't this unnecessary
-    Line{p1:p1,p2:p2}
+    let (p1,p2) = swl2(&args.0.p1, &args.0.p2, self.p2.into()); // TODO p1 is just a, isn't this unnecessary
+    Line{p1,p2 }
   }
 }
 
@@ -98,7 +96,7 @@ impl FnMut<(Point,)> for Translator { extern "rust-call" fn call_mut(&mut self, 
 impl FnOnce<(Point,)> for Translator { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point {self.call(args)} }
 impl Fn<(Point,)> for Translator {
   extern "rust-call" fn call(&self, args: (Point,))->Point {
-    Point(sw32(args.0.p3, self.p2.into()))
+    Point(sw32(&args.0.0, &self.p2))
   }
 }
 
@@ -187,7 +185,7 @@ impl Neg for Translator {
 impl Not for Translator {
   type Output = Self;
   fn not(self)->Self::Output {
-    Translator { p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true])) }
+    Translator { p2: flip_signs(&self.p2, mask32x4::from_array([false,true,true,true])) }
   }
 }
 
@@ -195,8 +193,8 @@ impl Not for Translator {
 impl Mul<Rotor> for Translator {
   type Output = Motor;
   fn mul(self, r: Rotor) -> Self::Output {
-    let p2 = gptr(r.p1, self.p2);
-    Motor{p1: r.p1, p2}
+    let p2 = gptr(&r.0, &self.p2);
+    Motor{p1: r.0, p2}
   }
 }
 impl Mul<Translator> for Translator {
@@ -208,7 +206,7 @@ impl Mul<Translator> for Translator {
 impl Mul<Motor> for Translator {
   type Output = Motor;
   fn mul(self, m: Motor) -> Self::Output {
-    let p2 = gptr(m.p1, self.p2);
+    let p2 = gptr(&m.p1, &self.p2);
     Motor{p1: m.p1.into(), p2: p2 + m.p2}
   }
 }

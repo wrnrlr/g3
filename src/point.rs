@@ -98,7 +98,7 @@ impl Mul<f32> for Point {
 }
 
 impl MulAssign<f32> for Point {
-    fn mul_assign(&mut self, s: f32) { self.0 = self.0*f32x4::splat(s) }
+    fn mul_assign(&mut self, s: f32) { self.0 = &self.0*f32x4::splat(s) }
 }
 
 impl Div<f32> for Point {
@@ -107,7 +107,7 @@ impl Div<f32> for Point {
 }
 
 impl DivAssign<f32> for Point {
-    fn div_assign(&mut self, s: f32) { self.0 = self.0/f32x4::splat(s) }
+    fn div_assign(&mut self, s: f32) { self.0 = &self.0/f32x4::splat(s) }
 }
 
 // Reversion
@@ -118,7 +118,7 @@ impl Neg for Point {
 
 impl Not for Point {
   type Output = Plane;
-  fn not(self)->Plane { Plane { p0: self.0 }}
+  fn not(self)->Plane {Plane(self.0)}
 }
 
 // Geometric Product *
@@ -132,7 +132,7 @@ impl Mul<Point> for Point {
 impl Mul<Plane> for Point {
   type Output = Motor;
   fn mul(self, p: Plane) -> Motor {
-      let (p1,p2) = gp30(&p.p0, &self.0);
+      let (p1,p2) = gp30(&p.0, &self.0);
       Motor{p1,p2}
   }
 }
@@ -161,8 +161,7 @@ impl BitOr<Plane> for Point {
 impl BitOr<Line> for Point {
   type Output = Plane;
   fn bitor(self, l:Line) -> Plane {
-    let p0 = dotptl(&self.0,&l.p1);
-    Plane{p0:p0}
+    Plane(dotptl(&self.0,&l.p1))
   }
 }
 impl BitOr<Point> for Point {
@@ -173,11 +172,11 @@ impl BitOr<Point> for Point {
   }
 }
 
-// Meet Operator ^ (aka Wedge/Exteriour Product)
+// Meet Operator ^ (aka Wedge/Exterior Product)
 impl BitXor<Plane> for Point {
   type Output = Dual;
   fn bitxor(self, p:Plane) -> Dual {
-    let out = ext03::<true>(&p.p0,&self.0);
+    let out = ext03::<true>(&p.0,&self.0);
     Dual::new(0.0,out[0])
   }
 }

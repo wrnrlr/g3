@@ -33,7 +33,7 @@ impl Line {
   // two points, the squared norm provided here is the squared
   // distance between the two points (provided the points are
   // normalized). Returns $d^2 + e^2 + f^2$.
-  pub fn squared_norm(&self)->f32 { hi_dp(self.p1, self.p1)[0] }
+  pub fn squared_norm(&self)->f32 { hi_dp(&self.p1, &self.p1)[0] }
 
   // Normalize a line such that $\ell^2 = -1$.
   pub fn normalized(&self)->Line {
@@ -44,22 +44,22 @@ impl Line {
     //
     // 1/sqrt(l*~l) = 1/|b| + (b1 c1 + b2 c2 + b3 c3)/|b|^3 e0123
     //              = s + t e0123
-    let b2 = hi_dp_bc(self.p1, self.p1);
-    let s = rsqrt_nr1(b2);
-    let bc = hi_dp_bc(self.p1, self.p2);
+    let b2 = &hi_dp_bc(&self.p1, &self.p1);
+    let s = &rsqrt_nr1(b2);
+    let bc = hi_dp_bc(&self.p1, &self.p2);
     let t = bc * rcp_nr1(b2) * s;
 
     // p1 * (s + t e0123) = s * p1 - t p1_perp
-    let tmp = self.p2 * s;
-    Line{p1: self.p1 * s, p2: tmp - self.p1 * t}
+    let tmp = &self.p2 * s;
+    Line{p1: &self.p1 * s, p2: tmp - &self.p1 * t}
   }
 
   pub fn inverse(&self)->Line {
     // s, t computed as in the normalization
-    let b2 = hi_dp_bc(&self.p1, &self.p1);
-    let s = rsqrt_nr1(b2);
+    let b2 = &hi_dp_bc(&self.p1, &self.p1);
+    let s = &rsqrt_nr1(b2);
     let bc = hi_dp_bc(&self.p1, &self.p2);
-    let b2_inv = rcp_nr1(&b2);
+    let b2_inv = &rcp_nr1(&b2);
     let t = bc * b2_inv * s;
     let neg  = mask32x4::from_array([false, true, true, true]);
 
@@ -68,16 +68,16 @@ impl Line {
     // = s^2 p1 - 2 s t p1_perp
     // p2 * (s + t e0123)^2 = s^2 p2
     // NOTE: s^2 = b2_inv
-    let st = s * t * self.p1;
-    let p2 = flip_signs(self.p2 * b2_inv - (st + st), neg);
-    let p1 = flip_signs(self.p1 * b2_inv, neg);
+    let st = s * t * &self.p1;
+    let p2 = flip_signs(&(&self.p2 * b2_inv - (st + st)), neg);
+    let p1 = flip_signs(&(&self.p1 * b2_inv), neg);
     Line{p1,p2}
   }
 
   pub fn approx_eq(&self, other:Line, epsilon:f32)->bool {
     let esp = f32x4::splat(epsilon);
-    let cmp1 = f32x4_abs(self.p1 - other.p1) < esp;
-    let cmp2 = f32x4_abs(self.p2 - other.p2) < esp;
+    let cmp1 = f32x4_abs(&self.p1 - other.p1) < esp;
+    let cmp2 = f32x4_abs(&self.p2 - other.p2) < esp;
     cmp1 && cmp2
   }
 
@@ -87,14 +87,14 @@ impl Line {
   // or accelerate the motor's action. The line need not be a _simple bivector_
   // for the operation to be well-defined.
   pub fn exp(&self)->Motor {
-    let (p1,p2) = exp(self.p1, self.p1);
+    let (p1,p2) = exp(&self.p1, &self.p1);
     Motor{p1,p2}
   }
 
   pub fn reverse(self)->Line {
     Line {
-      p1: flip_signs(self.p1, mask32x4::from_array([false,true,true,true])),
-      p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))
+      p1: flip_signs(&self.p1, mask32x4::from_array([false,true,true,true])),
+      p2: flip_signs(&self.p2, mask32x4::from_array([false,true,true,true]))
     }
   }
 
@@ -108,7 +108,7 @@ impl Line {
 
 impl From<Branch> for Line {
   fn from(b: Branch) -> Self {
-    Line{p1: b.p1, p2: f32x4::splat(0.0)}
+    Line{p1: b.0, p2: f32x4::splat(0.0)}
   }
 }
 
@@ -193,9 +193,9 @@ impl BitXor<Plane> for Line {
 }
 impl BitXor<Line> for Line {
   type Output = Dual;
-  fn bitxor(self, other:Line)->Dual {
-    let dp1 = hi_dp_ss(self.p1, other.p2);
-    let dp2 = hi_dp_ss(other.p1, self.p2);
+  fn bitxor(self, l:Line)->Dual {
+    let dp1 = hi_dp_ss(&self.p1, &l.p2);
+    let dp2 = hi_dp_ss(&l.p1, &self.p2);
     Dual::new(0.0, dp1[0] + dp2[0])
   }
 }
@@ -222,20 +222,20 @@ impl BitOr<Point> for Line {
 
 impl BitOr<Line> for Line {
   type Output = f32;
-  fn bitor(self, other:Line)->f32 { dot11(self.p1, other.p1)[0] }
+  fn bitor(self, l:Line)->f32 { dot11(&self.p1, &l.p1)[0] }
 }
 
 impl BitOr<Plane> for Line {
   type Output = Plane;
-  fn bitor(self, p:Plane)->Plane { Plane{p0: dotlp(p.p0, self.p1, self.p2)} }
+  fn bitor(self, p:Plane)->Plane { Plane(dotlp(&p.0, &self.p1, &self.p2))}
 }
 
 // Geometric Product
 
 impl Mul<Line> for Line {
   type Output = Motor;
-  fn mul(self, other: Line) -> Motor {
-    let (p1,p2) = gpll(self.p1, self.p2, other.p1, other.p2);
+  fn mul(self, l: Line) -> Motor {
+    let (p1,p2) = gpll(&self.p1, &self.p2, &l.p1, &l.p2);
     Motor{ p1, p2 }
   }
 }

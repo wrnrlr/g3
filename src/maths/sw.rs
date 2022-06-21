@@ -93,10 +93,10 @@ pub fn sw20(a:&f32x4,b:&f32x4)->f32x4 {
 
   let a_yyzw = &shuffle_yyzw(a);
   let mut tmp = a_yyzw * a_yyzw;
-  tmp = f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), tmp + a_zzwy * a_zzwy);
+  tmp = f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), &(tmp + a_zzwy * a_zzwy));
   tmp -= a_wwyz * a_wwyz;
   p2 += tmp * shuffle_xwyz(b);
-  shuffle_xzwy(p2)
+  shuffle_xzwy(&p2)
 }
 
 // reflect point through plane
@@ -125,7 +125,7 @@ pub fn sw30(a:&f32x4, b:&f32x4) ->f32x4 {
   // a1^2+a2^2      | a2^2+a3^2      | a3^2+a1^2      | a1^2+a2^2
   tmp += a_zwyz * a_zwyz;
   // a1^2+a2^2+a3^2 | a2^2+a3^2-a1^2 | a3^2+a1^2-a2^2 | a1^2+a2^2-a3^2
-  tmp -= f32x4_xor(a_wyzw * a_wyzw, f32x4::from_array([-0.0,0.0,0.0,0.0]));
+  tmp -= f32x4_xor(&(a_wyzw * a_wyzw), f32x4::from_array([-0.0,0.0,0.0,0.0]));
 
   p3_out = p3_out + b * tmp;
 
@@ -144,7 +144,7 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= flip_signs(shuffle_wxxx(b) * shuffle_wzwy(b), [true,false,false,false].into());
+  tmp2 -= flip_signs(&shuffle_wxxx(b) * shuffle_wzwy(b), [true,false,false,false].into());
   tmp2 *= dc_scale;
 
   let mut tmp3 = b * b;
@@ -175,7 +175,7 @@ pub fn sw012(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), shuffle_wxxx(b) * shuffle_wzwy(b));
+  tmp2 -= f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), &(shuffle_wxxx(b) * shuffle_wzwy(b)));
   // Scale later with (a0, a3, a1, a2)
   tmp2 *= dc_scale;
 
@@ -380,7 +380,7 @@ pub fn sw02(a:&f32x4, b:&f32x4)->f32x4 {
 // p2: (e0123, e01, e02, e03)
 // p3: (e123, e032, e013, e021)
 // b * a * ~b
-pub fn sw32(a:f32x4, b:f32x4)->f32x4 {
+pub fn sw32(a:&f32x4, b:&f32x4)->f32x4 {
   // a0 e123 +
   // (a1 - 2 a0 b1) e032 +
   // (a2 - 2 a0 b2) e013 +

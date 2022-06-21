@@ -36,7 +36,7 @@ impl Motor {
   /// provided Euclidean axis.
   pub fn from_screw_axis(angle:f32, d:f32, l:Line)->Motor {
     let (p1,p2) = gpdl(-angle * 0.5, d * 0.5, &l.p1, &l.p2);
-    let (p1,p2) = exp(p1, p2);
+    let (p1,p2) = exp(&p1, &p2);
     Motor{p1,p2}
   }
 
@@ -53,7 +53,7 @@ impl Motor {
     // s, t computed as in the normalization
     let b2 = dp_bc(self.p1.into(), self.p1.into());
     let s = &rsqrt_nr1(b2.into());
-    let bc = dp_bc(flip_signs(self.p1.into(), mask32x4::from_array([true,false,false,false])), self.p2.into());
+    let bc = dp_bc(&flip_signs(self.p1.into(), mask32x4::from_array([true,false,false,false])), self.p2.into());
     let b2_inv = &rcp_nr1(b2.into());
     let t = bc * b2_inv * s;
     let neg = mask32x4::from_array([false,true,true,true]);
@@ -64,9 +64,9 @@ impl Motor {
     // (the scalar component above needs to be negated)
     // p2 * (s + t e0123)^2 = s^2 p2 NOTE: s^2 = b2_inv
     let st = s * t * &self.p1;
-    let mut p2 = &self.p2 * b2_inv - (flip_signs(st+st, mask32x4::from_array([true,false,false,false])));
-    p2 = flip_signs(p2, neg);
-    let p1 = flip_signs(&self.p1 * b2_inv, neg);
+    let mut p2 = &self.p2 * b2_inv - (flip_signs(&(st+st), mask32x4::from_array([true,false,false,false])));
+    p2 = flip_signs(&p2, neg);
+    let p1 = flip_signs(&(&self.p1 * b2_inv), neg);
     Motor{p1,p2}
   }
 
@@ -85,7 +85,7 @@ impl Motor {
     // normalized motor.
     let b2 = &dp_bc(self.p1.into(), self.p1.into());
     let s = &rsqrt_nr1(b2);
-    let bc = dp_bc(f32x4_xor(&self.p1, [-0.0,0.0,0.0,0.0].into()), self.p2.into());
+    let bc = dp_bc(&f32x4_xor(&self.p1, [-0.0,0.0,0.0,0.0].into()), self.p2.into());
     let t = bc * rcp_nr1(b2) * s;
 
     // (s + t e0123) * motor =
@@ -99,7 +99,7 @@ impl Motor {
     // (s c2 - t b2) e02 +
     // (s c3 - t b3) e03
     let tmp = &self.p2 * s;
-    let p2 = tmp - (f32x4_xor(&self.p1 * t, [-0.0,0.0,0.0,0.0].into()));
+    let p2 = tmp - (f32x4_xor(&(&self.p1 * t), [-0.0,0.0,0.0,0.0].into()));
     let p1 = &self.p1 * s;
     Motor{p1,p2}
   }
@@ -130,8 +130,8 @@ impl Motor {
 
   pub fn reverse(self)->Motor {
     Motor {
-      p1: flip_signs(self.p1, mask32x4::from_array([false,true,true,true])),
-      p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))
+      p1: flip_signs(&self.p1, mask32x4::from_array([false,true,true,true])),
+      p2: flip_signs(&self.p2, mask32x4::from_array([false,true,true,true]))
     }
   }
 
@@ -151,7 +151,7 @@ impl Display for Motor {
   }
 }
 
-impl From<Rotor> for Motor { fn from(r:Rotor)->Motor { Motor{p1: r.p1, p2: f32x4::splat(0.0)} } }
+impl From<Rotor> for Motor { fn from(r:Rotor)->Motor { Motor{p1: r.0, p2: f32x4::splat(0.0)} } }
 
 impl From<Translator> for Motor { fn from(t:Translator)->Motor { Motor{p1: f32x4::from_array([1.0,0.0,0.0,0.0]), p2: t.p2} } }
 
@@ -159,7 +159,7 @@ impl FnMut<(Plane,)> for Motor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Plane,)> for Motor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
 impl Fn<(Plane,)> for Motor {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0:sw012(&args.0.p0, &self.p1, &self.p2)}
+    Plane(sw012(&args.0.0, &self.p1, &self.p2))
   }
 }
 
@@ -170,7 +170,7 @@ impl FnOnce<(Line,)> for Motor { type Output = Line; extern "rust-call" fn call_
 impl Fn<(Line,)> for Motor {
   extern "rust-call" fn call(&self, args: (Line,))->Self::Output {
     let (p1,p2) = swml(&args.0.p1, &args.0.p2, &self.p1, &self.p2);
-    Line{p1:p1,p2:p2}
+    Line{p1,p2 }
   }
 }
 
@@ -181,7 +181,7 @@ impl FnOnce<(Point,)> for Motor { type Output = Point; extern "rust-call" fn cal
 // Conjugates a point p with this motor and returns the result.
 impl Fn<(Point,)> for Motor {
   extern "rust-call" fn call(&self, args: (Point,))->Point {
-    let p3 = sw312(&args.0.p3, &self.p1, &self.p2);
+    let p3 = sw312(&args.0.0, &self.p1, &self.p2);
     Point(p3)
   }
 }
@@ -223,9 +223,9 @@ impl Add for Motor {
 }
 
 impl AddAssign for Motor {
-  fn add_assign(&mut self, othmr: Self) {
-    self.p1 += othmr.p1;
-    self.p2 += othmr.p2;
+  fn add_assign(&mut self, m: Self) {
+    self.p1 += m.p1;
+    self.p2 += m.p2;
   }
 }
 
@@ -297,44 +297,44 @@ impl Neg for Motor {
 impl Mul<Rotor> for Motor {
   type Output = Self;
   fn mul(self, r:Rotor)->Motor {
-    let p1 = gp11(self.p1, r.p1);
-    let p2 = gp21(r.p1, self.p2);
+    let p1 = gp11(&self.p1, &r.0);
+    let p2 = gp21(&r.0, &self.p2);
     Motor{p1,p2}
   }
 }
 
 impl MulAssign<Rotor> for Motor {
   fn mul_assign(&mut self, r: Rotor) {
-    self.p1 = gp11(self.p1.into(), r.p1);
-    self.p2 = gp21(r.p1, self.p2.into());
+    self.p1 = gp11(&self.p1, &r.0);
+    self.p2 = gp21(&r.0, &self.p2);
   }
 }
 
 impl Mul<Translator> for Motor {
   type Output = Motor;
   fn mul(self, t:Translator)->Motor {
-    let p2 = gprt(self.p1, t.p2) + self.p2;
-    Motor{p1:self.p1.into(), p2:p2}
+    let p2 = gprt(&self.p1, &t.p2) + self.p2;
+    Motor{p1:self.p1.into(), p2}
   }
 }
 
 impl MulAssign<Translator> for Motor {
   fn mul_assign(&mut self, t: Translator) {
-    self.p1 = gprt(self.p1.into(), t.p2) + self.p2.into()
+    self.p1 = gprt(self.p1.into(), &t.p2) + self.p2.into()
   }
 }
 
 impl Mul<Motor> for Motor {
   type Output = Motor;
-  fn mul(self, other:Motor)->Motor {
-    let (p1,p2) = gpmm(self.p1, self.p2, other.p1, other.p2);
+  fn mul(self, m:Motor)->Motor {
+    let (p1,p2) = gpmm(&self.p1, &self.p2, &m.p1, &m.p2);
     Motor{p1, p2}
   }
 }
 
 impl MulAssign<Motor> for Motor {
-  fn mul_assign(&mut self, other:Motor) {
-    let (p1,p2) = gpmm(self.p1.into(), self.p2.into(), other.p1, other.p2);
+  fn mul_assign(&mut self, m:Motor) {
+    let (p1,p2) = gpmm(self.p1.into(), self.p2.into(), &m.p1, &m.p2);
     self.p1 = p1; self.p2 = p2;
   }
 }

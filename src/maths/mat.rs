@@ -2,7 +2,7 @@ use std::simd::{f32x4};
 use crate::maths::{f32x4_xor, shuffle_wwxx, shuffle_wxxx, shuffle_wywx, shuffle_wyzx, shuffle_xxxx, shuffle_xzxx, shuffle_ywyx, shuffle_yxwx, shuffle_yzwx, shuffle_yzxx, shuffle_zwxx, shuffle_zwyx, shuffle_zxzx, shuffle_zzwx};
 
 // false, false, for rotor
-pub fn mat4x4_12(b:f32x4)->(f32x4,f32x4,f32x4,f32x4) {
+pub fn mat4x4_12(b:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {
   let buf = *(b * b).as_array();
   let b0_2 = buf[0];
   let b1_2 = buf[1];
@@ -11,29 +11,29 @@ pub fn mat4x4_12(b:f32x4)->(f32x4,f32x4,f32x4,f32x4) {
 
   let mut c0 = b * shuffle_xzxx(b);
   let mut tmp = shuffle_ywyx(b) * shuffle_yxwx(b);
-  tmp = f32x4_xor(f32x4::from([0.0, -0.0, 0.0, 0.0]), tmp); // TODO why reference?
-  c0 = f32x4::from([1.0, 2.0, 2.0, 0.0]) * (c0 + tmp);
+  tmp = f32x4_xor([0.0, -0.0, 0.0, 0.0].into(), tmp); // TODO why reference?
+  c0 = [1.0, 2.0, 2.0, 0.0].into() * (c0 + tmp);
   c0 = c0 - f32x4::splat(b3_2 + b2_2);
 
   let c1 = b * shuffle_wywx(b);
   let mut tmp = shuffle_zwxx(b) * shuffle_ywyx(b);
-  tmp = f32x4_xor(f32x4::from([0.0, 0.0, -0.0, 0.0]), tmp); // TODO why reference?
-  let mut c1 = f32x4::from([2.0, -1.0, 2.0, 0.0]) * (c1 + tmp);
-  c1 = c1 + f32x4::from([0.0, b0_2+b2_2, 0.0, 0.0]);
+  tmp = f32x4_xor([0.0, 0.0, -0.0, 0.0].into(), tmp); // TODO why reference?
+  let mut c1 = [2.0, -1.0, 2.0, 0.0].into() * (c1 + tmp);
+  c1 = c1 + [0.0, b0_2+b2_2, 0.0, 0.0].into();
 
-  let mut c2 = f32x4_xor(f32x4::from([-0.0, 0.0, -0.0, 0.0]), b * shuffle_zxzx(b));
+  let mut c2 = f32x4_xor([-0.0, 0.0, -0.0, 0.0].into(), b * shuffle_zxzx(b));
   c2 = c2 + (shuffle_yzxx(b) * shuffle_wwxx(b));
-  c2 = c2 * f32x4::from([2.0, 2.0, 1.0, 0.0]);
-  c2 = c2 + f32x4::from([0.0, 0.0, b3_2 - b1_2, 0.0]);
+  c2 = c2 * [2.0, 2.0, 1.0, 0.0].into();
+  c2 = c2 + [0.0, 0.0, b3_2 - b1_2, 0.0].into();
 
   // TODO why is c3 here
   // c3 = _mm_add_ps(c3, _mm_set_ps(b0_2 + b1_2 + b2_2 + b3_2, 0.f, 0.f, 0.f));
-  let c3 = f32x4::from([0.0, 0.0, 0.0, b0_2 + b1_2 + b2_2 + b3_2]);
+  let c3 = [0.0, 0.0, 0.0, b0_2 + b1_2 + b2_2 + b3_2].into();
   (c0,c1,c2,c3)
 }
 
 // true, false, for motor
-pub fn mat4x4_12_m(b:f32x4, c:f32x4)->(f32x4,f32x4,f32x4,f32x4) {
+pub fn mat4x4_12_m(b:&f32x4, c:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {
   let buf = *(b * b).as_array();
   let b0_2 = buf[0];
   let b1_2 = buf[1];
@@ -42,20 +42,20 @@ pub fn mat4x4_12_m(b:f32x4, c:f32x4)->(f32x4,f32x4,f32x4,f32x4) {
 
   let mut c0 = b * shuffle_xzxx(b);
   let mut tmp = shuffle_ywyx(b) * shuffle_yxwx(b);
-  tmp = f32x4_xor(f32x4::from([0.0, -0.0, 0.0, 0.0]), tmp);
-  c0 = f32x4::from([1.0, 2.0, 2.0, 0.0]) * (c0 + tmp);
-  c0 = c0 - f32x4::from([b3_2 + b2_2, 0.0, 0.0, 0.0]);
+  tmp = f32x4_xor([0.0, -0.0, 0.0, 0.0].into(), tmp);
+  c0 = [1.0, 2.0, 2.0, 0.0].into() * (c0 + tmp);
+  c0 = c0 - [b3_2 + b2_2, 0.0, 0.0, 0.0].into();
 
   let c1 = b * shuffle_wywx(b);
   let mut tmp = shuffle_zwxx(b) * shuffle_ywyx(b);
-  tmp = f32x4_xor(f32x4::from([0.0, 0.0, -0.0, 0.0]), tmp);
-  let mut c1 = f32x4::from([2.0, -1.0, 2.0, 0.0]) * (c1 + tmp);
-  c1 = c1 + f32x4::from([0.0, b0_2+b2_2, 0.0, 0.0]);
+  tmp = f32x4_xor([0.0, 0.0, -0.0, 0.0].into(), tmp);
+  let mut c1 = [2.0, -1.0, 2.0, 0.0].into() * (c1 + tmp);
+  c1 = c1 + [0.0, b0_2+b2_2, 0.0, 0.0].into();
 
-  let mut c2 = f32x4_xor(f32x4::from([-0.0, 0.0, -0.0, 0.0]), b * shuffle_zxzx(b));
+  let mut c2 = f32x4_xor([-0.0, 0.0, -0.0, 0.0].into(), b * shuffle_zxzx(b));
   c2 = c2 + (shuffle_yzxx(b) * shuffle_wwxx(b));
-  c2 = c2 * f32x4::from([2.0, 2.0, 1.0, 0.0]);
-  c2 = c2 + f32x4::from([0.0, 0.0, b3_2 - b1_2, 0.0]);
+  c2 = c2 * [2.0, 2.0, 1.0, 0.0].into();
+  c2 = c2 + [0.0, 0.0, b3_2 - b1_2, 0.0].into();
 
   // c2 = _mm_xor_ps(_mm_set_ps(0.f, -0.f, 0.f, -0.f), _mm_mul_ps(b, KLN_SWIZZLE(b, 0, 2, 0, 2)));
   // c2 = _mm_add_ps(c2, _mm_mul_ps(KLN_SWIZZLE(b, 0, 0, 2, 1), KLN_SWIZZLE(b, 0, 0, 3, 3)));
@@ -66,7 +66,7 @@ pub fn mat4x4_12_m(b:f32x4, c:f32x4)->(f32x4,f32x4,f32x4,f32x4) {
   c3 = c3 + shuffle_wxxx(b) * shuffle_zzwx(c);
   c3 = c3 + shuffle_yzwx(b) * shuffle_xxxx(c);
   tmp = shuffle_zwyx(b) * shuffle_wyzx(c);
-  c3 = f32x4::from([2.0,2.0,2.0,0.0]) * (tmp - c3);
+  c3 = [2.0,2.0,2.0,0.0].into() * (tmp - c3);
 
   // __m128& c3 = out[3];
   // c3 = _mm_mul_ps(b, KLN_SWIZZLE(*c, 0, 1, 3, 1));
@@ -76,7 +76,7 @@ pub fn mat4x4_12_m(b:f32x4, c:f32x4)->(f32x4,f32x4,f32x4,f32x4) {
   // c3  = _mm_mul_ps(_mm_set_ps(0.f, 2.f, 2.f, 2.f), _mm_sub_ps(tmp, c3));
 
   // c3 = _mm_add_ps(c3, _mm_set_ps(b0_2 + b1_2 + b2_2 + b3_2, 0.f, 0.f, 0.f));
-  c3 = c3 + f32x4::from([0.0, 0.0, 0.0, b0_2 + b1_2 + b2_2 + b3_2]);
+  c3 = c3 + [0.0, 0.0, 0.0, b0_2 + b1_2 + b2_2 + b3_2].into();
 
   (c0,c1,c2,c3)
 }

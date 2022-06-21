@@ -130,5 +130,5 @@ impl BitAnd<Point> for Horizon {
 // Inner Product, |
 impl BitOr<Plane> for Horizon {
   type Output = Plane;
-  fn bitor(self, p:Plane)->Plane { Plane{p0: dotilp(&p.p0, &self.p2)} }
+  fn bitor(self, p:Plane)->Plane { Plane(dotilp(&p.0, &self.p2)) }
 }

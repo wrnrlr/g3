@@ -1,36 +1,33 @@
-use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4},ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn}};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4},ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn}};
 use crate::{Dual, Point, Line, Horizon, Branch, Motor,maths::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc, rsqrt_nr1, sqrt_nr1, sw00, sw10, sw20, sw30, ext00, ext02, ext03, extpb, gp00, gp03, dot00, dot03, dotpil, dotpl}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
-pub const E0:Plane = Plane{p0:f32x4::from_array([1.0,0.0,0.0,0.0])};
-pub const E1:Plane = Plane{p0:f32x4::from_array([0.0,1.0,0.0,0.0])};
-pub const E2:Plane = Plane{p0:f32x4::from_array([0.0,0.0,1.0,0.0])};
-pub const E3:Plane = Plane{p0:f32x4::from_array([0.0,0.0,0.0,1.0])};
+pub const E0:Plane = Plane([1.0,0.0,0.0,0.0].into());
+pub const E1:Plane = Plane([0.0,1.0,0.0,0.0].into());
+pub const E2:Plane = Plane([0.0,0.0,1.0,0.0].into());
+pub const E3:Plane = Plane([0.0,0.0,0.0,1.0].into());
 
 // form: ax + by + cz + d
 pub fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
+// p0: (e0, e1, e2, e3)
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Plane {
-  // p0: (e0, e1, e2, e3)
-  // d, a, b, c
-  pub p0:f32x4
-}
+pub struct Plane (pub f32x4);
 
 impl Plane {
-  #[inline] pub fn d(&self)->f32 { self.p0[0] }
+  #[inline] pub fn d(&self)->f32 { self.0[0] }
   #[inline] pub fn e0(&self)->f32 { self.d() }
-  #[inline] pub fn x(&self)->f32 { self.p0[1] }
+  #[inline] pub fn x(&self)->f32 { self.0[1] }
   #[inline] pub fn e1(&self)->f32 { self.x() }
-  #[inline] pub fn y(&self)->f32 { self.p0[2] }
+  #[inline] pub fn y(&self)->f32 { self.0[2] }
   #[inline] pub fn e2(&self)->f32 { self.y() }
-  #[inline] pub fn z(&self)->f32 { self.p0[3] }
+  #[inline] pub fn z(&self)->f32 { self.0[3] }
   #[inline] pub fn e3(&self)->f32 { self.z() }
 
   // The constructor performs the rearrangement so the plane can be specified
   // in the familiar form: ax + by + cz + d
-  pub fn new(a:f32,b:f32,c:f32,d:f32)->Plane { Plane{p0:f32x4::from_array([d,a,b,c]) }}
+  pub fn new(a:f32,b:f32,c:f32,d:f32)->Plane { Plane([d,a,b,c].into())}
 
   // Normalize this plane $p$ such that $p \cdot p = 1$.
   //
@@ -39,9 +36,9 @@ impl Plane {
   // normalized rotor between two planes with the geometric product `*` also
   // requires that the planes are normalized.
   pub fn normalized(&self)->Plane {
-    let mut inv_norm  = rsqrt_nr1(&hi_dp_bc(&self.p0, &self.p0));
+    let mut inv_norm  = rsqrt_nr1(&hi_dp_bc(&self.0, &self.0));
     inv_norm = inv_norm + f32x4::from_array([1.0, 0.0, 0.0, 0.0]);
-    Plane{p0: inv_norm * &self.p0}
+    Plane(inv_norm * &self.0)
   }
 
   // Compute the plane norm, which is often used to compute distances
@@ -51,16 +48,16 @@ impl Plane {
   // $P\vee\ell$ containing both $\ell$ and $P$ will have a norm equivalent
   // to the distance between $P$ and $\ell$.
   pub fn norm(&self)->f32 {
-    sqrt_nr1(hi_dp(self.0, self.0))[0]
+    sqrt_nr1(&hi_dp(&self.0, &self.0))[0]
   }
 
   pub fn inverse(&self)->Plane {
-    let inv_norm = &rsqrt_nr1(&hi_dp_bc(&self.p0, &self.p0));
-    Plane{p0: inv_norm * inv_norm * self.0}
+    let inv_norm = &rsqrt_nr1(&hi_dp_bc(&self.0, &self.0));
+    Plane(inv_norm * inv_norm * &self.0)
   }
 
   pub fn approx_eq(&self, other:Plane, epsilon:f32)->bool {
-    let diff = f32x4_abs(self.0 - other.p0);
+    let diff = f32x4_abs(&self.0 - other.0);
     diff < f32x4::splat(epsilon)
   }
 
@@ -96,7 +93,7 @@ impl FnMut<(Plane,)> for Plane { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Plane,)> for Plane { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane {self.call(args)} }
 impl Fn<(Plane,)> for Plane {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0:sw00(self.0, &args.0.p0)}
+    Plane(sw00(&self.0, &args.0.0))
   }
 }
 
@@ -107,7 +104,7 @@ impl FnMut<(Point,)> for Plane { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Point,)> for Plane { type Output = Point; extern "rust-call" fn call_once(self, args: (Point,))->Point { self.call(args) }}
 impl Fn<(Point,)> for Plane {
   extern "rust-call" fn call(&self, args: (Point,))->Point {
-    Point(sw30(self.0, args.0.p3))
+    Point(sw30(&self.0, &args.0.0))
   }
 }
 
@@ -119,8 +116,8 @@ impl FnOnce<(Line,)> for Plane { type Output = Line; extern "rust-call" fn call_
 impl Fn<(Line,)> for Plane {
   extern "rust-call" fn call(&self, args: (Line,)) -> Line {
     let l = args.0;
-    let (p1, mut p2) = sw10(self.0, &l.p1);
-    let p2_tmp = sw20(self.0, &l.p2);
+    let (p1, mut p2) = sw10(&self.0, &l.p1);
+    let p2_tmp = sw20(&self.0, &l.p2);
     p2 += p2_tmp;
     Line{p1,p2}
   }
@@ -128,45 +125,45 @@ impl Fn<(Line,)> for Plane {
 
 impl Add<Plane> for Plane {
   type Output = Plane;
-  fn add(self, other: Plane) -> Plane { Plane { p0:self.p0+other.p0 } }
+  fn add(self, p: Plane) -> Plane { Plane(self.0+p.0) }
 }
 
 impl AddAssign for Plane {
-  fn add_assign(&mut self, other: Self) { self.p0 += other.p0 }
+  fn add_assign(&mut self, p: Self) { self.0 += p.0 }
 }
 
 impl Sub<Plane> for Plane {
   type Output = Plane;
-  fn sub(self, other: Plane) -> Plane { Plane { p0:self.p0-other.p0 } }
+  fn sub(self, p: Plane) -> Plane { Plane(self.0-p.0) }
 }
 
 impl SubAssign for Plane {
-  fn sub_assign(&mut self, other: Self) { self.p0 -= other.p0 }
+  fn sub_assign(&mut self, p: Self) { self.0 -= p.0 }
 }
 
 impl Mul<f32> for Plane {
   type Output = Plane;
-  fn mul(self, s: f32) -> Plane { Plane { p0:self.p0*f32x4::splat(s) } }
+  fn mul(self, s: f32) -> Plane { Plane(self.0*f32x4::splat(s)) }
 }
 
 impl MulAssign<f32> for Plane {
-  fn mul_assign(&mut self, s: f32) { self.p0 *= f32x4::splat(s) }
+  fn mul_assign(&mut self, s: f32) { self.0 *= f32x4::splat(s) }
 }
 
 impl Div<f32> for Plane {
   type Output = Plane;
-  fn div(self, s: f32) -> Plane { Plane { p0:self.p0/f32x4::splat(s) } }
+  fn div(self, s: f32) -> Plane { Plane(self.0/f32x4::splat(s)) }
 }
 
 impl DivAssign<f32> for Plane {
-  fn div_assign(&mut self, s: f32) { self.p0 /= f32x4::splat(s) }
+  fn div_assign(&mut self, s: f32) { self.0 /= f32x4::splat(s) }
 }
 
 // Unary minus (leaves displacement from origin untouched, changing orientation only)
 impl Neg for Plane {
   type Output = Self;
   fn neg(self)->Self::Output {
-      Plane { p0:flip_signs(self.p0, mask32x4::from_array([false,true,true,true])) }
+      Plane(flip_signs(&self.0, [false,true,true,true].into()) )
   }
 }
 
@@ -174,14 +171,14 @@ impl Neg for Plane {
 impl Mul<Point> for Plane {
   type Output = Motor;
   fn mul(self, a: Point) -> Motor {
-    let (p1,p2) = gp03(&self.p0,a.p3);
+    let (p1,p2) = gp03(&self.0,&a.0);
     Motor{p1,p2}
   }
 }
 impl Mul<Plane> for Plane {
   type Output = Motor;
   fn mul(self, p: Plane) -> Motor {
-    let (p1,p2) = gp00(&self.p0,&p.p0);
+    let (p1,p2) = gp00(&self.0,&p.0);
     Motor{p1,p2}
   }
 }
@@ -205,27 +202,27 @@ impl Div<Plane> for Plane {
 impl BitOr<Plane> for Plane {
   type Output = f32;
   fn bitor(self, p:Plane) -> f32 {
-    dot00(&self.p0,&p.p0)[0]
+    dot00(&self.0,&p.0)[0]
   }
 }
 impl BitOr<Line> for Plane {
   type Output = Plane;
   fn bitor(self, l:Line) -> Plane {
-    let p0 = dotpl(&self.p0,&l.p1,&l.p2);
-    Plane{p0}
+    let p0 = dotpl(&self.0,&l.p1,&l.p2);
+    Plane(p0)
   }
 }
 impl BitOr<Horizon> for Plane {
   type Output = Plane;
   fn bitor(self, l: Horizon) -> Plane {
-    let p0 = dotpil(&self.p0,&l.p2);
-    Plane{p0}
+    let p0 = dotpil(&self.0,&l.p2);
+    Plane(p0)
   }
 }
 impl BitOr<Point> for Plane {
   type Output = Line;
   fn bitor(self, a:Point) -> Line {
-    let (p1,p2) = dot03(&self.p0,a.p3);
+    let (p1,p2) = dot03(&self.0,&a.0);
     Line{p1,p2}
   }
 }
@@ -234,34 +231,34 @@ impl BitOr<Point> for Plane {
 impl BitXor<Plane> for Plane {
   type Output = Line;
   fn bitxor(self, p:Plane) -> Line {
-    let (p1,p2) = ext00(self.p0,p.p0);
+    let (p1,p2) = ext00(&self.0,&p.0);
     Line{p1,p2}
   }
 }
 impl BitXor<Line> for Plane {
   type Output = Point;
   fn bitxor(self, l:Line) -> Point {
-    let tmp1 = extpb(self.0,&l.p1);
-    let tmp2 = ext02(self.0,l.p2);
+    let tmp1 = extpb(&self.0,&l.p1);
+    let tmp2 = ext02(&self.0,&l.p2);
     Point(tmp1+tmp2)
   }
 }
 impl BitXor<Horizon> for Plane {
   type Output = Point;
   fn bitxor(self, l: Horizon) -> Point {
-    Point(ext02(self.p0, l.p2))
+    Point(ext02(&self.0, &l.p2))
   }
 }
 impl BitXor<Branch> for Plane {
   type Output = Point;
   fn bitxor(self, b:Branch) -> Point {
-    Point(extpb(self.0, &b.0))
+    Point(extpb(&self.0, &b.0))
   }
 }
 impl BitXor<Point> for Plane {
   type Output = Dual;
   fn bitxor(self, p:Point) -> Dual {
-    let tmp = ext03::<false>(&self.p0,p.p3);
+    let tmp = ext03::<false>(&self.0,&p.0);
     Dual::new(0.0, tmp[0])
   }
 }
@@ -274,4 +271,4 @@ impl BitAnd<Point> for Plane {
   }
 }
 
-impl Not for Plane {type Output = Point;fn not(self)->Point{Point(self.p0)}}
+impl Not for Plane {type Output = Point;fn not(self)->Point{Point(self.0)}}
