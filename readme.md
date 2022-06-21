@@ -5,15 +5,13 @@ Rust crate for plane-based projective geometric-algebra for 3D aka the Clifford 
 
 ## API
 
-* Invariants:
-  * `Point`
-  * `Line`, `Branch` and `IdealLine`
-  * `Plane`
-* Variants:
-  * `Direction`
-  * `Translator`
-  * `Rotor`
-  * `Motor`
+## Plane
+
+## Point
+
+## Line
+
+## 
 
 ### Meet Operation `^`
 
@@ -31,7 +29,7 @@ Rust crate for plane-based projective geometric-algebra for 3D aka the Clifford 
 
 ## Get Started
 
-This software uses some of Rust experimental feautures like `std_simd` and `fn_traits` so make sure to compile using the nightly release.
+This software uses some of Rust experimental feautures like `fn_traits` so make sure to compile using the nightly release.
 
 ```bash
 rustup update -- nightly
@@ -69,12 +67,4 @@ cargo +nightly run --example elements --features="mirror"
 * [Paper with CGA](https://www.researchgate.net/profile/Leo-Dorst/publication/266149530_Total_Least_Squares_Fitting_of_k-Spheres_in_n-D_Euclidean_Space_Using_an_n2-D_Isometric_Representation/links/561431ce08ae4ce3cc6391ac/Total-Least-Squares-Fitting-of-k-Spheres-in-n-D-Euclidean-Space-Using-an-n-2-D-Isometric-Representation.pdf)
 * [New Developments in Projective Geometric Algebra](http://terathon.com/gdc21_lengyel.pdf)
 * [Flectors](https://projectivegeometricalgebra.org/wiki/index.php?title=Flector)
-
-## Status
-
-This software is very much still a work in progress.
-
-* Todo
-  * Integrate with the baryon graphics library
-    * WebGPU shaders to draw basic elements: // WebGPU tutorial: https://github.com/jack1232/webgpu11
-  * Rename `reverse` methods to `conjugate` for Clifford Conjugate, see [section 1.5](https://observablehq.com/@enkimute/glu-lookat-in-3d-pga)
+* [Space & Antispace](https://projectivegeometricalgebra.org/Lengyel-SpaceAntispace.pdf)
