@@ -35,7 +35,7 @@ pub fn sw00(a:&f32x4,b:&f32x4)->f32x4 {
 
   // Right block
   let a_yyzw = &shuffle_yyzw(a);
-  let mut tmp2 = f32x4_xor(a_yyzw * a_yyzw, [-0.0, 0.0, 0.0, 0.0].into());
+  let mut tmp2 = f32x4_xor(&(a_yyzw * a_yyzw), &[-0.0, 0.0, 0.0, 0.0].into());
   tmp2 -= a_zzwy * a_zzwy;
   tmp2 -= a_wwyz * a_wwyz;
   tmp2 *= b;
@@ -65,16 +65,16 @@ pub fn sw10(a:&f32x4,b:&f32x4)->(f32x4,f32x4) {
 
   let mut tmp = a_zyzw * a_zyzw;
   tmp += a_wzwy * a_wzwy;
-  tmp = f32x4_xor(tmp, [-0.0, 0.0, 0.0, 0.0].into());
+  tmp = f32x4_xor(&tmp, &[-0.0, 0.0, 0.0, 0.0].into());
   tmp = (a_ywyz * a_ywyz) - tmp;
   tmp = shuffle_xwyz(b) * tmp;
 
-  let p1 = shuffle_xzwy(p1 + tmp);
+  let p1 = shuffle_xzwy(&(p1 + tmp));
 
   let mut p2 = a_zyzw * b_xzwy;
   p2 = p2 - a_wzwy * b;
   p2 = p2 * shuffle_xxxx(a) * two_zero;
-  p2 = shuffle_xzwy(p2);
+  p2 = shuffle_xzwy(&p2);
 
   (p1,p2)
 }
@@ -93,7 +93,7 @@ pub fn sw20(a:&f32x4,b:&f32x4)->f32x4 {
 
   let a_yyzw = &shuffle_yyzw(a);
   let mut tmp = a_yyzw * a_yyzw;
-  tmp = f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), &(tmp + a_zzwy * a_zzwy));
+  tmp = f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(tmp + a_zzwy * a_zzwy));
   tmp -= a_wwyz * a_wwyz;
   p2 += tmp * shuffle_xwyz(b);
   shuffle_xzwy(&p2)
@@ -125,7 +125,7 @@ pub fn sw30(a:&f32x4, b:&f32x4) ->f32x4 {
   // a1^2+a2^2      | a2^2+a3^2      | a3^2+a1^2      | a1^2+a2^2
   tmp += a_zwyz * a_zwyz;
   // a1^2+a2^2+a3^2 | a2^2+a3^2-a1^2 | a3^2+a1^2-a2^2 | a1^2+a2^2-a3^2
-  tmp -= f32x4_xor(&(a_wyzw * a_wyzw), f32x4::from_array([-0.0,0.0,0.0,0.0]));
+  tmp -= f32x4_xor(&(a_wyzw * a_wyzw), &f32x4::from_array([-0.0,0.0,0.0,0.0]));
 
   p3_out = p3_out + b * tmp;
 
@@ -144,7 +144,7 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= flip_signs(&shuffle_wxxx(b) * shuffle_wzwy(b), [true,false,false,false].into());
+  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)), &[true,false,false,false].into());
   tmp2 *= dc_scale;
 
   let mut tmp3 = b * b;
@@ -175,7 +175,7 @@ pub fn sw012(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), &(shuffle_wxxx(b) * shuffle_wzwy(b)));
+  tmp2 -= f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(shuffle_wxxx(b) * shuffle_wzwy(b)));
   // Scale later with (a0, a3, a1, a2)
   tmp2 *= dc_scale;
 
@@ -197,7 +197,7 @@ pub fn sw012(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   p += tmp2 * shuffle_xwyz(a);
   p += tmp3 * a; // TODO should be a[1]
 
-  let tmp5 = hi_dp(tmp4, a);
+  let tmp5 = hi_dp(&tmp4, a);
   let out = p + tmp5;
   out
 }
@@ -215,7 +215,7 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = &shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
-  tmp -= flip_signs(tmp2, [true, false, false, false].into());
+  tmp -= flip_signs(&tmp2, &[true, false, false, false].into());
 
   let b_xxxx = &shuffle_xxxx(b);
   let scale = [0.0, 2.0, 2.0, 2.0].into();
@@ -279,7 +279,7 @@ pub fn swrl(a1:&f32x4, a2:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = &shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
-  tmp -= flip_signs(tmp2, [true, false, false, false].into());
+  tmp -= flip_signs(&tmp2, [true, false, false, false].into());
 
   let b_xxxx = &shuffle_xxxx(b);
   let scale = [0.0, 2.0, 2.0, 2.0].into();
@@ -318,7 +318,7 @@ pub fn swrb(a:&f32x4,b:&f32x4)->f32x4 {
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = &shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
-  tmp -= f32x4_xor(tmp2, [-0.0, 0.0, 0.0, 0.0].into());
+  tmp -= f32x4_xor(&tmp2, &[-0.0, 0.0, 0.0, 0.0].into());
 
   let b_xxxx = &shuffle_xxxx(b);
   let scale = [0.0, 2.0, 2.0, 2.0].into();
@@ -371,7 +371,7 @@ pub fn sw02(a:&f32x4, b:&f32x4)->f32x4 {
   let mut inv_b = &rcp_nr1(b);
   // 2 / b0
   inv_b = &add_ss(inv_b, inv_b);
-  inv_b = swizzle!(inv_b, f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
+  inv_b = swizzle!(&inv_b, f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
   a + mul_ss(&tmp, inv_b)
 }
 
@@ -404,7 +404,7 @@ pub fn swl2(a:&f32x4, d:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   // Add and subtract the same quantity in the low component to produce a cancellation
   p2_out -= shuffle_xwyz(a) * shuffle_xzwy(c);
   p2_out -= flip_signs(a * shuffle_xxxx(c), mask32x4::from_array([true, false, false, false]));
-  (a.into(), p2_out + p2_out + d)
+  (*a.clone(), p2_out + p2_out + d)
 }
 
 pub fn sw312(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {

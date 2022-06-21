@@ -11,17 +11,17 @@ pub fn mat4x4_12(b:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {
 
   let mut c0 = b * shuffle_xzxx(b);
   let mut tmp = shuffle_ywyx(b) * shuffle_yxwx(b);
-  tmp = f32x4_xor([0.0, -0.0, 0.0, 0.0].into(), tmp); // TODO why reference?
+  tmp = f32x4_xor(&[0.0, -0.0, 0.0, 0.0].into(), tmp); // TODO why reference?
   c0 = [1.0, 2.0, 2.0, 0.0].into() * (c0 + tmp);
   c0 = c0 - f32x4::splat(b3_2 + b2_2);
 
   let c1 = b * shuffle_wywx(b);
   let mut tmp = shuffle_zwxx(b) * shuffle_ywyx(b);
-  tmp = f32x4_xor([0.0, 0.0, -0.0, 0.0].into(), tmp); // TODO why reference?
+  tmp = f32x4_xor(&[0.0, 0.0, -0.0, 0.0].into(), &tmp); // TODO why reference?
   let mut c1 = [2.0, -1.0, 2.0, 0.0].into() * (c1 + tmp);
   c1 = c1 + [0.0, b0_2+b2_2, 0.0, 0.0].into();
 
-  let mut c2 = f32x4_xor([-0.0, 0.0, -0.0, 0.0].into(), b * shuffle_zxzx(b));
+  let mut c2 = f32x4_xor(&[-0.0, 0.0, -0.0, 0.0].into(), &(b * shuffle_zxzx(b)));
   c2 = c2 + (shuffle_yzxx(b) * shuffle_wwxx(b));
   c2 = c2 * [2.0, 2.0, 1.0, 0.0].into();
   c2 = c2 + [0.0, 0.0, b3_2 - b1_2, 0.0].into();
@@ -42,17 +42,17 @@ pub fn mat4x4_12_m(b:&f32x4, c:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {
 
   let mut c0 = b * shuffle_xzxx(b);
   let mut tmp = shuffle_ywyx(b) * shuffle_yxwx(b);
-  tmp = f32x4_xor([0.0, -0.0, 0.0, 0.0].into(), tmp);
+  tmp = f32x4_xor(&[0.0, -0.0, 0.0, 0.0].into(), &tmp);
   c0 = [1.0, 2.0, 2.0, 0.0].into() * (c0 + tmp);
   c0 = c0 - [b3_2 + b2_2, 0.0, 0.0, 0.0].into();
 
   let c1 = b * shuffle_wywx(b);
   let mut tmp = shuffle_zwxx(b) * shuffle_ywyx(b);
-  tmp = f32x4_xor([0.0, 0.0, -0.0, 0.0].into(), tmp);
+  tmp = f32x4_xor(&[0.0, 0.0, -0.0, 0.0].into(), &tmp);
   let mut c1 = [2.0, -1.0, 2.0, 0.0].into() * (c1 + tmp);
   c1 = c1 + [0.0, b0_2+b2_2, 0.0, 0.0].into();
 
-  let mut c2 = f32x4_xor([-0.0, 0.0, -0.0, 0.0].into(), b * shuffle_zxzx(b));
+  let mut c2 = f32x4_xor(&[-0.0, 0.0, -0.0, 0.0].into(), &(b * shuffle_zxzx(b)));
   c2 = c2 + (shuffle_yzxx(b) * shuffle_wwxx(b));
   c2 = c2 * [2.0, 2.0, 1.0, 0.0].into();
   c2 = c2 + [0.0, 0.0, b3_2 - b1_2, 0.0].into();

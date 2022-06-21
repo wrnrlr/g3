@@ -59,7 +59,7 @@ impl Rotor {
     let half = 0.5 * ang_rad;
     let sin_ang = half.sin();
     let scale = sin_ang * inv_norm;
-    Rotor([half.cos(),x,y,z].into() * [1.0,scale,scale,scale].into())
+    Rotor([half.cos(),x,y,z] as f32x4 * [1.0,scale,scale,scale].into())
   }
 
   pub fn from_euler_angles(roll:f32,pitch:f32,yaw:f32)->Rotor {
@@ -107,9 +107,9 @@ impl Rotor {
     Rotor(p1)
   }
 
-  pub fn approx_eq(&self, other:Rotor, epsilon:f32)->bool {
+  pub fn approx_eq(&self, r:Rotor, epsilon:f32)->bool {
     let eps = f32x4::splat(epsilon);
-    f32x4_abs(&self.0 - other.p1) < eps
+    f32x4_abs(&self.0 - r.0) < eps
   }
 
   // Returns the principal branch of this rotor's logarithm. Invoking
@@ -133,7 +133,7 @@ impl Rotor {
 
   // Compute the square root of the provided rotor $r$.
   pub fn sqrt(&self)->Rotor {
-    let p1 = add_ss(&self.0, [1.0, 0.0, 0.0, 0.0].into());
+    let p1 = add_ss(&self.0, &[1.0, 0.0, 0.0, 0.0].into());
     Rotor(p1).normalized() // TODO avoid extra copy...
   }
 }
@@ -270,7 +270,7 @@ impl Neg for Rotor {
 impl Mul<Rotor> for Rotor {
   type Output = Rotor;
   fn mul(self,r:Rotor)->Self::Output {
-    Rotor(gp11(&self.0, r.0))
+    Rotor(gp11(&self.0, &r.0))
   }
 }
 

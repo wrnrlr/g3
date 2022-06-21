@@ -18,7 +18,7 @@ pub fn logarithm(p1:&f32x4, p2:&f32x4) ->(f32x4, f32x4) {
   let a = bv_mask * p1;
 
   // Early out if we're taking the log of a motor without any rotation
-  if a == f32x4::splat(0.0) { return (a, p2.into()); }
+  if a == f32x4::splat(0.0) { return (a, (*p2).copy()); }
 
   let b = bv_mask * p2;
 

@@ -85,13 +85,13 @@ pub fn hi_dp_ss(a:&f32x4, b:&f32x4)->f32x4 {
 }
 
 pub fn dp(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut out = a * b;
-  let hi = shuffle_yyww(out);
+  let mut out = &(a * b);
+  let hi = &shuffle_yyww(out);
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
   out = hi + out;
-  out[0] += b2b3a2a3(hi.into(),out)[0];
+  out[0] += b2b3a2a3(hi,out)[0];
   mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
 }
 
@@ -119,11 +119,11 @@ pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 
 // #[cfg(target_arch = "x86_64")] #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_add_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
 // #[cfg(not(target_arch = "x86_64"))] #[inline]
-pub fn add_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a + b, a, [First(0), Second(1), Second(2), Second(3)]) }
-#[inline] pub fn sub_ss(a:&f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a, [First(0), Second(1), Second(2), Second(3)]) }
+pub fn add_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a + b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
+#[inline] pub fn sub_ss(a:&f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
 // #[cfg(target_arch = "x86_64")] #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_mul_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
 // #[cfg(not(target_arch = "x86_64"))] #[inline]
-pub fn mul_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a * b, a, [First(0), Second(1), Second(2), Second(3)]) }
+pub fn mul_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a * b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
 
 #[inline] pub fn b2b3a2a3(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) }
 #[inline] pub fn b0a1a2a3(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a, b, [Second(0),First(1),First(2),First(3)]) }

@@ -53,8 +53,8 @@ impl Motor {
     // s, t computed as in the normalization
     let b2 = dp_bc(&self.p1.into(), &self.p1.into());
     let s = &rsqrt_nr1(&b2.into());
-    let bc = dp_bc(&flip_signs(self.p1.into(), mask32x4::from_array([true,false,false,false])), self.p2.into());
-    let b2_inv = &rcp_nr1(b2.into());
+    let bc = dp_bc(&flip_signs(&self.p1, mask32x4::from_array([true,false,false,false])), &self.p2);
+    let b2_inv = &rcp_nr1(&b2);
     let t = bc * b2_inv * s;
     let neg = mask32x4::from_array([false,true,true,true]);
 
@@ -83,9 +83,9 @@ impl Motor {
     //
     // Multiplying our original motor by this inverse will give us a
     // normalized motor.
-    let b2 = &dp_bc(self.p1.into(), self.p1.into());
+    let b2 = &dp_bc(&self.p1, &self.p1);
     let s = &rsqrt_nr1(b2);
-    let bc = dp_bc(&f32x4_xor(&self.p1, [-0.0,0.0,0.0,0.0].into()), self.p2.into());
+    let bc = dp_bc(&f32x4_xor(&self.p1, &[-0.0,0.0,0.0,0.0].into()), &self.p2);
     let t = bc * rcp_nr1(b2) * s;
 
     // (s + t e0123) * motor =
@@ -99,7 +99,7 @@ impl Motor {
     // (s c2 - t b2) e02 +
     // (s c3 - t b3) e03
     let tmp = &self.p2 * s;
-    let p2 = tmp - (f32x4_xor(&(&self.p1 * t), [-0.0,0.0,0.0,0.0].into()));
+    let p2 = tmp - (f32x4_xor(&(&self.p1 * t), &[-0.0,0.0,0.0,0.0].into()));
     let p1 = &self.p1 * s;
     Motor{p1,p2}
   }
@@ -119,12 +119,12 @@ impl Motor {
   // produce this motor again. The logarithm presumes that the motor is
   // normalized.
   pub fn log(&self)->Line {
-    let (p1,p2) = logarithm(self.p1.into(), self.p2.into());
+    let (p1,p2) = logarithm(&self.p1, &self.p2);
     Line{p1,p2}
   }
 
   pub fn sqrt(self)->Motor {
-    let p1 = add_ss(&self.p1, [1.0, 0.0, 0.0, 0.0].into());
+    let p1 = add_ss(&self.p1, &[1.0, 0.0, 0.0, 0.0].into());
     Motor{p1, p2:self.p2}.normalized()
   }
 
@@ -320,7 +320,7 @@ impl Mul<Translator> for Motor {
 
 impl MulAssign<Translator> for Motor {
   fn mul_assign(&mut self, t: Translator) {
-    self.p1 = gprt(self.p1.into(), &t.p2) + self.p2.into()
+    self.p1 = gprt(&self.p1, &t.p2) + &self.p2
   }
 }
 
@@ -334,7 +334,7 @@ impl Mul<Motor> for Motor {
 
 impl MulAssign<Motor> for Motor {
   fn mul_assign(&mut self, m:Motor) {
-    let (p1,p2) = gpmm(self.p1.into(), self.p2.into(), &m.p1, &m.p2);
+    let (p1,p2) = gpmm(&self.p1, &self.p2, &m.p1, &m.p2);
     self.p1 = p1; self.p2 = p2;
   }
 }

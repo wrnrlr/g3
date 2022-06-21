@@ -46,7 +46,7 @@ impl Translator {
 
   pub fn normalized(&self)->Translator {
     let inv_norm = rsqrt_nr1(&dp_bc(&self.p2,&self.p2));
-    Translator{p2: self.p2.into() * inv_norm}
+    Translator{p2: &self.p2 * inv_norm}
   }
 
   pub fn inverse(&self)->Translator {

@@ -70,7 +70,7 @@ pub fn gp11(a:&f32x4, b:&f32x4)->f32x4 {
   // negate the lower single-precision element with a single instruction
   let tmp1 = shuffle_zyzw(a) * shuffle_zxxx(b);
   let tmp2 = shuffle_wwyz(a) * shuffle_wzwy(b);
-  let tmp = f32x4_xor(&(tmp1 + tmp2), [-0.0, 0.0, 0.0, 0.0].into());
+  let tmp = f32x4_xor(&(tmp1 + tmp2), &[-0.0, 0.0, 0.0, 0.0].into());
   p1_out + tmp
 }
 
@@ -135,7 +135,7 @@ pub fn gp21(a:&f32x4, b:&f32x4)->f32x4 {
 }
 
 pub fn gpll(a:&f32x4, d:&f32x4, b:&f32x4, c:&f32x4)->(f32x4, f32x4) {
-  let flip = [-0.0,0.0,0.0,0.0].into();
+  let flip = &[-0.0,0.0,0.0,0.0].into();
   let mut p1 = shuffle_yzyw(a) * shuffle_yywz(b);
   p1 = f32x4_xor(&p1, flip);
   p1 -= shuffle_wywz(a) * shuffle_wzyw(b);
@@ -144,13 +144,13 @@ pub fn gpll(a:&f32x4, d:&f32x4, b:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   let p1 = sub_ss(&p1, mul_ss(a2, b2));
 
   let mut p2 = shuffle_ywyz(a) * shuffle_yzwy(c);
-  p2 -= f32x4_xor(&flip, &(shuffle_wzwy(a) * shuffle_wwyz(c)));
+  p2 -= f32x4_xor(flip, &(shuffle_wzwy(a) * shuffle_wwyz(c)));
   p2 += shuffle_yzwy(b) * shuffle_ywyz(d);
-  p2 -= f32x4_xor(flip, shuffle_wwyz(b) * shuffle_wzwy(d));
+  p2 -= f32x4_xor(flip, &(shuffle_wwyz(b) * shuffle_wzwy(d)));
   let c2 = shuffle_zzww(c);
   let d2 = shuffle_zzww(d);
-  p2 = add_ss(p2, a2*c2);
-  p2 = add_ss(p2, b2*d2);
+  p2 = add_ss(&p2, &(a2*c2));
+  p2 = add_ss(&p2, &(b2*d2));
   (p1, p2)
 }
 
@@ -178,7 +178,7 @@ pub fn gpmm(a:&f32x4, b:&f32x4, c:&f32x4, d:&f32x4)->(f32x4,f32x4) {
   let mut t = a_ywyz * c_yzwy;
 
   t += a_zyzw * shuffle_zxxx(c);
-  t = flip_signs(t, s_flip);
+  t = flip_signs(&t, s_flip);
 
   e = e + t;
   e = e - a_wzwy * c_wwyz;
@@ -192,7 +192,7 @@ pub fn gpmm(a:&f32x4, b:&f32x4, c:&f32x4, d:&f32x4)->(f32x4,f32x4) {
   t += a_wzwy * shuffle_wwyz(d);
   t += shuffle_zxxx(b) * shuffle_zyzw(c);
   t += shuffle_wzwy(b) * c_wwyz;
-  t = f32x4_xor(t, &[-0.0,0.0,0.0,0.0].into());
+  t = f32x4_xor(&t, &[-0.0,0.0,0.0,0.0].into());
 
   f = f - t;
 

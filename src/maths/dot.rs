@@ -20,7 +20,7 @@ pub fn dot03(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
 }
 
 pub fn dot11(a:&f32x4, b:&f32x4)->f32x4 {
-  f32x4_xor([-0.0, 0.0, 0.0, 0.0].into(), &hi_dp_ss(a, b))
+  f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &hi_dp_ss(a, b))
 }
 
 pub fn dot33(a:&f32x4, b:&f32x4)->f32x4 {
@@ -31,7 +31,7 @@ pub fn dot33(a:&f32x4, b:&f32x4)->f32x4 {
 pub fn dotptl(a:&f32x4, b:&f32x4)->f32x4 {
   let dp = &hi_dp_ss(a, b);
   let p0 = &shuffle_xxxx(a) * b;
-  let p0 = &f32x4_xor(&p0, [0.0, -0.0, -0.0, -0.0].into());
+  let p0 = &f32x4_xor(&p0, &[0.0, -0.0, -0.0, -0.0].into());
   add_ss(p0, dp)
 }
 
@@ -48,7 +48,7 @@ pub fn dotlp(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
 }
 
 pub fn dotpil(a:&f32x4, c:&f32x4)->f32x4 {
-  f32x4_xor(&dotilp(a, c), [-0.0, 0.0, 0.0, 0.0].into())
+  f32x4_xor(&dotilp(a, c), &[-0.0, 0.0, 0.0, 0.0].into())
 }
 
 pub fn dotilp(a:&f32x4, c:&f32x4)->f32x4 {
