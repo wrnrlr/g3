@@ -29,30 +29,30 @@ pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 pub struct Point (pub f32x4);
 
 impl Point {
-  #[inline] pub fn w(&self)->f32 { self.p3[0] }
+  #[inline] pub fn w(&self)->f32 { self.0[0] }
   #[inline] pub fn e123(&self)->f32 { self.w() }
-  #[inline] pub fn x(&self)->f32 { self.p3[1] }
+  #[inline] pub fn x(&self)->f32 { self.0[1] }
   #[inline] pub fn e032(&self)->f32 { self.x() }
-  #[inline] pub fn y(&self)->f32 { self.p3[2] }
+  #[inline] pub fn y(&self)->f32 { self.0[2] }
   #[inline] pub fn e013(&self)->f32 { self.y() }
-  #[inline] pub fn z(&self)->f32 { self.p3[3] }
+  #[inline] pub fn z(&self)->f32 { self.0[3] }
   #[inline] pub fn e021(&self)->f32 { self.z() }
 
   // Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
   pub fn new(x:f32,y:f32,z:f32)->Point { Point(f32x4::from_array([1.0,x,y,z])) }
 
   pub fn normalized(&self)->Point {
-      let tmp = rcp_nr1(shuffle_xxxx(self.0.into()));
-      Self(self.p3 * tmp)
+      let tmp = rcp_nr1(&shuffle_xxxx(&self.0));
+      Self(self.0 * tmp)
   }
 
   pub fn inverse(&self)->Point {
-      let inv_norm = &rcp_nr1(shuffle_xxxx(self.0.into()));
-      Self(inv_norm * inv_norm * self.p3)
+      let inv_norm = &rcp_nr1(&shuffle_xxxx(&self.0));
+      Self(inv_norm * inv_norm * self.0)
   }
 
   pub fn reverse(&self)->Point {
-    Point(flip_signs(self.p3, mask32x4::from_array([false,true,true,true])))
+    Point(flip_signs(self.0, mask32x4::from_array([false,true,true,true])))
   }
 
   // Project a point onto a line
@@ -76,71 +76,71 @@ impl Into<[f32;3]> for Point {
 
 impl Add<Point> for Point {
     type Output = Point;
-    fn add(self, other: Point) -> Point { Point(self.p3+other.p3) }
+    fn add(self, p: Point) -> Point { Point(self.0+p.0) }
 }
 
 impl AddAssign for Point {
-    fn add_assign(&mut self, other: Self) { self.p3 += other.p3 }
+    fn add_assign(&mut self, p: Self) { self.0 += p.0 }
 }
 
 impl Sub<Point> for Point {
     type Output = Point;
-    fn sub(self, other: Point) -> Point { Point(self.p3-other.p3) }
+    fn sub(self, p: Point) -> Point { Point(self.0-p.0) }
 }
 
 impl SubAssign for Point {
-    fn sub_assign(&mut self, other: Self) { self.p3 -= other.p3 }
+    fn sub_assign(&mut self, p: Self) { self.0 -= p.0 }
 }
 
 impl Mul<f32> for Point {
     type Output = Point;
-    fn mul(self, s: f32) -> Point { Point(self.p3*f32x4::splat(s)) }
+    fn mul(self, s: f32) -> Point { Point(self.0*f32x4::splat(s)) }
 }
 
 impl MulAssign<f32> for Point {
-    fn mul_assign(&mut self, s: f32) { self.p3 = self.p3*f32x4::splat(s) }
+    fn mul_assign(&mut self, s: f32) { self.0 = self.0*f32x4::splat(s) }
 }
 
 impl Div<f32> for Point {
     type Output = Point;
-    fn div(self, s: f32) -> Point { Point(self.p3/f32x4::splat(s)) }
+    fn div(self, s: f32) -> Point { Point(self.0/f32x4::splat(s)) }
 }
 
 impl DivAssign<f32> for Point {
-    fn div_assign(&mut self, s: f32) { self.p3 = self.p3/f32x4::splat(s) }
+    fn div_assign(&mut self, s: f32) { self.0 = self.0/f32x4::splat(s) }
 }
 
 // Reversion
 impl Neg for Point {
   type Output = Point;
-  fn neg(self)->Point { Point( -self.p3 ) }
+  fn neg(self)->Point { Point( -self.0 ) }
 }
 
 impl Not for Point {
   type Output = Plane;
-  fn not(self)->Plane { Plane { p0: self.p3 }}
+  fn not(self)->Plane { Plane { p0: self.0 }}
 }
 
 // Geometric Product *
 impl Mul<Point> for Point {
   type Output = Translator;
-  fn mul(self, other: Point) -> Translator {
-    let p2 = gp33(self.p3, other.p3);
+  fn mul(self, p: Point) -> Translator {
+    let p2 = gp33(self.0, p.0);
     Translator{p2}
   }
 }
 impl Mul<Plane> for Point {
   type Output = Motor;
   fn mul(self, p: Plane) -> Motor {
-      let (p1,p2) = gp30(p.p0, self.p3);
+      let (p1,p2) = gp30(p.p0, self.0);
       Motor{p1,p2}
   }
 }
 // Inverse Geometric Product
 impl Div<Point> for Point {
   type Output = Translator;
-  fn div(self, other: Point) -> Translator {
-    self * other.inverse()
+  fn div(self, p: Point) -> Translator {
+    self * p.inverse()
   }
 }
 
@@ -161,14 +161,14 @@ impl BitOr<Plane> for Point {
 impl BitOr<Line> for Point {
   type Output = Plane;
   fn bitor(self, l:Line) -> Plane {
-    let p0 = dotptl(self.p3,l.p1);
+    let p0 = dotptl(self.0,l.p1);
     Plane{p0:p0}
   }
 }
 impl BitOr<Point> for Point {
   type Output = f32;
   fn bitor(self, a:Point) -> f32 {
-    let out = dot33(self.p3,a.p3);
+    let out = dot33(self.0,a.0);
     out[0]
   }
 }
@@ -176,8 +176,8 @@ impl BitOr<Point> for Point {
 // Meet Operator ^ (aka Wedge/Exteriour Product)
 impl BitXor<Plane> for Point {
   type Output = Dual;
-  fn bitxor(self, other:Plane) -> Dual {
-    let out = ext03::<true>(other.p0,self.p3);
+  fn bitxor(self, p:Plane) -> Dual {
+    let out = ext03::<true>(p.p0,self.0);
     Dual::new(0.0,out[0])
   }
 }
@@ -194,7 +194,7 @@ impl BitXor<Plane> for Point {
 // Join Operation, Regressive Product, &
 impl BitAnd<Point> for Point {
   type Output = Line;
-  fn bitand(self, other: Point) -> Line { !(!self ^ (!other)) }
+  fn bitand(self, p: Point) -> Line { !(!self ^ (!p)) }
 }
 impl BitAnd<Line> for Point {
   type Output = Plane;
