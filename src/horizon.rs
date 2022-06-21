@@ -39,7 +39,7 @@ impl Horizon {
   #[inline] pub fn exp(self)->Translator { Translator{p2: self.p2} }
 
   pub fn reverse(self)-> Horizon {
-    Horizon {p2: flip_signs(self.p2, mask32x4::from_array([false,true,true,true]))}
+    Horizon {p2: flip_signs(&self.p2, mask32x4::from_array([false,true,true,true]))}
   }
 }
 
@@ -130,5 +130,5 @@ impl BitAnd<Point> for Horizon {
 // Inner Product, |
 impl BitOr<Plane> for Horizon {
   type Output = Plane;
-  fn bitor(self, p:Plane)->Plane { Plane{p0: dotilp(p.p0, self.p2)} }
+  fn bitor(self, p:Plane)->Plane { Plane{p0: dotilp(&p.p0, &self.p2)} }
 }

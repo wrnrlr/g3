@@ -39,9 +39,9 @@ impl Plane {
   // normalized rotor between two planes with the geometric product `*` also
   // requires that the planes are normalized.
   pub fn normalized(&self)->Plane {
-    let mut inv_norm  = rsqrt_nr1(hi_dp_bc(self.0, self.0));
+    let mut inv_norm  = rsqrt_nr1(&hi_dp_bc(&self.p0, &self.p0));
     inv_norm = inv_norm + f32x4::from_array([1.0, 0.0, 0.0, 0.0]);
-    Plane{p0: inv_norm * self.0}
+    Plane{p0: inv_norm * &self.p0}
   }
 
   // Compute the plane norm, which is often used to compute distances
@@ -55,7 +55,7 @@ impl Plane {
   }
 
   pub fn inverse(&self)->Plane {
-    let inv_norm = &rsqrt_nr1(hi_dp_bc(self.0, self.0));
+    let inv_norm = &rsqrt_nr1(&hi_dp_bc(&self.p0, &self.p0));
     Plane{p0: inv_norm * inv_norm * self.0}
   }
 
@@ -96,7 +96,7 @@ impl FnMut<(Plane,)> for Plane { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Plane,)> for Plane { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane {self.call(args)} }
 impl Fn<(Plane,)> for Plane {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0:sw00(self.0, args.0.p0)}
+    Plane{p0:sw00(self.0, &args.0.p0)}
   }
 }
 
@@ -119,8 +119,8 @@ impl FnOnce<(Line,)> for Plane { type Output = Line; extern "rust-call" fn call_
 impl Fn<(Line,)> for Plane {
   extern "rust-call" fn call(&self, args: (Line,)) -> Line {
     let l = args.0;
-    let (p1, mut p2) = sw10(self.0, l.p1);
-    let p2_tmp = sw20(self.0, l.p2);
+    let (p1, mut p2) = sw10(self.0, &l.p1);
+    let p2_tmp = sw20(self.0, &l.p2);
     p2 += p2_tmp;
     Line{p1,p2}
   }
@@ -174,14 +174,14 @@ impl Neg for Plane {
 impl Mul<Point> for Plane {
   type Output = Motor;
   fn mul(self, a: Point) -> Motor {
-    let (p1,p2) = gp03(self.p0,a.p3);
+    let (p1,p2) = gp03(&self.p0,a.p3);
     Motor{p1,p2}
   }
 }
 impl Mul<Plane> for Plane {
   type Output = Motor;
-  fn mul(self, other: Plane) -> Motor {
-    let (p1,p2) = gp00(self.p0,other.p0);
+  fn mul(self, p: Plane) -> Motor {
+    let (p1,p2) = gp00(&self.p0,&p.p0);
     Motor{p1,p2}
   }
 }
@@ -196,36 +196,36 @@ impl Mul<Plane> for Plane {
 
 impl Div<Plane> for Plane {
   type Output = Motor;
-  fn div(self, other: Plane) -> Motor {
-    self * other.inverse()
+  fn div(self, p: Plane) -> Motor {
+    self * p.inverse()
   }
 }
 
 // Inner Product |
 impl BitOr<Plane> for Plane {
   type Output = f32;
-  fn bitor(self, other:Plane) -> f32 {
-    dot00(self.p0,other.p0)[0]
+  fn bitor(self, p:Plane) -> f32 {
+    dot00(&self.p0,&p.p0)[0]
   }
 }
 impl BitOr<Line> for Plane {
   type Output = Plane;
   fn bitor(self, l:Line) -> Plane {
-    let p0 = dotpl(self.p0,l.p1,l.p2);
+    let p0 = dotpl(&self.p0,&l.p1,&l.p2);
     Plane{p0}
   }
 }
 impl BitOr<Horizon> for Plane {
   type Output = Plane;
   fn bitor(self, l: Horizon) -> Plane {
-    let p0 = dotpil(self.p0,l.p2);
+    let p0 = dotpil(&self.p0,&l.p2);
     Plane{p0}
   }
 }
 impl BitOr<Point> for Plane {
   type Output = Line;
   fn bitor(self, a:Point) -> Line {
-    let (p1,p2) = dot03(self.p0,a.p3);
+    let (p1,p2) = dot03(&self.p0,a.p3);
     Line{p1,p2}
   }
 }
@@ -233,8 +233,8 @@ impl BitOr<Point> for Plane {
 // Meet Operator, Exterior Product, ^
 impl BitXor<Plane> for Plane {
   type Output = Line;
-  fn bitxor(self, other:Plane) -> Line {
-    let (p1,p2) = ext00(self.p0,other.p0);
+  fn bitxor(self, p:Plane) -> Line {
+    let (p1,p2) = ext00(self.p0,p.p0);
     Line{p1,p2}
   }
 }
@@ -255,13 +255,13 @@ impl BitXor<Horizon> for Plane {
 impl BitXor<Branch> for Plane {
   type Output = Point;
   fn bitxor(self, b:Branch) -> Point {
-    Point(extpb(self.0, &b.p1))
+    Point(extpb(self.0, &b.0))
   }
 }
 impl BitXor<Point> for Plane {
   type Output = Dual;
   fn bitxor(self, p:Point) -> Dual {
-    let tmp = ext03::<false>(self.p0,p.p3);
+    let tmp = ext03::<false>(&self.p0,p.p3);
     Dual::new(0.0, tmp[0])
   }
 }

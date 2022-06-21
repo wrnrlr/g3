@@ -1,11 +1,11 @@
-use core_simd::{f32x4};
+use std::simd::{f32x4};
 use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
 
 // a + b is a general bivector but it is most likely *non-simple* meaning
 // that it is neither purely real nor purely ideal.
 // Exponentiates the bivector and returns the motor defined by partitions 1
 // and 2.
-pub fn exp(a:f32x4, b:f32x4)->(f32x4,f32x4) {
+pub fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   // The exponential map produces a continuous group of rotations about an
   // axis. We'd *like* to evaluate the exp(a + b) as exp(a)exp(b) but we
   // cannot do that in general because a and b do not commute (consider
@@ -14,10 +14,10 @@ pub fn exp(a:f32x4, b:f32x4)->(f32x4,f32x4) {
 
   // Check if the bivector we're exponentiating is ideal
 
-  if a == f32x4::splat(0.0) {
+  if *a == f32x4::splat(0.0) {
     // When exponentiating an ideal line, the terms past the linear
     // term in the Taylor series expansion vanishes
-    return (f32x4::from([1.0, 0.0, 0.0, 0.0]),b);
+    return ([1.0, 0.0, 0.0, 0.0].into(),b.into());
   }
 
   // First, we need to decompose the bivector into the sum of two
@@ -33,8 +33,8 @@ pub fn exp(a:f32x4, b:f32x4)->(f32x4,f32x4) {
 
   // Broadcast dot(a, a) ignoring the scalar component to all components
   // of a2
-  let a2 = hi_dp_bc(a, b);
-  let ab = hi_dp_bc(a, b);
+  let a2 = &hi_dp_bc(a, b);
+  let ab = &hi_dp_bc(a, b);
 
   // Next, we need the sqrt of that quantity. Since e0123 squares to 0,
   // this has a closed form solution.
@@ -46,7 +46,7 @@ pub fn exp(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   //
   // (square the above quantity yourself to quickly verify the claim)
   // Maximum relative error < 1.5*2e-12
-  let a2_sqrt_rcp = rsqrt_nr1(a2);
+  let a2_sqrt_rcp = &rsqrt_nr1(a2);
   let u = a2 * a2_sqrt_rcp;
   // Don't forget the minus later!
   let minus_v = ab * a2_sqrt_rcp;
@@ -89,16 +89,16 @@ pub fn exp(a:f32x4, b:f32x4)->(f32x4,f32x4) {
   let sincosu_1 = uv_0.cos();
 
   let sinu = f32x4::splat(sincosu_0);
-  let p1_out  = f32x4::from([sincosu_1, 0.0, 0.0, 0.0]) + (sinu * norm_real);
+  let p1_out  = [sincosu_1, 0.0, 0.0, 0.0].into() + (sinu * norm_real);
 
   // The second partition has contributions from both the real and ideal
   // parts.
-  let cosu = f32x4::from([0.0, sincosu_1, sincosu_1, sincosu_1]);
+  let cosu = [0.0, sincosu_1, sincosu_1, sincosu_1].into();
   let minus_vcosu = minus_v * cosu;
   let mut p2_out = sinu * norm_ideal;
   p2_out = p2_out + minus_vcosu * norm_real;
   let minus_vsinu = uv_1 * sincosu_0;
-  p2_out = f32x4::from([minus_vsinu, 0.0, 0.0, 0.0]) + p2_out;
+  p2_out = [minus_vsinu, 0.0, 0.0, 0.0].into() + p2_out;
   return (p1_out,p2_out);
 }
 

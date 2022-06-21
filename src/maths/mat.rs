@@ -1,4 +1,4 @@
-use core_simd::{f32x4};
+use std::simd::{f32x4};
 use crate::maths::{f32x4_xor, shuffle_wwxx, shuffle_wxxx, shuffle_wywx, shuffle_wyzx, shuffle_xxxx, shuffle_xzxx, shuffle_ywyx, shuffle_yxwx, shuffle_yzwx, shuffle_yzxx, shuffle_zwxx, shuffle_zwyx, shuffle_zxzx, shuffle_zzwx};
 
 // false, false, for rotor

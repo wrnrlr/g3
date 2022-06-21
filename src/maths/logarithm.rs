@@ -1,4 +1,4 @@
-use core_simd::{f32x4};
+use std::simd::{f32x4};
 use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
 
 pub fn logarithm(p1:f32x4, p2:f32x4) ->(f32x4, f32x4) {

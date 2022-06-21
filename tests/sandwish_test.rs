@@ -5,11 +5,10 @@
 // A plane `b` perpendicular to a mirror a reflects to itself:
 // -ab^(-a) = b
 
-#![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
   use g3::*;
-  use core_simd::f32x4;
+  use std::simd::f32x4;
 
   fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
     const EPSILON:f32 = 0.02;

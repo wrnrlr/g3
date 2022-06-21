@@ -1,4 +1,4 @@
-use core_simd::f32x4;
+use std::simd::f32x4;
 use glam;
 use crate::{Motor, Point, Rotor};
 use crate::{maths::mat4x4_12};
@@ -81,13 +81,13 @@ impl Mat4 {
 
 #[cfg(all(test, feature = "glam"))]
 mod tests {
-  use core_simd::f32x4;
+  use std::simd::f32x4;
   use crate::{Mat4, motor};
 
   #[test] fn motor_to_matrix() {
     let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
     let m4:Mat4 = m.into();
-    let a = m4.call(f32x4::from([-1.0,1.0,2.0,1.0]));
+    let a = m4.call([-1.0,1.0,2.0,1.0].into());
     assert_eq!(a, f32x4::from([-12.0,-86.0,-86.0,30.0]));
   }
 

@@ -35,7 +35,7 @@ impl Motor {
   /// Produce a screw motion rotating and translating by given amounts along a
   /// provided Euclidean axis.
   pub fn from_screw_axis(angle:f32, d:f32, l:Line)->Motor {
-    let (p1,p2) = gpdl(-angle * 0.5, d * 0.5, l.p1, l.p2);
+    let (p1,p2) = gpdl(-angle * 0.5, d * 0.5, &l.p1, &l.p2);
     let (p1,p2) = exp(p1, p2);
     Motor{p1,p2}
   }
@@ -124,7 +124,7 @@ impl Motor {
   }
 
   pub fn sqrt(self)->Motor {
-    let p1 = add_ss(self.p1, [1.0, 0.0, 0.0, 0.0].into());
+    let p1 = add_ss(&self.p1, [1.0, 0.0, 0.0, 0.0].into());
     Motor{p1, p2:self.p2}.normalized()
   }
 
@@ -159,7 +159,7 @@ impl FnMut<(Plane,)> for Motor { extern "rust-call" fn call_mut(&mut self, args:
 impl FnOnce<(Plane,)> for Motor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
 impl Fn<(Plane,)> for Motor {
   extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane{p0:sw012(args.0.p0, self.p1.into(), self.p2.into())}
+    Plane{p0:sw012(&args.0.p0, &self.p1, &self.p2)}
   }
 }
 
@@ -169,7 +169,7 @@ impl FnMut<(Line,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: 
 impl FnOnce<(Line,)> for Motor { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
 impl Fn<(Line,)> for Motor {
   extern "rust-call" fn call(&self, args: (Line,))->Self::Output {
-    let (p1,p2) = swml(args.0.p1, args.0.p2, self.p1.into(), self.p2);
+    let (p1,p2) = swml(&args.0.p1, &args.0.p2, &self.p1, &self.p2);
     Line{p1:p1,p2:p2}
   }
 }
@@ -181,7 +181,7 @@ impl FnOnce<(Point,)> for Motor { type Output = Point; extern "rust-call" fn cal
 // Conjugates a point p with this motor and returns the result.
 impl Fn<(Point,)> for Motor {
   extern "rust-call" fn call(&self, args: (Point,))->Point {
-    let p3 = sw312(args.0.p3, self.p1.into(), self.p2.into());
+    let p3 = sw312(&args.0.p3, &self.p1, &self.p2);
     Point(p3)
   }
 }
@@ -191,7 +191,7 @@ impl Fn<(Point,)> for Motor {
 impl FnMut<(Origin,)> for Motor { extern "rust-call" fn call_mut(&mut self, args: (Origin,))->Point { self.call(args) }}
 impl FnOnce<(Origin,)> for Motor { type Output = Point; extern "rust-call" fn call_once(self, args: (Origin,))->Point { self.call(args) }}
 impl Fn<(Origin,)> for Motor {
-  extern "rust-call" fn call(&self, _args: (Origin,))->Point { Point(swo12(self.p1.into(), self.p2.into())) }
+  extern "rust-call" fn call(&self, _args: (Origin,))->Point { Point(swo12(&self.p1, &self.p2)) }
 }
 
 // The cost of this operation is the same as the application of a rotor due

@@ -1,5 +1,5 @@
 use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd}};
-use crate::{Dual, Plane, Point, Rotor, Line, Horizon,maths::{gp11, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rsqrt_nr1, sqrt_nr1};};
+use crate::{Dual, Plane, Point, Rotor, Line, Horizon,maths::{gp11, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rsqrt_nr1, sqrt_nr1}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 pub fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }

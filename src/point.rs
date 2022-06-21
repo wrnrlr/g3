@@ -43,16 +43,16 @@ impl Point {
 
   pub fn normalized(&self)->Point {
       let tmp = rcp_nr1(&shuffle_xxxx(&self.0));
-      Self(self.0 * tmp)
+      Self(&self.0 * tmp)
   }
 
   pub fn inverse(&self)->Point {
       let inv_norm = &rcp_nr1(&shuffle_xxxx(&self.0));
-      Self(inv_norm * inv_norm * self.0)
+      Self(inv_norm * inv_norm * &self.0)
   }
 
   pub fn reverse(&self)->Point {
-    Point(flip_signs(self.0, mask32x4::from_array([false,true,true,true])))
+    Point(flip_signs(&self.0, mask32x4::from_array([false,true,true,true])))
   }
 
   // Project a point onto a line
@@ -125,14 +125,14 @@ impl Not for Point {
 impl Mul<Point> for Point {
   type Output = Translator;
   fn mul(self, p: Point) -> Translator {
-    let p2 = gp33(self.0, p.0);
+    let p2 = gp33(&self.0, &p.0);
     Translator{p2}
   }
 }
 impl Mul<Plane> for Point {
   type Output = Motor;
   fn mul(self, p: Plane) -> Motor {
-      let (p1,p2) = gp30(p.p0, self.0);
+      let (p1,p2) = gp30(&p.p0, &self.0);
       Motor{p1,p2}
   }
 }
@@ -161,14 +161,14 @@ impl BitOr<Plane> for Point {
 impl BitOr<Line> for Point {
   type Output = Plane;
   fn bitor(self, l:Line) -> Plane {
-    let p0 = dotptl(self.0,l.p1);
+    let p0 = dotptl(&self.0,&l.p1);
     Plane{p0:p0}
   }
 }
 impl BitOr<Point> for Point {
   type Output = f32;
   fn bitor(self, a:Point) -> f32 {
-    let out = dot33(self.0,a.0);
+    let out = dot33(&self.0,&a.0);
     out[0]
   }
 }
@@ -177,7 +177,7 @@ impl BitOr<Point> for Point {
 impl BitXor<Plane> for Point {
   type Output = Dual;
   fn bitxor(self, p:Plane) -> Dual {
-    let out = ext03::<true>(p.p0,self.0);
+    let out = ext03::<true>(&p.p0,&self.0);
     Dual::new(0.0,out[0])
   }
 }

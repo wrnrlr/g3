@@ -1,7 +1,7 @@
 #![feature(portable_simd)]
 #[cfg(test)]
 mod tests {
-  use core_simd::f32x4;
+  use std::simd::f32x4;
   use g3::*;
 
   const EPSILON: f32 = 0.02;
