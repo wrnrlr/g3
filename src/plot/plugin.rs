@@ -52,6 +52,13 @@ fn points_added(
 fn points_changed(mut q:Query<(&Point, &mut Transform, Changed<Point>)>) {
   for (p,mut t,_) in q.iter_mut() {
     *t.translation = *Vec3::from([p.x(), p.y(), p.z()]);
+
+  }
+}
+
+fn plane_changed(mut q:Query<(&Plane, &mut Transform, Changed<Point>)>) {
+  for (p,mut t,_) in q.iter_mut() {
+    *t.translation = *Vec3::from([p.x(), p.y(), p.z()]);
   }
 }
 
