@@ -1,9 +1,6 @@
-use std::fmt::{Display, Formatter, Result};
-use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn};
-use std::simd::{f32x4,mask32x4};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn}};
+use crate::{Plane, Line, Point, Motor, Rotor, Horizon,maths::{dp_bc, flip_signs, rsqrt_nr1, sw02, sw32, swl2, gptr}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
-use crate::{Plane, Line, Point, Motor, Rotor, Horizon};
-use crate::maths::{dp_bc, flip_signs, rsqrt_nr1, sw02, sw32, swl2, gptr};
 
 pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
   Translator::new(delta,x,y,z)
@@ -14,7 +11,6 @@ pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
 pub struct Translator { pub p2:f32x4 }
 
 impl Translator {
-
   #[inline] pub fn scalar(&self)->f32 { 1.0 }
   #[inline] pub fn e01(&self)->f32 { self.p2[1] }
   #[inline] pub fn e10(&self)->f32 { -self.e01() }

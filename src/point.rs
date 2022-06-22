@@ -6,9 +6,7 @@ use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::{flip_s
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Origin {}
 
-impl Origin {
-  pub fn to_point()->Point { Point::new(0.0,0.0,0.0) }
-}
+impl Origin { pub fn to_point()->Point { Point::new(0.0,0.0,0.0) } }
 
 pub const E032:Point = Point(f32x4::from_array([1.0,1.0,0.0,0.0]));
 pub const E012:Point = Point(f32x4::from_array([1.0,0.1,0.0,0.0]));

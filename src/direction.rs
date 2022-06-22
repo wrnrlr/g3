@@ -1,7 +1,6 @@
-use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg};
-use std::simd::{f32x4,u32x4};
-#[cfg(feature = "bevy")] use bevy::prelude::Component;
+use std::{simd::{f32x4,u32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg}};
 use crate::maths::{refined_reciprocal, hi_dp_bc, rsqrt_nr1};
+#[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 // Directions in are represented using points at infinity (homogeneous coordinate 0).
 // Having a homogeneous coordinate of zero ensures that directions are translation-invariant.
