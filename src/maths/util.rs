@@ -77,11 +77,11 @@ pub fn hi_dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 }
 
 pub fn hi_dp_ss(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut out = a * b;
+  let mut out = &(a * b);
   let hi = shuffle_yyww(out);
   let sum = hi + out;
-  out = sum + shuffle_xxyy(out);
-  shuffle_zwzw(&out)
+  out = &(sum + shuffle_xxyy(out));
+  shuffle_zwzw(out)
 }
 
 pub fn dp(a:&f32x4, b:&f32x4)->f32x4 {
@@ -90,20 +90,20 @@ pub fn dp(a:&f32x4, b:&f32x4)->f32x4 {
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
-  out = hi + out;
+  out = &(hi + out);
   out[0] += b2b3a2a3(hi,out)[0];
   mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
 }
 
 pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut out = a * b;
-  let hi = shuffle_yyww(out);
+  let mut out = &(a * b);
+  let hi = &shuffle_yyww(out);
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
-  out = hi + out;
-  out = add_ss(out, &b2b3a2a3(&hi, &out));
-  shuffle_xxxx(&out)
+  out = &(hi + out);
+  out = &add_ss(out, &b2b3a2a3(hi, out));
+  shuffle_xxxx(out)
 }
 
 #[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) } // TODO find a faster way
@@ -115,7 +115,7 @@ pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 // Is this faster then f32x4::abs, which is implemented in rust?
 #[inline] pub fn f32x4_abs(a:f32x4)->f32x4 { f32x4_andnot(f32x4::splat(-0.0), a) }
 
-#[inline] pub fn flip_signs(x:&f32x4, mask:mask32x4)->f32x4 { mask.select(-x.into(), x) }
+#[inline] pub fn flip_signs(x:&f32x4, mask:mask32x4)->f32x4 { mask.select(-x, x) }
 
 // #[cfg(target_arch = "x86_64")] #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_add_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
 // #[cfg(not(target_arch = "x86_64"))] #[inline]
@@ -125,8 +125,8 @@ pub fn add_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a + b, a.clone(), [First(0), 
 // #[cfg(not(target_arch = "x86_64"))] #[inline]
 pub fn mul_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a * b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
 
-#[inline] pub fn b2b3a2a3(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a, b, [Second(2),Second(3),First(2),First(3)]) }
-#[inline] pub fn b0a1a2a3(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a, b, [Second(0),First(1),First(2),First(3)]) }
+#[inline] pub fn b2b3a2a3(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a.clone(), b.clone(), [Second(2),Second(3),First(2),First(3)]) }
+#[inline] pub fn b0a1a2a3(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a.clone(), b.clone(), [Second(0),First(1),First(2),First(3)]) }
 
 #[inline] pub fn shuffle_xxxx(a:&f32x4)->f32x4 { swizzle!(a.clone(), [0,0,0,0]) }
 #[inline] pub fn shuffle_xyxy(a:&f32x4)->f32x4 { swizzle!(a.clone(), [0,1,0,1]) }
@@ -214,19 +214,19 @@ mod tests {
   #[test] fn dp_bc_test() {
     let a = [1.0, 2.0, 3.0, 5.0].into();
     let b = [-4.0, -3.0, -2.0, -1.0].into();
-    assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0xff>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, dp_bc(a.into(), b.into()));
-    assert_eq!(dp_bc(a.into(), b.into()), [-21.0, -21.0, -21.0, -21.0].into());
+    assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0xff>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, dp_bc(&a, &b));
+    assert_eq!(dp_bc(&a, &b), [-21.0, -21.0, -21.0, -21.0].into());
   }
 
   #[test] fn hi_dp_ss_test() {
     let a:f32x4 = [1.0, 2.0, 3.0, 5.0].into();
     let b = [-4.0, -3.0, -2.0, -1.0].into();
-    assert_eq!(hi_dp_ss(&a, b), [-17.0, -16.0, -17.0, -16.0].into());
+    assert_eq!(hi_dp_ss(&a, b), &[-17.0, -16.0, -17.0, -16.0]);
   }
 
   #[test] fn add_first() {
     let a:f32x4 = [2.0, 2.0, 3.0, 4.0].into();
-    assert_eq!(add_ss(a.into(), &a), [4.0, 2.0, 3.0, 4.0].into());
+    assert_eq!(add_ss(&a, &a), [4.0, 2.0, 3.0, 4.0].into());
   }
 
   #[test] fn rcp_test() {

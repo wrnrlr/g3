@@ -1,4 +1,4 @@
-use std::simd::{f32x4,Simd};
+use std::simd::{f32x4};
 use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
 
 // a + b is a general bivector but it is most likely *non-simple* meaning

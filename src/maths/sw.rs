@@ -89,7 +89,7 @@ pub fn sw20(a:&f32x4,b:&f32x4)->f32x4 {
 
   let mut p2 = a * b;
   p2 += a_zzwy * shuffle_xzwy(b);
-  p2 *= a_wwyz * [0.0, -2.0, -2.0, -2.0].into();
+  p2 *= a_wwyz * &[0.0, -2.0, -2.0, -2.0].into();
 
   let a_yyzw = &shuffle_yyzw(a);
   let mut tmp = a_yyzw * a_yyzw;
@@ -144,7 +144,7 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)), &[true,false,false,false].into());
+  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)), mask32::from([true,false,false,false]));
   tmp2 *= dc_scale;
 
   let mut tmp3 = b * b;
@@ -215,7 +215,7 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = &shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
-  tmp -= flip_signs(&tmp2, &[true, false, false, false].into());
+  tmp -= flip_signs(&tmp2, mask32::from([true, false, false, false]));
 
   let b_xxxx = &shuffle_xxxx(b);
   let scale = [0.0, 2.0, 2.0, 2.0].into();
@@ -282,7 +282,7 @@ pub fn swrl(a1:&f32x4, a2:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   tmp -= flip_signs(&tmp2, [true, false, false, false].into());
 
   let b_xxxx = &shuffle_xxxx(b);
-  let scale = [0.0, 2.0, 2.0, 2.0].into();
+  let scale = &[0.0, 2.0, 2.0, 2.0].into();
   tmp2 = b_xxxx * b_xwyz;
   tmp2 += b * b_xzwy;
   tmp2 = tmp2 * scale;
@@ -371,7 +371,7 @@ pub fn sw02(a:&f32x4, b:&f32x4)->f32x4 {
   let mut inv_b = &rcp_nr1(b);
   // 2 / b0
   inv_b = &add_ss(inv_b, inv_b);
-  inv_b = swizzle!(&inv_b, f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
+  inv_b = &swizzle!(inv_b, f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
   a + mul_ss(&tmp, inv_b)
 }
 
@@ -403,7 +403,7 @@ pub fn swl2(a:&f32x4, d:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   let mut p2_out = shuffle_xzwy(a) * shuffle_xwyz(c);
   // Add and subtract the same quantity in the low component to produce a cancellation
   p2_out -= shuffle_xwyz(a) * shuffle_xzwy(c);
-  p2_out -= flip_signs(a * shuffle_xxxx(c), mask32x4::from_array([true, false, false, false]));
+  p2_out -= flip_signs(&(a * shuffle_xxxx(c)), mask32x4::from_array([true, false, false, false]));
   (*a.clone(), p2_out + p2_out + d)
 }
 
@@ -427,7 +427,7 @@ pub fn sw312(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   let mut tmp4 = b_tmp * b_tmp;
   b_tmp = &shuffle_wzwy(b);
   tmp4 += b_tmp * b_tmp;
-  tmp3 -= flip_signs(tmp4, mask32x4::from_array([true, false, false, false]));
+  tmp3 -= flip_signs(&tmp4, mask32x4::from_array([true, false, false, false]));
 
   tmp4 = b_xzwy * shuffle_xwyz(c);
   tmp4 -= b_xxxx * c;

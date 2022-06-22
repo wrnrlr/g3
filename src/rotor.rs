@@ -1,5 +1,5 @@
 use std::ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg,Fn};
-use std::simd::{f32x4,simd_swizzle as swizzle};
+use std::simd::{f32x4, Simd, simd_swizzle as swizzle};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI2};
 use crate::maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb, zero_first};
@@ -59,7 +59,7 @@ impl Rotor {
     let half = 0.5 * ang_rad;
     let sin_ang = half.sin();
     let scale = sin_ang * inv_norm;
-    Rotor([half.cos(),x,y,z] as f32x4 * [1.0,scale,scale,scale].into())
+    Rotor(f32x4::from([half.cos(),x,y,z]) * f32x4::from([1.0,scale,scale,scale]))
   }
 
   pub fn from_euler_angles(roll:f32,pitch:f32,yaw:f32)->Rotor {
@@ -97,7 +97,7 @@ impl Rotor {
   }
 
   pub fn reverse(&self)->Rotor {
-    Rotor(f32x4_xor(&self.0, [0.0,-0.0,-0.0,-0.0].into()))
+    Rotor(f32x4_xor(&self.0, &f32x4::from(Simd([0.0,-0.0,-0.0,-0.0]))))
   }
 
   // Constrains the rotor to traverse the shortest arc
