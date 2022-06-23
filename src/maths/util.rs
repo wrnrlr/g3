@@ -221,7 +221,7 @@ mod tests {
   #[test] fn hi_dp_ss_test() {
     let a:f32x4 = [1.0, 2.0, 3.0, 5.0].into();
     let b = [-4.0, -3.0, -2.0, -1.0].into();
-    assert_eq!(hi_dp_ss(&a, b), &[-17.0, -16.0, -17.0, -16.0]);
+    assert_eq!(hi_dp_ss(&a, &b), [-17.0, -16.0, -17.0, -16.0].into());
   }
 
   #[test] fn add_first() {
