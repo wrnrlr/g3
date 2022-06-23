@@ -364,7 +364,7 @@ impl Div<Motor> for Motor {
 
 #[cfg(test)]
 mod tests {
-  use super::{Motor, Rotor, Translator, point, PI};
+  use crate::{Motor, Rotor, Translator, point, PI};
 
   #[test] #[ignore] fn motor_normalized() {
     let m = Motor::new(0.1,0.2,0.3,0.4,0.1,0.2,0.3,0.4).normalized();

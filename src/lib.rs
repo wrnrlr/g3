@@ -16,19 +16,18 @@ mod direction;
 mod translator;
 
 pub use std::f32::consts::PI;
-pub const PI2:f32 = PI/2.0;
 pub const TAU:f32 = PI*2.0;
 
-pub use dual::{Dual, dual};
-pub use point::*;
-pub use line::{Line, line};
-pub use branch::{Branch, branch};
-pub use horizon::{horizon, Horizon};
-pub use plane::*;
-pub use motor::{Motor, motor};
-pub use rotor::{EulerAngles, Rotor, rotor};
-pub use direction::Direction;
-pub use translator::{Translator, translator};
+pub use dual::{Dual,dual};
+pub use point::{Point,point,Origin,E012,E023,E032};
+pub use line::{Line,line};
+pub use branch::{Branch,branch};
+pub use horizon::{Horizon,horizon};
+pub use plane::{Plane,plane,E0,E1,E2,E3};
+pub use motor::{Motor,motor};
+pub use rotor::{EulerAngles,Rotor,rotor};
+pub use direction::{Direction};
+pub use translator::{Translator,translator};
 pub mod maths;
 
 #[cfg(feature = "glam")]

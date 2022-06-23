@@ -220,7 +220,7 @@ impl Div<Translator> for Translator {
 
 #[cfg(test)]
 mod tests {
-  use super::{Translator, point, Point, Origin};
+  use crate::{Translator, point, Point, Origin};
 
   fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
     const EPSILON: f32 = 0.02;

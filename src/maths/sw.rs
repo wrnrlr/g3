@@ -1,4 +1,4 @@
-use std::simd::{f32x4,mask32x4,simd_swizzle as swizzle,Which::{First,Second}};
+use std::simd::{f32x4,mask32x4,Simd,Mask,simd_swizzle as swizzle,Which::{First,Second}};
 use crate::maths::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, shuffle_zwwy, shuffle_wzyz};
 
 // p3: (w,    x,    y,    z)
@@ -58,7 +58,7 @@ pub fn sw10(a:&f32x4,b:&f32x4)->(f32x4,f32x4) {
   let a_wzwy = &shuffle_wzwy(a);
   let b_xzwy = &shuffle_xzwy(b);
 
-  let two_zero = [0.0, 2.0, 2.0, 2.0].into();
+  let two_zero:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
   let mut p1 = a * b;
   p1 += a_wzwy * b_xzwy;
   p1 *= a_ywyz * two_zero;
@@ -215,7 +215,7 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = &shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
-  tmp -= flip_signs(&tmp2, mask32::from([true, false, false, false]));
+  tmp -= flip_signs(&tmp2, mask32x4::from([true, false, false, false]));
 
   let b_xxxx = &shuffle_xxxx(b);
   let scale = [0.0, 2.0, 2.0, 2.0].into();
@@ -321,14 +321,14 @@ pub fn swrb(a:&f32x4,b:&f32x4)->f32x4 {
   tmp -= f32x4_xor(&tmp2, &[-0.0, 0.0, 0.0, 0.0].into());
 
   let b_xxxx = &shuffle_xxxx(b);
-  let scale = [0.0, 2.0, 2.0, 2.0].into();
+  let scale:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
   let mut tmp2 = b_xxxx * b_xwyz;
   tmp2 += b * b_xzwy;
   tmp2 *= scale;
 
   let mut tmp3 = b * b_xwyz;
   tmp3 -= b_xxxx * b_xzwy;
-  tmp3 *= scale;
+  tmp3 *= &scale;
 
   let a_xzwy = shuffle_xzwy(a);
   let a_xwyz = shuffle_xwyz(a);
@@ -371,7 +371,7 @@ pub fn sw02(a:&f32x4, b:&f32x4)->f32x4 {
   let mut inv_b = &rcp_nr1(b);
   // 2 / b0
   inv_b = &add_ss(inv_b, inv_b);
-  inv_b = &swizzle!(inv_b, f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
+  inv_b = &swizzle!(inv_b.clone(), f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
   a + mul_ss(&tmp, inv_b)
 }
 
@@ -404,7 +404,7 @@ pub fn swl2(a:&f32x4, d:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   // Add and subtract the same quantity in the low component to produce a cancellation
   p2_out -= shuffle_xwyz(a) * shuffle_xzwy(c);
   p2_out -= flip_signs(&(a * shuffle_xxxx(c)), mask32x4::from_array([true, false, false, false]));
-  (*a.clone(), p2_out + p2_out + d)
+  (a.clone(), p2_out + p2_out + d)
 }
 
 pub fn sw312(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
@@ -451,11 +451,11 @@ pub fn swo12(b:&f32x4, c:&f32x4)->f32x4 {
   // 2(b2 c3 - b1 c0 - b0 c1 - b3 c2) e032 +
   // 2(b3 c1 - b2 c0 - b0 c2 - b1 c3) e013 +
   // 2(b1 c2 - b3 c0 - b0 c3 - b2 c1) e021
-  let mut tmp = b * shuffle_xxxx(c);
+  let mut tmp:f32x4 = b * shuffle_xxxx(c);
   tmp += shuffle_xxxx(b) * c;
   tmp += shuffle_xwyz(b) * shuffle_xzwy(c);
   tmp = (shuffle_xzwy(b) * shuffle_xwyz(c)) - tmp;
-  tmp *= [0.0, 2.0, 2.0, 2.0].into();
+  tmp = tmp * [0.0, 2.0, 2.0, 2.0].into();
   // b0^2 + b1^2 + b2^2 + b3^2 assumed to equal 1
   // Set the low component to unity
   tmp + [1.0, 0.0, 0.0, 0.0].into()

@@ -1,5 +1,5 @@
 #![feature(portable_simd)]
-use std::simd::{f32x4,mask32x4,u32x4,simd_swizzle as swizzle,Which::{First,Second}};
+use std::simd::{f32x4,mask32x4,u32x4,StdFloat as _,simd_swizzle as swizzle,Which::{First,Second}};
 #[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_xor_ps},mem::transmute};
 
 // #[cfg(target_arch = "x86_64")]
@@ -7,7 +7,7 @@ use std::simd::{f32x4,mask32x4,u32x4,simd_swizzle as swizzle,Which::{First,Secon
 //   unsafe { transmute::<__m128, f32x4>(_mm_rsqrt_ps(transmute::<f32x4,__m128>(a))) }
 // }
 // #[cfg(not(target_arch = "x86_64"))]
-fn rsqrt(a:f32x4)->f32x4 { f32x4::splat(1.0) / a }
+fn rsqrt(a:&f32x4)->f32x4 { f32x4::splat(1.0) / a }
 // #[cfg(target_arch = "x86_64")]
 // #[inline] fn rcp(a:&f32x4)->f32x4 {
 //   unsafe { transmute::<__m128,&f32x4>(_mm_rcp_ps(transmute::<&f32x4,&__m128>(a))) }
@@ -40,8 +40,8 @@ pub fn rsqrt_nr1(a:&f32x4)->f32x4 {
   // TODO find portable version of _mm_rsqrt_ps in core_simd
   // From Intel optimization manual: expected performance is ~5.2x
   // baseline (sqrtps + divps) with ~22 bits of accuracy
-  let xn = rsqrt(a.into());
-  let axn2 = xn.into() * xn.into() * a;
+  let xn = &rsqrt(&a);
+  let axn2 = xn * xn * a;
   let xn3 = f32x4::splat(3.0) - axn2;
   f32x4::splat(0.5) * xn * xn3
 }
@@ -92,7 +92,7 @@ pub fn dp(a:&f32x4, b:&f32x4)->f32x4 {
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
   out = &(hi + out);
   out[0] += b2b3a2a3(hi,out)[0];
-  mask32x4::from_array([true, false, false, false]).select(out, f32x4::splat(0.0))
+  mask32x4::from_array([true, false, false, false]).select(out.copy(), f32x4::splat(0.0))
 }
 
 pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
@@ -241,8 +241,8 @@ mod tests {
 
   #[test] fn inverse_sqrt() {
     let a:f32x4 = [4.0, 9.0, 16.0, 25.0].into();
-    assert_eq!( a.sqrt(), [2.0, 3.0, 4.0, 5.0].into());
-    assert_eq!(f32x4::splat(1.0)/a.sqrt(), [1.0/2.0, 1.0/3.0, 1.0/4.0, 1.0/5.0]);
+    assert_eq!(a.sqrt(), [2.0, 3.0, 4.0, 5.0].into());
+    assert_eq!(f32x4::splat(1.0)/a.sqrt(), [1.0/2.0, 1.0/3.0, 1.0/4.0, 1.0/5.0].into());
   }
 
   #[test] fn rcp_nr1_test() {
