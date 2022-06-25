@@ -14,6 +14,10 @@ use crate::maths::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_
 // p2: (e0123, e01, e02, e03)
 // p3: (e123, e032, e013, e021)
 
+const TRUE_FALSES:mask32x4 = [true,false,false,false].into();
+const ZERO_TWOS:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
+const ONE_ZEROS:f32x4 = [1.0, 0.0, 0.0, 0.0].into();
+
 // Reflect a plane through another plane
 // b * a * b
 pub fn sw00(a:&f32x4,b:&f32x4)->f32x4 {
@@ -58,7 +62,7 @@ pub fn sw10(a:&f32x4,b:&f32x4)->(f32x4,f32x4) {
   let a_wzwy = &shuffle_wzwy(a);
   let b_xzwy = &shuffle_xzwy(b);
 
-  let two_zero:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
+  let two_zero:f32x4 = [0.0, 2.0, 2.0, 2.0].into(); // TODO is this right?
   let mut p1 = a * b;
   p1 += a_wzwy * b_xzwy;
   p1 *= a_ywyz * two_zero;
@@ -144,7 +148,7 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)),  mask32::from([true,false,false,false]));
+  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)),  TRUE_FALSES);
   tmp2 *= dc_scale;
 
   let mut tmp3 = b * b;
@@ -215,10 +219,10 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = &shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
-  tmp -= flip_signs(&tmp2, mask32x4::from([true, false, false, false]));
+  tmp -= flip_signs(&tmp2, TRUE_FALSES);
 
   let b_xxxx = &shuffle_xxxx(b);
-  let scale = &<[f32; 4] as Into<T>>::into([0.0, 2.0, 2.0, 2.0]);
+  let scale = &ZERO_TWOS;
   tmp2 = b_xxxx * b_xwyz;
   tmp2 += b * b_xzwy;
   tmp2 = tmp2 * scale;
@@ -451,8 +455,6 @@ pub fn swo12(b:&f32x4, c:&f32x4)->f32x4 {
   // 2(b2 c3 - b1 c0 - b0 c1 - b3 c2) e032 +
   // 2(b3 c1 - b2 c0 - b0 c2 - b1 c3) e013 +
   // 2(b1 c2 - b3 c0 - b0 c3 - b2 c1) e021
-  const ZERO_TWOS:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
-  const ONE_ZEROS:f32x4 = [1.0, 0.0, 0.0, 0.0].into();
   let mut tmp:f32x4 = b * shuffle_xxxx(c);
   tmp += shuffle_xxxx(b) * c;
   tmp += shuffle_xwyz(b) * shuffle_xzwy(c);
