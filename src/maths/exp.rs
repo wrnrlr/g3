@@ -17,7 +17,7 @@ pub fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   if *a == f32x4::splat(0.0) {
     // When exponentiating an ideal line, the terms past the linear
     // term in the Taylor series expansion vanishes
-    return ([1.0, 0.0, 0.0, 0.0].into(),b.into());
+    return ([1.0, 0.0, 0.0, 0.0].into(),b.clone());
   }
 
   // First, we need to decompose the bivector into the sum of two
@@ -47,7 +47,7 @@ pub fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   // (square the above quantity yourself to quickly verify the claim)
   // Maximum relative error < 1.5*2e-12
   let a2_sqrt_rcp = &rsqrt_nr1(a2);
-  let u = a2 * a2_sqrt_rcp;
+  let u:f32x4 = a2 * a2_sqrt_rcp;
   // Don't forget the minus later!
   let minus_v = ab * a2_sqrt_rcp;
 
@@ -58,7 +58,7 @@ pub fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   //
   // The original bivector * the inverse norm gives us a normalized
   // bivector.
-  let norm_real  = a * a2_sqrt_rcp;
+  let norm_real:&f32x4  = &(a * a2_sqrt_rcp);
   let mut norm_ideal = b * a2_sqrt_rcp;
   // The real part of the bivector also interacts with the pseudoscalar to
   // produce a portion of the normalized ideal part
@@ -86,19 +86,21 @@ pub fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let uv_1 = minus_v[0];
 
   let sincosu_0 = uv_0.sin();
-  let sincosu_1 = uv_0.cos();
+  let sincosu_1:f32 = uv_0.cos();
 
   let sinu = f32x4::splat(sincosu_0);
-  let p1_out  = [sincosu_1, 0.0, 0.0, 0.0].into() + (sinu * norm_real);
+  let tmp:f32x4 = [sincosu_1, 0.0, 0.0, 0.0].into();
+  let p1_out:f32x4  = tmp + (sinu * norm_real.clone());
 
   // The second partition has contributions from both the real and ideal
   // parts.
-  let cosu = [0.0, sincosu_1, sincosu_1, sincosu_1].into();
+  let cosu:f32x4 = [0.0, sincosu_1, sincosu_1, sincosu_1].into();
   let minus_vcosu = minus_v * cosu;
   let mut p2_out = sinu * norm_ideal;
   p2_out = p2_out + minus_vcosu * norm_real;
   let minus_vsinu = uv_1 * sincosu_0;
-  p2_out = [minus_vsinu, 0.0, 0.0, 0.0].into() + p2_out;
+  let tmp:f32x4 = [minus_vsinu, 0.0, 0.0, 0.0].into();
+  p2_out = tmp + p2_out;
   return (p1_out,p2_out);
 }
 

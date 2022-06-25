@@ -1,4 +1,3 @@
-#![feature(portable_simd)]
 use std::simd::{f32x4};
 use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
 
@@ -15,7 +14,7 @@ pub fn logarithm(p1:&f32x4, p2:&f32x4) ->(f32x4, f32x4) {
 
   // The first thing we need to do is extract only the bivector components
   // from the motor.
-  let bv_mask = [0.0, 1.0, 1.0, 1.0].into();
+  let bv_mask:f32x4 = [0.0, 1.0, 1.0, 1.0].into();
   let a = bv_mask * p1;
 
   // Early out if we're taking the log of a motor without any rotation

@@ -33,9 +33,9 @@ pub fn gp30(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
   p2 -= shuffle_xzwy(a) * shuffle_xwyz(b);
   // Compute a0 b0 + a1 b1 + a2 b2 + a3 b3 and store it in the low component
-  let mut tmp = &dp(a, b);
-  tmp = &flip_signs(tmp, [true, false, false, false].into());
-  p2 = b0a1a2a3(&p2, tmp);
+  let mut tmp = dp(a, b);
+  tmp = flip_signs(&tmp, [true, false, false, false].into());
+  p2 = b0a1a2a3(&p2, &tmp);
   (p1,p2)
 }
 

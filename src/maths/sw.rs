@@ -14,10 +14,6 @@ use crate::maths::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_
 // p2: (e0123, e01, e02, e03)
 // p3: (e123, e032, e013, e021)
 
-const TRUE_FALSES:mask32x4 = [true,false,false,false].into();
-const ZERO_TWOS:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
-const ONE_ZEROS:f32x4 = [1.0, 0.0, 0.0, 0.0].into();
-
 // Reflect a plane through another plane
 // b * a * b
 pub fn sw00(a:&f32x4,b:&f32x4)->f32x4 {
@@ -148,6 +144,7 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
+  let TRUE_FALSES:mask32x4 = [true,false,false,false].into();
   tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)),  TRUE_FALSES);
   tmp2 *= dc_scale;
 
@@ -219,10 +216,12 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   let mut tmp2 = b_tmp * b_tmp;
   let b_tmp = &shuffle_wzwy(b);
   tmp2 += b_tmp * b_tmp;
-  tmp -= flip_signs(&tmp2, TRUE_FALSES);
+  let true_falses:mask32x4 = [true,false,false,false].into();
+  tmp -= flip_signs(&tmp2, true_falses);
 
   let b_xxxx = &shuffle_xxxx(b);
-  let scale = &ZERO_TWOS;
+  let zero_twos = f32x4::from_array([0.0, 2.0, 2.0, 2.0]);
+  let scale = &zero_twos;
   tmp2 = b_xxxx * b_xwyz;
   tmp2 += b * b_xzwy;
   tmp2 = tmp2 * scale;
@@ -424,13 +423,13 @@ pub fn sw312(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   let tmp2 = (b_xxxx * b_xwyz + b_xzwy * b) * two;
 
   let mut tmp3 = b * b;
-  let mut b_tmp = &shuffle_yxxx(b);
-  tmp3 += b_tmp * b_tmp;
-  b_tmp = &shuffle_zwyz(b);
+  let mut b_tmp = shuffle_yxxx(b);
+  tmp3 += b_tmp * &b_tmp;
+  b_tmp = shuffle_zwyz(b);
 
-  let mut tmp4 = b_tmp * b_tmp;
-  b_tmp = &shuffle_wzwy(b);
-  tmp4 += b_tmp * b_tmp;
+  let mut tmp4 = &b_tmp * &b_tmp;
+  b_tmp = shuffle_wzwy(b);
+  tmp4 += &b_tmp * &b_tmp;
   tmp3 -= flip_signs(&tmp4, mask32x4::from_array([true, false, false, false]));
 
   tmp4 = b_xzwy * shuffle_xwyz(c);
@@ -459,8 +458,10 @@ pub fn swo12(b:&f32x4, c:&f32x4)->f32x4 {
   tmp += shuffle_xxxx(b) * c;
   tmp += shuffle_xwyz(b) * shuffle_xzwy(c);
   tmp = (shuffle_xzwy(b) * shuffle_xwyz(c)) - tmp;
+  const ZERO_TWOS:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
   tmp = tmp * ZERO_TWOS;
   // b0^2 + b1^2 + b2^2 + b3^2 assumed to equal 1
   // Set the low component to unity
+  const ONE_ZEROS:f32x4 = [1.0, 0.0, 0.0, 0.0].into();
   tmp + ONE_ZEROS
 }

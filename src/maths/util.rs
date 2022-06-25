@@ -62,8 +62,8 @@ pub fn rsqrt_nr1(a:&f32x4)->f32x4 {
 
 // #[cfg(not(target_arch = "x86_64"))]
 pub fn hi_dp(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut ab = &(a * b);
-  ab = &shuffle_zwzw(&(shuffle_yyww(ab) + ab + shuffle_xxyy(ab)));
+  let mut ab = a * b;
+  ab = shuffle_zwzw(&(shuffle_yyww(&ab) + ab + shuffle_xxyy(&ab)));
   swizzle!(ab.clone(), f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]) // TODO make faster???
 }
 
@@ -84,14 +84,15 @@ pub fn hi_dp_ss(a:&f32x4, b:&f32x4)->f32x4 {
 }
 
 pub fn dp(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut out = &(a * b);
-  let hi = &shuffle_yyww(out);
+  let mut out = a * b;
+  let hi = &shuffle_yyww(&out);
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
-  out = &(hi + out);
-  out[0] += b2b3a2a3(hi,out)[0];
-  mask32x4::from_array([true, false, false, false]).select(out.copy(), f32x4::splat(0.0))
+  out = hi + out;
+  out[0] += b2b3a2a3(hi,&out)[0];
+  let TRUE_FALSES = mask32x4::from_array([true, false, false, false]);
+  TRUE_FALSES.select(out, f32x4::splat(0.0))
 }
 
 pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
