@@ -1,4 +1,3 @@
-#![feature(portable_simd)]
 use std::simd::{f32x4,mask32x4,u32x4,StdFloat as _,simd_swizzle as swizzle,Which::{First,Second}};
 #[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_xor_ps},mem::transmute};
 
@@ -115,7 +114,7 @@ pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 // Is this faster then f32x4::abs, which is implemented in rust?
 #[inline] pub fn f32x4_abs(a:f32x4)->f32x4 { f32x4_andnot(f32x4::splat(-0.0), a) }
 
-#[inline] pub fn flip_signs(x:&f32x4, mask:mask32x4)->f32x4 { mask.select(-x, x) }
+#[inline] pub fn flip_signs(x:&f32x4, mask:mask32x4)->f32x4 { mask.select(-x.clone(), x.clone())}
 
 // #[cfg(target_arch = "x86_64")] #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_add_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
 // #[cfg(not(target_arch = "x86_64"))] #[inline]
@@ -236,7 +235,7 @@ mod tests {
 
   #[test] fn multiply_first() {
     let a:f32x4 = [2.0, 2.0, 3.0, 4.0].into();
-    assert_eq!(mul_ss(a.into(), &a), [4.0, 2.0, 3.0, 4.0].into());
+    assert_eq!(mul_ss(&a, &a), [4.0, 2.0, 3.0, 4.0].into());
   }
 
   #[test] fn inverse_sqrt() {
