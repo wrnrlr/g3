@@ -1,4 +1,4 @@
-use std::simd::{f32x4,mask32x4,Simd,Mask,simd_swizzle as swizzle,Which::{First,Second}};
+use std::simd::{f32x4,mask32x4,simd_swizzle as swizzle,Which::{First,Second}};
 use crate::maths::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, shuffle_zwwy, shuffle_wzyz};
 
 // p3: (w,    x,    y,    z)
@@ -144,7 +144,7 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)), mask32::from([true,false,false,false]));
+  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)),  mask32::from([true,false,false,false]));
   tmp2 *= dc_scale;
 
   let mut tmp3 = b * b;
@@ -218,7 +218,7 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   tmp -= flip_signs(&tmp2, mask32x4::from([true, false, false, false]));
 
   let b_xxxx = &shuffle_xxxx(b);
-  let scale = [0.0, 2.0, 2.0, 2.0].into();
+  let scale = &<[f32; 4] as Into<T>>::into([0.0, 2.0, 2.0, 2.0]);
   tmp2 = b_xxxx * b_xwyz;
   tmp2 += b * b_xzwy;
   tmp2 = tmp2 * scale;
@@ -451,12 +451,14 @@ pub fn swo12(b:&f32x4, c:&f32x4)->f32x4 {
   // 2(b2 c3 - b1 c0 - b0 c1 - b3 c2) e032 +
   // 2(b3 c1 - b2 c0 - b0 c2 - b1 c3) e013 +
   // 2(b1 c2 - b3 c0 - b0 c3 - b2 c1) e021
+  const ZERO_TWOS:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
+  const ONE_ZEROS:f32x4 = [1.0, 0.0, 0.0, 0.0].into();
   let mut tmp:f32x4 = b * shuffle_xxxx(c);
   tmp += shuffle_xxxx(b) * c;
   tmp += shuffle_xwyz(b) * shuffle_xzwy(c);
   tmp = (shuffle_xzwy(b) * shuffle_xwyz(c)) - tmp;
-  tmp = tmp * [0.0, 2.0, 2.0, 2.0].into();
+  tmp = tmp * ZERO_TWOS;
   // b0^2 + b1^2 + b2^2 + b3^2 assumed to equal 1
   // Set the low component to unity
-  tmp + [1.0, 0.0, 0.0, 0.0].into()
+  tmp + ONE_ZEROS
 }
