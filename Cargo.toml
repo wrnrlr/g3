@@ -59,3 +59,15 @@ rend3-framework = { version = "0.3.0", optional = true }
 #    "Window",
 #    "Element",
 #]}
+
+[[example]]
+name = "differentiation"
+features = ["bevy"]
+
+[[example]]
+name = "icosahedron"
+features = ["bevy"]
+
+[[example]]
+name = "plane"
+features = ["mirror"]

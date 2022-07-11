@@ -76,34 +76,34 @@ pub fn hi_dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 }
 
 pub fn hi_dp_ss(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut out = &(a * b);
-  let hi = shuffle_yyww(out);
-  let sum = hi + out;
-  out = &(sum + shuffle_xxyy(out));
-  shuffle_zwzw(out)
+  let mut ab = a * b;
+  let hi = shuffle_yyww(&ab);
+  let sum = hi + ab;
+  ab = sum + shuffle_xxyy(&ab);
+  shuffle_zwzw(&ab)
 }
 
 pub fn dp(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut out = a * b;
-  let hi = &shuffle_yyww(&out);
+  let mut ab = a * b;
+  let hi = &shuffle_yyww(&ab);
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
-  out = hi + out;
-  out[0] += b2b3a2a3(hi,&out)[0];
+  ab = hi + ab;
+  ab[0] += b2b3a2a3(hi, &ab)[0];
   let TRUE_FALSES = mask32x4::from_array([true, false, false, false]);
-  TRUE_FALSES.select(out, f32x4::splat(0.0))
+  TRUE_FALSES.select(ab, f32x4::splat(0.0))
 }
 
 pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut out = &(a * b);
-  let hi = &shuffle_yyww(out);
+  let mut ab = a * b;
+  let hi = &shuffle_yyww(&ab);
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
-  out = &(hi + out);
-  out = &add_ss(out, &b2b3a2a3(hi, out));
-  shuffle_xxxx(out)
+  ab = (hi + ab);
+  ab = add_ss(&ab, &b2b3a2a3(hi, &ab));
+  shuffle_xxxx(&ab)
 }
 
 #[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) } // TODO find a faster way

@@ -1,4 +1,4 @@
-#[cfg(test)]
+#![feature(portable_simd)] #[cfg(test)]
 mod tests {
   use std::simd::{f32x4, mask32x4};
   use g3::maths::{f32x4_xor, flip_signs, f32x4_andnot, f32x4_abs};
@@ -6,8 +6,8 @@ mod tests {
   #[test] fn test_f32_sign_flipping() {
     let v1 = f32x4::from_array([1.0,2.0,3.0,4.0]);
     let expected = f32x4::from_array([-1.0,-2.0,-3.0,4.0]);
-    assert_eq!(f32x4_xor(v1, f32x4::from_array([-0.0,-0.0,-0.0,0.0])), expected);
-    assert_eq!(flip_signs(v1, [true,true,true,false].into()), expected);
+    assert_eq!(f32x4_xor(&v1, &f32x4::from_array([-0.0,-0.0,-0.0,0.0])), expected);
+    assert_eq!(flip_signs(&v1, [true,true,true,false].into()), expected);
   }
 
   #[test] fn test_f32x4_abs() {

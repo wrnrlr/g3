@@ -4,8 +4,7 @@
 
 // A plane `b` perpendicular to a mirror a reflects to itself:
 // -ab^(-a) = b
-
-#[cfg(test)]
+#![feature(portable_simd)] #[cfg(test)]
 mod tests {
   use g3::*;
   use std::simd::f32x4;
@@ -31,7 +30,7 @@ mod tests {
   #[test] fn simd_sandwich() {
     let a = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
     let b = f32x4::from_array([-4.0, -3.0, -2.0, -1.0]);
-    let c = maths::sw02(a, b);
+    let c = maths::sw02(&a, &b);
     assert_eq!([c[0], c[1], c[2], c[3]], [9.0, 2.0, 3.0, 4.0]);
   }
 
@@ -173,7 +172,7 @@ mod tests {
   }
 
   #[test] fn normalize_rotor() {
-    let r = Rotor{p1: f32x4::from([4.0, -3.0, 3.0, 28.0])};
+    let r = Rotor(f32x4::from_array([4.0, -3.0, 3.0, 28.0]));
     r.normalized();
     let norm = r * r.inverse();
     approx_eq([norm.scalar(), 0.0, 0.0], [1.0, 0.0, 0.0]);

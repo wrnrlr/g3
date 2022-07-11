@@ -371,11 +371,11 @@ pub fn sw02(a:&f32x4, b:&f32x4)->f32x4 {
 
   // a1*b1 + a2*b2 + a3*b3 stored in the low component of tmp
   let mut tmp = hi_dp(a, b);
-  let mut inv_b = &rcp_nr1(b);
+  let mut inv_b = rcp_nr1(b);
   // 2 / b0
-  inv_b = &add_ss(inv_b, inv_b);
-  inv_b = &swizzle!(inv_b.clone(), f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
-  a + mul_ss(&tmp, inv_b)
+  inv_b = add_ss(&inv_b, &inv_b);
+  inv_b = swizzle!(inv_b.clone(), f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
+  a + mul_ss(&tmp, &inv_b)
 }
 
 // Apply a translator to a point.
@@ -458,10 +458,10 @@ pub fn swo12(b:&f32x4, c:&f32x4)->f32x4 {
   tmp += shuffle_xxxx(b) * c;
   tmp += shuffle_xwyz(b) * shuffle_xzwy(c);
   tmp = (shuffle_xzwy(b) * shuffle_xwyz(c)) - tmp;
-  const ZERO_TWOS:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
-  tmp = tmp * ZERO_TWOS;
+  let zero_twos:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
+  tmp = tmp * zero_twos;
   // b0^2 + b1^2 + b2^2 + b3^2 assumed to equal 1
   // Set the low component to unity
-  const ONE_ZEROS:f32x4 = [1.0, 0.0, 0.0, 0.0].into();
-  tmp + ONE_ZEROS
+  let one_zeros:f32x4 = [1.0, 0.0, 0.0, 0.0].into();
+  tmp + one_zeros
 }
