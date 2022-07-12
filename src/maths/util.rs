@@ -1,12 +1,13 @@
 use std::simd::{f32x4,mask32x4,u32x4,StdFloat as _,simd_swizzle as swizzle,Which::{First,Second}};
 #[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_xor_ps},mem::transmute};
+// use std::arch::x86_64::{__m128, _mm_dp_ps};
 
 // #[cfg(target_arch = "x86_64")]
 // #[inline] fn rsqrt(a:f32x4)->f32x4 {
 //   unsafe { transmute::<__m128, f32x4>(_mm_rsqrt_ps(transmute::<f32x4,__m128>(a))) }
 // }
 // #[cfg(not(target_arch = "x86_64"))]
-fn rsqrt(a:&f32x4)->f32x4 { f32x4::splat(1.0) / a }
+fn rsqrt(a:&f32x4)->f32x4 { f32x4::splat(1.0) / a.sqrt() } // TODO fast rsqrt...
 // #[cfg(target_arch = "x86_64")]
 // #[inline] fn rcp(a:&f32x4)->f32x4 {
 //   unsafe { transmute::<__m128,&f32x4>(_mm_rcp_ps(transmute::<&f32x4,&__m128>(a))) }
@@ -57,7 +58,7 @@ pub fn rsqrt_nr1(a:&f32x4)->f32x4 {
 
 // #[cfg(target_arch = "x86_64")]
 // #[inline] pub fn hi_dp(a:&f32x4,b:&f32x4)->f32x4 {
-//   unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11100001>(transmute::<f32x4,__m128>(a.into()),transmute::<f32x4,__m128>(b.into()))) }
+//   unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11100001>(transmute::<f32x4,__m128>(a.clone()),transmute::<f32x4,__m128>(b.clone()))) }
 // }
 
 // #[cfg(not(target_arch = "x86_64"))]
@@ -70,7 +71,6 @@ pub fn hi_dp(a:&f32x4, b:&f32x4)->f32x4 {
 pub fn hi_dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
   let mut out = &(a * b);
   let hi = shuffle_yyww(out);
-
   let sum  = hi + out;
   shuffle_zzzz(&(sum + shuffle_xxyy(out)))
 }
