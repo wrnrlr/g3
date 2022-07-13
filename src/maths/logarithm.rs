@@ -23,7 +23,7 @@ pub fn logarithm(p1:&f32x4, p2:&f32x4) ->(f32x4, f32x4) {
   let b = bv_mask * p2;
 
   // Next, we need to compute the norm as in the exponential.
-  let a2 = &hi_dp_bc(&a, &b);
+  let a2 = &hi_dp_bc(&a, &a);
   let ab = hi_dp_bc(&a, &b);
   let a2_sqrt_rcp = &rsqrt_nr1(a2);
   let s = a2 * a2_sqrt_rcp;
