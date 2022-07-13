@@ -38,7 +38,7 @@ impl Plane {
   // requires that the planes are normalized.
   pub fn normalized(&self)->Plane {
     let mut inv_norm  = rsqrt_nr1(&hi_dp_bc(&self.0, &self.0));
-    inv_norm = inv_norm + f32x4::from_array([1.0, 0.0, 0.0, 0.0]);
+    inv_norm[0] = 1.0;
     Plane(inv_norm * &self.0)
   }
 
