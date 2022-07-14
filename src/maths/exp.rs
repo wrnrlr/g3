@@ -33,7 +33,7 @@ pub fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
 
   // Broadcast dot(a, a) ignoring the scalar component to all components
   // of a2
-  let a2 = &hi_dp_bc(a, b);
+  let a2 = &hi_dp_bc(a, a);
   let ab = &hi_dp_bc(a, b);
 
   // Next, we need the sqrt of that quantity. Since e0123 squares to 0,
