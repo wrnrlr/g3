@@ -67,7 +67,7 @@ mod tests {
 
     let b1 = b1.normalized();
     let b2 = b2.normalized();
-    let b3:Branch = (b2 * b1).sqrt().reverse()(b1);
+    let b3:Branch = (b2 * b1).sqrt()(b1).reverse();
     approx_eq([b3.x(), b3.y(), b3.z(), 0.0], [b2.x(), b2.y(), b2.z(), 0.0])
   }
 
