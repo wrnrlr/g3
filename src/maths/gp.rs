@@ -108,7 +108,7 @@ pub fn gptr(a:&f32x4, b:&f32x4)->f32x4 {
   let mut p2 = shuffle_yxxx(a) * shuffle_yyzw(b);
   p2 += shuffle_zzwy(a) * shuffle_zwyz(b);
   let tmp = shuffle_wwyz(a) * shuffle_wzwy(b);
-  p2 - flip_signs(&tmp, [true,false,false,false].into())
+  p2 - f32x4_xor(&tmp, &[-0.0,0.0,0.0,0.0].into())
 }
 
 pub fn gprt(a:&f32x4, b:&f32x4)->f32x4 {
@@ -119,7 +119,7 @@ pub fn gprt(a:&f32x4, b:&f32x4)->f32x4 {
   let mut p2 = shuffle_yxxx(a) * shuffle_yyzw(b);
   p2 += shuffle_zwyz(a) * shuffle_zzwy(b);
   let tmp = shuffle_wzwy(a) * shuffle_wwyz(b);
-  p2 - flip_signs(&tmp, mask32x4::from_array([true,false,false,false]))
+  p2 - f32x4_xor(&tmp, &[-0.0,0.0,0.0,0.0].into())
 }
 
 pub fn gp12(a:&f32x4, b:&f32x4)->f32x4 {

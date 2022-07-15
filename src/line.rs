@@ -81,13 +81,13 @@ impl Line {
     cmp1 && cmp2
   }
 
-  // Exponentiate a line to produce a motor that posesses this line
+  // Exponentiate a line to produce a motor that has this line
   // as its axis. This routine will be used most often when this line is
   // produced as the logarithm of an existing rotor, then scaled to subdivide
   // or accelerate the motor's action. The line need not be a _simple bivector_
   // for the operation to be well-defined.
   pub fn exp(&self)->Motor {
-    let (p1,p2) = exp(&self.p1, &self.p1);
+    let (p1,p2) = exp(&self.p1, &self.p2);
     Motor{p1,p2}
   }
 
