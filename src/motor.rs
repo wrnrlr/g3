@@ -124,8 +124,8 @@ impl Motor {
   }
 
   pub fn sqrt(self)->Motor {
-    let p1 = add_ss(&self.p1, &[1.0, 0.0, 0.0, 0.0].into());
-    Motor{p1, p2:self.p2}.normalized()
+    let p1 = &self.p1 + f32x4::from_array([1.0, 0.0, 0.0, 0.0]);
+    Motor{p1, p2:self.p2}.normalized() // TODO use normalize to prevent extra copy
   }
 
   pub fn reverse(self)->Motor {
@@ -366,7 +366,7 @@ impl Div<Motor> for Motor {
 mod tests {
   use crate::{Motor, Rotor, Translator, point, PI};
 
-  #[test] #[ignore] fn motor_normalized() {
+  #[test] fn motor_normalized() {
     let m = Motor::new(0.1,0.2,0.3,0.4,0.1,0.2,0.3,0.4).normalized();
     assert_eq!((m*m.reverse()).scalar(), 1.0, "for a normalized motor m*~m = 1")
   }
