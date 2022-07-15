@@ -160,7 +160,7 @@ mod tests {
     let s = m.sqrt();
     let n = s * s;
     approx_eq([m.scalar(), m.e01(), m.e02()], [n.scalar(), n.e01(), n.e02()]);
-    approx_eq([m.e03(), m.e23(), m.e31()], [n.e03(), n.e21(), n.e31()]);
+    approx_eq([m.e03(), m.e23(), m.e31()], [n.e03(), n.e23(), n.e31()]);
     approx_eq([m.e12(), m.e0123(), 0.0], [n.e12(), n.e0123(), 0.0]);
   }
 
@@ -178,4 +178,6 @@ mod tests {
     approx_eq([norm.scalar(), 0.0, 0.0], [1.0, 0.0, 0.0]);
     approx_eq([norm.e12(), norm.e31(), norm.e23()], [0.0, 0.0, 0.0]);
   }
+
+  // TODO motor_to_matrix_3x4
 }
