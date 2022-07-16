@@ -57,9 +57,11 @@ mod tests {
     let r1 = rotor(PI/2.0, 0.0, 0.0, 1.0);
     let t1 = translator(1.0, 0.0, 0.0, 1.0);
     let m1 = r1 * t1;
+
     let r2 = rotor(PI/2.0, 0.3, -3.0, 1.0);
     let t2 = translator(12.0, -2.0, 0.4, 1.0);
     let m2 = r2 * t2;
+
     let motion = m2 * m1.reverse();
     let step = motion.log() / 4.0;
     let motor_step = step.exp();
@@ -73,6 +75,7 @@ mod tests {
 
   #[test] fn translator_motor_log() {
     let t = translator(1.0, 1.0, 2.0, 3.0);
+    t.log();
     let m:Motor = t.into();
     let l = m.log();
     approx_eq([l.e01(), l.e02(), l.e03(), 0.0], [m.e01(), m.e02(), m.e03(), 0.0]);

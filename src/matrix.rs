@@ -55,7 +55,7 @@ impl Into<Mat4> for &Point {
 
 impl Into<Mat4> for Rotor {
   fn into(self)->Mat4 {
-    let m = mat4x4_12(self.p1);
+    let m = mat4x4_12(&self.0);
     Mat4(glam::Mat4::from_cols_array_2d(&[m.0.into(),m.1.into(),m.2.into(),m.3.into()]))
   }
 }
@@ -64,17 +64,17 @@ impl Into<Mat4> for Rotor {
 
 impl Into<Mat4> for Motor {
   fn into(self)->Mat4 {
-    let cols = mat4x4_12_m(self.p1, self.p2);
+    let cols = mat4x4_12_m(&self.p1, &self.p2);
     Mat4(glam::Mat4::from_cols_array_2d(&[*cols.0.as_array(), *cols.1.as_array(), *cols.2.as_array(), *cols.3.as_array()]))
   }
 }
 
 impl Mat4 {
   pub fn call(self, xyzw:f32x4)->f32x4 {
-    let mut out = f32x4::from(self.0.x_axis.to_array()) * shuffle_xxxx(xyzw);
-    out = out + f32x4::from(self.0.y_axis.to_array()) * shuffle_yyyy(xyzw);
-    out = out + f32x4::from(self.0.z_axis.to_array()) * shuffle_zzzz(xyzw);
-    out = out + f32x4::from(self.0.w_axis.to_array()) * shuffle_wwww(xyzw);
+    let mut out = f32x4::from(self.0.x_axis.to_array()) * shuffle_xxxx(&xyzw);
+    out = out + f32x4::from(self.0.y_axis.to_array()) * shuffle_yyyy(&xyzw);
+    out = out + f32x4::from(self.0.z_axis.to_array()) * shuffle_zzzz(&xyzw);
+    out = out + f32x4::from(self.0.w_axis.to_array()) * shuffle_wwww(&xyzw);
     out
   }
 }

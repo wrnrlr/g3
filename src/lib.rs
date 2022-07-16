@@ -49,5 +49,5 @@ pub use bevy::prelude::{Plugin,Res,Time,App,Query,Without,Handle,Quat,Changed,Ve
 
 #[cfg(feature = "bevy")] pub mod prelude {
   pub use bevy::prelude::{App,Commands as Cmd,Res,Time,Query as Q};
-  pub use super::{PlotPlugin,Color,Point,Direction,Plane,Line,Horizon,Branch,Translator,Rotor,Motor,point,plane,line,horizon,branch,translator,rotor,motor,direction};
+  pub use super::{PlotPlugin,Color,Point,Direction,Plane,Line,Horizon,Branch,Translator,Rotor,Motor,point,plane,line,horizon,branch,translator,rotor,motor};
 }
