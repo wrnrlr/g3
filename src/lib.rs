@@ -2,6 +2,7 @@
 #![feature(fn_traits)]
 #![feature(portable_simd)]
 #![feature(adt_const_params)]
+#![feature(portable_simd)]
 #![allow(incomplete_features)]
 
 mod dual;
@@ -32,6 +33,7 @@ pub mod maths;
 
 #[cfg(feature = "glam")]
 pub use {matrix::*};
+
 #[cfg(feature = "glam")]
 mod matrix;
 
