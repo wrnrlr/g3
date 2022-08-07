@@ -1,5 +1,5 @@
 use std::{convert::From,fmt::{Display,Formatter,Result},simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
-use crate::{Rotor,Translator,Point,Line,Plane,Origin,maths::{flip_signs,logarithm,rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, add_ss, exp, gp11, gprt, gpmm, gpdl, gp21, sw012, sw312, swml, swo12, f32x4_xor}};
+use crate::{Rotor,Translator,Point,Line,Plane,Origin,maths::{flip_signs,logarithm,rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, exp, gp11, gprt, gpmm, gpdl, gp21, sw012, sw312, swml, swo12, f32x4_xor}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 /// A Motor is a combination of a translation along a line combined

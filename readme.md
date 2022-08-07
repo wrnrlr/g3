@@ -11,8 +11,6 @@ Rust crate for plane-based projective geometric-algebra for 3D aka the Clifford 
 
 ## Line
 
-## 
-
 ### Meet Operation `^`
 
 ### Join Operator `&`
@@ -68,3 +66,10 @@ cargo +nightly run --example elements --features="mirror"
 * [New Developments in Projective Geometric Algebra](http://terathon.com/gdc21_lengyel.pdf)
 * [Flectors](https://projectivegeometricalgebra.org/wiki/index.php?title=Flector)
 * [Space & Antispace](https://projectivegeometricalgebra.org/Lengyel-SpaceAntispace.pdf)
+* [Rational trigonometry via projective geometric algebra](https://arxiv.org/pdf/1401.2371.pdf)
+* [Alan Macdonald videos](https://www.youtube.com/playlist?list=PLLvlxwbzkr7igd6bL7959WWE7XInCCevt)
+* [Geometric Calculus Talk](https://www.youtube.com/watch?v=ItGlUbFBFfc)
+* [Lecture playlist](https://www.youtube.com/playlist?list=PLv6uM2DOOtPY28m4RE_oGxyrf6w-Erq5b)
+* [TensorFlow-based framework for Geometric Algebra](https://tfgap.warlock.ai/#/)
+
+https://enki.ws/ganja.js/examples/coffeeshop.html#ydDtaGu0a

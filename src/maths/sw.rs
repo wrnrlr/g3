@@ -144,8 +144,8 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  let TRUE_FALSES:mask32x4 = [true,false,false,false].into();
-  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)),  TRUE_FALSES);
+  let true_falses:mask32x4 = [true,false,false,false].into();
+  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)), true_falses);
   tmp2 *= dc_scale;
 
   let mut tmp3 = b * b;
@@ -370,7 +370,7 @@ pub fn sw02(a:&f32x4, b:&f32x4)->f32x4 {
   // normal.
 
   // a1*b1 + a2*b2 + a3*b3 stored in the low component of tmp
-  let mut tmp = hi_dp(a, b);
+  let tmp = hi_dp(a, b);
   let mut inv_b = rcp_nr1(b);
   // 2 / b0
   inv_b = add_ss(&inv_b, &inv_b);

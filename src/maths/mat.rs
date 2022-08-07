@@ -53,7 +53,7 @@ pub fn mat4x4_12_m(b:&f32x4, c:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {
   let c1 = b * shuffle_wywx(b);
   let mut tmp = shuffle_zwxx(b) * shuffle_ywyx(b);
   tmp = f32x4_xor(&[0.0, 0.0, -0.0, 0.0].into(), &tmp);
-  let mut c1 = &[2.0, -1.0, 2.0, 0.0].into() * (c1 + tmp);
+  let mut c1 = &<[f32; 4] as Into<f32x4>>::into([2.0, -1.0, 2.0, 0.0]) * (c1 + tmp);
   c1 = c1 + &[0.0, b0_2+b2_2, 0.0, 0.0].into();
 
   let mut c2 = f32x4_xor(&[-0.0, 0.0, -0.0, 0.0].into(), &(b * shuffle_zxzx(b)));

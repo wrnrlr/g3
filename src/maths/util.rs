@@ -1,5 +1,5 @@
 use std::simd::{f32x4,mask32x4,u32x4,StdFloat as _,simd_swizzle as swizzle,Which::{First,Second}};
-#[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_xor_ps},mem::transmute};
+// #[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_xor_ps},mem::transmute};
 // use std::arch::x86_64::{__m128, _mm_dp_ps};
 
 // #[cfg(target_arch = "x86_64")]
@@ -69,10 +69,10 @@ pub fn hi_dp(a:&f32x4, b:&f32x4)->f32x4 {
 }
 
 pub fn hi_dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut out = &(a * b);
-  let hi = shuffle_yyww(out);
-  let sum  = hi + out;
-  shuffle_zzzz(&(sum + shuffle_xxyy(out)))
+  let ab = &(a * b);
+  let hi = shuffle_yyww(ab);
+  let sum  = hi + ab;
+  shuffle_zzzz(&(sum + shuffle_xxyy(ab)))
 }
 
 pub fn hi_dp_ss(a:&f32x4, b:&f32x4)->f32x4 {
@@ -91,8 +91,8 @@ pub fn dp(a:&f32x4, b:&f32x4)->f32x4 {
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
   ab = hi + ab;
   ab[0] += b2b3a2a3(hi, &ab)[0];
-  let TRUE_FALSES = mask32x4::from_array([true, false, false, false]);
-  TRUE_FALSES.select(ab, f32x4::splat(0.0))
+  let true_falses = mask32x4::from_array([true, false, false, false]);
+  true_falses.select(ab, f32x4::splat(0.0))
 }
 
 pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
@@ -101,7 +101,7 @@ pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 
   // (a1 b1, a2 b2, a3 b3, 0) + (a2 b2, a2 b2, 0, 0)
   // = (a1 b1 + a2 b2, _, a3 b3, 0)
-  ab = (hi + ab);
+  ab = hi + ab;
   ab = add_ss(&ab, &b2b3a2a3(hi, &ab));
   shuffle_xxxx(&ab)
 }

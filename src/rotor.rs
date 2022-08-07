@@ -1,4 +1,4 @@
-use std::{simd::{f32x4, StdFloat as _,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
+use std::{simd::{f32x4,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
 use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI, maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb, zero_first}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 

@@ -41,6 +41,6 @@ pub fn extpb(a:&f32x4, b:&f32x4)->f32x4 {
   // (-a0 b2) e013 +
   // (-a0 b3) e021
 
-  let mut p3_out = &flip_signs(&(shuffle_yxxx(a) * b), mask32x4::from_array([false,true,true,true]));
+  let p3_out = &flip_signs(&(shuffle_yxxx(a) * b), mask32x4::from_array([false,true,true,true]));
   return add_ss(p3_out, &hi_dp(a,b));
 }
