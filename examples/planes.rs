@@ -1,48 +1,20 @@
 use g3::prelude::*;
 
 const SAMPLE_COUNT:SampleCount = SampleCount::One;
-const DT:f32 = 1.0 / 6.0;
 
 #[derive(Default)]
 struct Planes {
-  position:Point,
-  velocity:Point,
-  radius:f32,
   camera:CameraControl,
-
   directional_light_handle:Option<DirectionalLightHandle>,
-
   planes: Vec<ObjectHandle>,
   aabb:AABB,
 }
 
 impl Planes {
-  fn new()->Self {
-    Self {
-      ..Default::default()
-    }
-  }
+  fn new()->Self { Self { ..Default::default() } }
 
-  fn simulate(&mut self) {
-    let g:Point = point(0.0,-10.0,0.0);
-    self.velocity += g * DT;
-    self.position += self.velocity * DT;
-    // if self.position.x() <
-  }
-
-  fn add_plane(&mut self, renderer: &Arc<rend3::Renderer>, p: Plane, color: Vec4) {
+  fn add_plane(&mut self, renderer: &Arc<Renderer>, p: Plane, color: Vec4) {
     let mesh = plane_mesh(&p);
-    let aabb: AABB = (&mesh).into();
-    self.aabb.add(aabb);
-    let mesh_handle = renderer.add_mesh(mesh);
-    let material = PbrMaterial { albedo: AlbedoComponent::Value(color), unlit: true, ..PbrMaterial::default() };
-    let material_handle = renderer.add_material(material);
-    let object = Object { mesh_kind: ObjectMeshKind::Static(mesh_handle), material: material_handle, transform: Mat4::IDENTITY };
-    self.planes.push(renderer.add_object(object));
-  }
-
-  fn add_point(&mut self, renderer: &Arc<rend3::Renderer>, p: Point, color: Vec4) {
-    let mesh = point_mesh(&p, 0.1);
     let aabb: AABB = (&mesh).into();
     self.aabb.add(aabb);
     let mesh_handle = renderer.add_mesh(mesh);
@@ -57,19 +29,9 @@ impl App for Planes {
   const HANDEDNESS: Handedness = Handedness::Left;
   fn sample_count(&self) -> SampleCount { SAMPLE_COUNT }
   fn setup(&mut self, window: &Window, renderer: &Arc<Renderer>, _routines: &Arc<DefaultRoutines>, _surface_format: TextureFormat) {
-
     self.add_plane(renderer, E1, Vec4::new(1.0, 0.0, 0.0, 0.9));
     self.add_plane(renderer, E2, Vec4::new(0.0, 1.0, 0.0, 0.9));
     self.add_plane(renderer, E3, Vec4::new(0.0, 0.0, 1.0, 0.9));
-    // self.add_point(renderer, point(0.0,0.0,0.0), Vec4::new(0.0, 0.0, 0.0, 1.0));
-
-    // let room_mesh = cloth::room_mesh();
-    // let aabb:&AABB = &(&room_mesh).into();
-    // let mesh_handle = renderer.add_mesh(room_mesh);
-    // let material = PbrMaterial { albedo: AlbedoComponent::Value(Vec4::new(1.0, 0.0, 0.0, 1.0)), unlit:true, ..PbrMaterial::default() };
-    // let material_handle = renderer.add_material(material);
-    // let floor = Object { mesh_kind: ObjectMeshKind::Static(mesh_handle), material: material_handle, transform: Mat4::IDENTITY };
-    // self.floor_mesh = Some(renderer.add_object(floor));
 
     let size = window.inner_size();
     self.camera.resize(size.width as f32, size.height as f32);
