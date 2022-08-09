@@ -1,6 +1,7 @@
-use std::{convert::From,fmt::{Display,Formatter,Result},simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
+use std::{convert::From,fmt::{Display,Formatter,Result},simd::{f32x4,mask32x4,SimdFloat},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
 use crate::{Rotor,Translator,Point,Line,Plane,Origin,maths::{flip_signs,logarithm,rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, exp, gp11, gprt, gpmm, gpdl, gp21, sw012, sw312, swml, swo12, f32x4_xor}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
+use crate::maths::to_bits;
 
 /// A Motor is a combination of a translation along a line combined
 /// with a rotation about an axis parallel to that line.
@@ -106,7 +107,7 @@ impl Motor {
 
   // Constrains the motor to traverse the shortest arc
   pub fn constrained(&self)->Motor {
-    let mask = bits_wwww(self.p1.to_bits() & f32x4::from_array([-0.0, 0.0, 0.0, 0.0]).to_bits());
+    let mask = bits_wwww(to_bits(&self.p1) & to_bits(&f32x4::from_array([-0.0, 0.0, 0.0, 0.0])));
     let p1 = f32x4::from_bits(&mask ^ self.p1.to_bits());
     let p2 = f32x4::from_bits(&mask ^ self.p2.to_bits());
     Motor{p1,p2}

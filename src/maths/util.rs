@@ -1,6 +1,11 @@
-use std::simd::{f32x4,mask32x4,u32x4,StdFloat as _,simd_swizzle as swizzle,Which::{First,Second}};
+use std::simd::{f32x4, mask32x4, u32x4, StdFloat as _, simd_swizzle as swizzle, Which::{First, Second}, SimdFloat};
 // #[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_xor_ps},mem::transmute};
 // use std::arch::x86_64::{__m128, _mm_dp_ps};
+
+// Workaround for to_bits issue, TODO remove if fixed
+pub fn to_bits(a:&f32x4)->u32x4 {
+  unsafe { std::mem::transmute::<f32x4, u32x4>((*a).clone()) }
+}
 
 // #[cfg(target_arch = "x86_64")]
 // #[inline] fn rsqrt(a:f32x4)->f32x4 {
@@ -20,7 +25,7 @@ fn rsqrt(a:&f32x4)->f32x4 { f32x4::splat(1.0) / a.sqrt() } // TODO fast rsqrt...
 // }
 // #[cfg(not(target_arch = "x86_64"))]
 #[inline] pub fn f32x4_xor(a:&f32x4,b:&f32x4)->f32x4 {
-  f32x4::from_bits(a.to_bits() ^ b.to_bits())
+  f32x4::from_bits(to_bits(&a) ^ to_bits(&b))
 }
 
 pub fn refined_reciprocal(s:f32)->f32x4 { rcp_nr1(&f32x4::splat(s)) }
