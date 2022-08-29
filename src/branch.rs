@@ -2,7 +2,7 @@ use std::{simd::{f32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Di
 use crate::{Dual, Plane, Point, Rotor, Line, Horizon,maths::{gp11, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rsqrt_nr1, sqrt_nr1}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
-pub fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
+pub const fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 
 // The `Branch` both a line through the origin and also the principal branch of
 // the logarithm of a rotor.
@@ -50,7 +50,7 @@ impl Branch {
   // To convince yourself this is a line through the origin, remember that
   // such a line can be generated using the geometric product of two planes
   // through the origin.
-  pub fn new(a:f32, b:f32, c:f32)->Branch { Branch(f32x4::from_array([0.0, a, b, c])) }
+  pub const fn new(a:f32, b:f32, c:f32)->Branch { Branch(f32x4::from_array([0.0, a, b, c])) }
 
   // If a line is constructed as the regressive product (join) of
   // two points, the squared norm provided here is the squared

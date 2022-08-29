@@ -78,3 +78,19 @@ hecs = { version = "0.7.6", optional = true }
 #]}
 
 #opt-level = 3
+
+[[example]]
+name = "ball"
+required-features = ["plot"]
+
+[[example]]
+name = "differentiation"
+required-features = ["plot"]
+
+[[example]]
+name = "icosahedron"
+required-features = ["plot"]
+
+[[example]]
+name = "planes"
+required-features = ["plot"]

@@ -2,7 +2,7 @@ use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulA
 use crate::{Dual, Plane, Point, Motor, Branch, Horizon,maths::{gpll, exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1, rsqrt_nr1, dot11, dotlp}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
-pub fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
+pub const fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
 #[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
@@ -22,7 +22,7 @@ impl Line {
   #[inline] pub fn e03(&self)->f32 { self.p2[3] }
   #[inline] pub fn e30(&self)->f32 { -self.e03() }
 
-  pub fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line {
+  pub const fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line {
     Line{p1:f32x4::from_array([0.0,d,e,f]), p2:f32x4::from_array([0.0,a,b,c])}
   }
 

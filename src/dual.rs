@@ -1,7 +1,7 @@
 use std::{simd::{f32x2},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
-pub fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
+pub const fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 
 // A dual number is a multivector of the form p + e_0123.
 #[cfg_attr(feature="bevy",derive(Component))]
@@ -12,7 +12,7 @@ impl Dual {
   #[inline] pub fn scalar(&self)->f32 { self.p[0] }
   #[inline] pub fn e0123(&self)->f32 { self.p[1] }
 
-  pub fn new(p:f32,q:f32)->Dual { Dual{p:f32x2::from_array([p,q])} }
+  pub const fn new(p:f32,q:f32)->Dual { Dual{p:f32x2::from_array([p,q])} }
 }
 
 impl Add<Dual> for Dual {

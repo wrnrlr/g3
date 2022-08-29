@@ -58,7 +58,7 @@ impl Rotor {
     let half = 0.5 * ang_rad;
     let sin_ang = half.sin();
     let scale = sin_ang * inv_norm;
-    Rotor(f32x4::from([half.cos(),x,y,z]) * f32x4::from([1.0,scale,scale,scale]))
+    Rotor(f32x4::from_array([half.cos(),x,y,z]) * f32x4::from_array([1.0,scale,scale,scale]))
   }
 
   pub fn from_euler_angles(roll:f32,pitch:f32,yaw:f32)->Rotor {

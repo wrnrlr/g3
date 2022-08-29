@@ -2,7 +2,7 @@ use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulA
 use crate::{Dual, Plane, Point, Line, Branch, Translator,maths::{flip_signs, hi_dp, dotilp}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
-pub fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
+pub const fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 
 // A horizon represents a line at infinity and corresponds to the multivector:
 //
@@ -19,7 +19,7 @@ impl Horizon {
   #[inline] pub fn e03(&self)->f32 { self.p2[3] }
   #[inline] pub fn e30(&self)->f32 { -self.e03() }
 
-  pub fn new(a:f32,b:f32,c:f32)->Horizon { Horizon {p2: f32x4::from_array([0.0, a, b, c])} }
+  pub const fn new(a:f32,b:f32,c:f32)->Horizon { Horizon {p2: f32x4::from_array([0.0, a, b, c])} }
 
   pub fn squared_ideal_norm(&self)->f32 {
     hi_dp(&self.p2, &self.p2)[0]

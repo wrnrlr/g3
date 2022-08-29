@@ -12,7 +12,7 @@ pub const E032:Point = Point(f32x4::from_array([1.0,1.0,0.0,0.0]));
 pub const E012:Point = Point(f32x4::from_array([1.0,0.1,0.0,0.0]));
 pub const E023:Point = Point(f32x4::from_array([1.0,0.0,0.1,0.0]));
 
-pub fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
+pub const fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 
 // A point is represented as the multivector
 // $x\mathbf{e}_{032} + y\mathbf{e}_{013} + z\mathbf{e}_{021} +
@@ -37,7 +37,7 @@ impl Point {
   #[inline] pub fn e021(&self)->f32 { self.z() }
 
   // Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
-  pub fn new(x:f32,y:f32,z:f32)->Self{ Point(f32x4::from_array([1.0,x,y,z])) }
+  pub const fn new(x:f32,y:f32,z:f32)->Self{ Point(f32x4::from_array([1.0,x,y,z])) }
 
   pub fn normalized(&self)->Self{Self(&self.0 * rcp_nr1(&shuffle_xxxx(&self.0)))}
 

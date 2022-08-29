@@ -10,7 +10,7 @@ use crate::maths::to_bits;
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 pub struct Motor { pub p1:f32x4, pub p2:f32x4 }
 
-pub fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
+pub const fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
 
 impl Motor {
   pub fn e12(&self)->f32 { self.p1[3] }
@@ -30,7 +30,7 @@ impl Motor {
   pub fn e0123(&self)->f32 { self.p2[0] }
 
   /// a + b*e23 + c*e31 + d*e12 + e*e01 + f*e02 + g*e03 + h*e0123
-  pub fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor {
+  pub const fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor {
     Motor{p1:f32x4::from_array([a,b,c,d]), p2:f32x4::from_array([h,e,f,g])}}
 
   /// Produce a screw motion rotating and translating by given amounts along a

@@ -8,7 +8,7 @@ pub const E2:Plane = Plane(f32x4::from_array([0.0,0.0,1.0,0.0]));
 pub const E3:Plane = Plane(f32x4::from_array([0.0,0.0,0.0,1.0]));
 
 // form: ax + by + cz + d
-pub fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
+pub const fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
 // p0: (e0, e1, e2, e3)
 #[cfg_attr(feature="bevy",derive(Component))]
@@ -27,7 +27,7 @@ impl Plane {
 
   // The constructor performs the rearrangement so the plane can be specified
   // in the familiar form: ax + by + cz + d
-  pub fn new(a:f32,b:f32,c:f32,d:f32)->Plane { Plane([d,a,b,c].into())}
+  pub const fn new(a:f32,b:f32,c:f32,d:f32)->Plane { Plane(f32x4::from_array([d,a,b,c]))}
 
   // Normalize this plane $p$ such that $p \cdot p = 1$.
   //
