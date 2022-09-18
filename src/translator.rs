@@ -220,7 +220,7 @@ impl Div<Translator> for Translator {
 
 #[cfg(test)]
 mod tests {
-  use crate::{Translator, point, Point, Origin};
+  use crate::{Translator, point, Point, ORIGIN};
 
   fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
     const EPSILON: f32 = 0.02;
@@ -234,7 +234,6 @@ mod tests {
   #[test] fn translator_from_points() {
     let a = point(1.0, 1.0, 1.0);
     let b = point(-1.0, -1.0, -1.0);
-    let o = Origin::to_point();
     let a_to_b = (b.normalized() / a.normalized()).sqrt();
 
     // assert_eq!(a_to_b);
@@ -244,10 +243,10 @@ mod tests {
     approx_eq([c.e013(), c.e021(), c.e032(), c.e123()], [b.e013(), b.e021(), b.e032(), b.e123()]);
     //translate halfway between a and b (origin)
     let d:Point = (a_to_b*0.5)(a);
-    approx_eq([d.e013(), d.e021(), d.e032(), d.e123()], [o.e013(), o.e021(), o.e032(), o.e123()]);
+    approx_eq([d.e013(), d.e021(), d.e032(), d.e123()], [ORIGIN.e013(), ORIGIN.e021(), ORIGIN.e032(), ORIGIN.e123()]);
 
     let t = Translator::new(4.0,1.0,0.0,1.0);
-    let e:Point = t(o);
+    let e:Point = t(ORIGIN);
     let f = point(8f32.sqrt(), 0.0, 8f32.sqrt());
     approx_eq([e.e013(), e.e021(), e.e032(), e.e123()], [f.e013(), f.e021(), f.e032(), f.e123()]);
   }

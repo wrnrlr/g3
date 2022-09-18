@@ -2,26 +2,24 @@ use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4},ops::{Add,Add
 use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp33, dotptl, dot33, ext03, gp30}};
 #[cfg(feature = "bevy")] use bevy::prelude::Component;
 
-#[cfg_attr(feature="bevy",derive(Component))]
-#[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Origin {}
-
-impl Origin { pub fn to_point()->Point { Point::new(0.0,0.0,0.0) } }
-
-pub const E032:Point = Point(f32x4::from_array([1.0,1.0,0.0,0.0]));
-pub const E012:Point = Point(f32x4::from_array([1.0,0.1,0.0,0.0]));
-pub const E023:Point = Point(f32x4::from_array([1.0,0.0,0.1,0.0]));
+pub const E032:Point = point(1.0,0.0,0.0);
+pub const E012:Point = point(1.0,0.0,0.0);
+pub const E023:Point = point(0.0,1.0,0.0);
+pub const ORIGIN:Point = point(0.0,0.0,0.0);
 
 pub const fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 
-// A point is represented as the multivector
-// $x\mathbf{e}_{032} + y\mathbf{e}_{013} + z\mathbf{e}_{021} +
-// \mathbf{e}_{123}$. The point has a trivector representation because it is
-// the fixed point of 3 planar reflections (each of which is a grade-1
-// multivector). In practice, the coordinate mapping can be thought of as an
-// implementation detail.
-// p3: (w,    x,    y,    z)
-// p3: (e123, e032, e013, e021)
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
+pub struct Origin {} impl Into<Point> for Origin { fn into(self)->Point { Point::new(0.0,0.0,0.0) } }
+
+/// A point is represented as the multivector
+/// $x\mathbf{e}_{032} + y\mathbf{e}_{013} + z\mathbf{e}_{021} +
+/// \mathbf{e}_{123}$. The point has a trivector representation because it is
+/// the fixed point of 3 planar reflections (each of which is a grade-1
+/// multivector). In practice, the coordinate mapping can be thought of as an
+/// implementation detail.
+/// p3: (w,    x,    y,    z)
+/// p3: (e123, e032, e013, e021)
 #[cfg_attr(feature="bevy", derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Point (pub f32x4);
@@ -36,24 +34,19 @@ impl Point {
   #[inline] pub fn z(&self)->f32 { self.0[3] }
   #[inline] pub fn e021(&self)->f32 { self.z() }
 
-  // Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
+  /// Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
   pub const fn new(x:f32,y:f32,z:f32)->Self{ Point(f32x4::from_array([1.0,x,y,z])) }
 
   pub fn normalized(&self)->Self{Self(&self.0 * rcp_nr1(&shuffle_xxxx(&self.0)))}
 
-  pub fn inverse(&self)->Self {
-      let inv_norm = &rcp_nr1(&shuffle_xxxx(&self.0));
-      Self(inv_norm * inv_norm * &self.0)
-  }
+  pub fn inverse(&self)->Self { let inv_norm = &rcp_nr1(&shuffle_xxxx(&self.0));Self(inv_norm * inv_norm * &self.0) }
 
-  pub fn reverse(&self)->Point {
-    Point(flip_signs(&self.0, mask32x4::from_array([false,true,true,true])))
-  }
+  pub fn reverse(&self)->Point { Point(flip_signs(&self.0, mask32x4::from_array([false,true,true,true]))) }
 
-  // Project a point onto a line
+  /// Project a point onto a line
   pub fn project_line(self, l:Line)->Point { (self | l) ^ l }
 
-  // Project a point onto a plane
+  /// Project a point onto a plane
   pub fn project_plane(self, p:Plane)->Point { (self | p) ^ p }
 }
 
@@ -68,6 +61,7 @@ impl Div<f32> for Point {type Output=Self;fn div(self, s:f32) -> Self { Point(se
 impl MulAssign<f32> for Point {fn mul_assign(&mut self, s: f32) { self.0 = &self.0*f32x4::splat(s) }}
 impl DivAssign<f32> for Point {fn div_assign(&mut self, s: f32) { self.0 = &self.0/f32x4::splat(s) }}
 impl Neg for Point {type Output = Self;fn neg(self)->Point{Point(-self.0)}}
+/// let p:Plane = !point(1.0,0.0,0.0);
 impl Not for Point {type Output = Plane;fn not(self)->Plane {Plane(self.0)}}
 impl Mul<Point> for Point {type Output=Translator;fn mul(self,p:Point)->Translator{Translator{p2:gp33(&self.0, &p.0)}}}
 impl Mul<Plane> for Point {type Output=Motor;fn mul(self,p:Plane)->Motor{let(p1,p2)=gp30(&p.0,&self.0);Motor{p1,p2}}}
@@ -102,7 +96,7 @@ impl BitAnd<Plane> for Point {type Output = Dual;fn bitand(self, p: Plane)->Dual
 
 #[cfg(test)]
 mod tests {
-  use super::{Point,point};
+  use super::*;
 
   #[test] fn point_constructor() {
     assert_eq!(Point::new(1.0,2.0,3.0), point(1.0, 2.0, 3.0))
@@ -176,4 +170,10 @@ mod tests {
     assert_eq!(p.z(),z);
     assert_eq!(p.w(),w);
   }
+
+  // #[test] fn constants() {
+  //   assert_eq!(E032,!(E0*E3)*E2);
+  //   // assert_eq!(E012,E0*E1*E2);
+  //   // assert_eq!(E023,E0*E2*E3);
+  // }
 }

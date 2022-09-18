@@ -37,6 +37,9 @@ rustup update -- nightly
 cargo +nightly build
 ```
 
+## Build Doc
+
+```RUSTDOCFLAGS="--html-in-header src/doc.html" cargo doc --open```
 
 ## Run example
 

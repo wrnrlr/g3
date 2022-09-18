@@ -340,6 +340,15 @@ impl MulAssign<Motor> for Motor {
   }
 }
 
+
+// impl Mul<Plane> for Motor {
+//   type Output = Motor;
+//   fn mul(self, m:Motor)->Motor {
+//     let (p1,p2) = gpmm(&self.p1, &self.p2, &m.p1, &m.p2);
+//     Motor{p1, p2}
+//   }
+// }
+
 impl Div<Rotor> for Motor {
   type Output = Self;
   fn div(self,r:Rotor)->Motor {

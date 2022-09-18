@@ -19,7 +19,7 @@ pub use std::f32::consts::PI;
 pub const TAU:f32 = PI*2.0;
 
 pub use dual::{Dual,dual};
-pub use point::{Point,point,Origin,E012,E023,E032};
+pub use point::{Point,point,Origin,E012,E023,E032,ORIGIN};
 pub use line::{Line,line};
 pub use branch::{Branch,branch};
 pub use horizon::{Horizon,horizon};

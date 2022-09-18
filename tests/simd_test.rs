@@ -1,6 +1,6 @@
 #![feature(portable_simd)] #[cfg(test)]
 mod tests {
-  use std::simd::{f32x4, mask32x4};
+  use std::simd::{f32x4};
   use g3::maths::{f32x4_xor, flip_signs, f32x4_andnot, f32x4_abs};
 
   #[test] fn test_f32_sign_flipping() {
