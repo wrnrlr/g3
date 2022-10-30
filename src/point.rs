@@ -74,7 +74,7 @@ impl BitAnd<Horizon> for Point {type Output = Plane;fn bitand(self, l: Horizon) 
 impl BitAnd<Branch> for Point {type Output = Plane;fn bitand(self, b: Branch) -> Plane { !(!self ^ !b)}}
 impl BitAnd<Plane> for Point {type Output = Dual;fn bitand(self, p: Plane)->Dual { !(!self ^ !p)}}
 
-// TODO Does not exist, strange?
+// TODO Does not exist in klein?
 // impl Div<Plane> for Point {
 //   type Output = Motor;
 //   fn div(self, p: Plane) -> Motor {
@@ -91,6 +91,11 @@ impl BitAnd<Plane> for Point {type Output = Dual;fn bitand(self, p: Plane)->Dual
 //   type Output = Dual;
 //   fn bitxor(self, a:Point) -> Dual {}
 // }
+
+#[cfg(feature = "mint")] impl From<mint::Point2<f32>> for Point { #[inline(always)] fn from(v: mint::Point2<f32>)->Point { Self::new(v.x,v.y,0.0) } }
+#[cfg(feature = "mint")] impl From<Point> for mint::Point2<f32> { #[inline(always)] fn from(v: Point) -> Self { Self { x: v.x(), y: v.y() } } }
+#[cfg(feature = "mint")] impl From<mint::Point3<f32>> for Point { #[inline(always)] fn from(v: mint::Point3<f32>)->Point { Self::new(v.x,v.y,v.z) } }
+#[cfg(feature = "mint")] impl From<Point> for mint::Point3<f32> { #[inline(always)] fn from(v: Point) -> Self { Self { x: v.x(), y: v.y(), z: v.z() } } }
 
 #[cfg(test)]
 mod tests {

@@ -6,10 +6,10 @@ edition = "2021"
 resolver = "2"
 
 [lib]
-#crate-type = ["cdylib"]
 
 [dependencies]
 glam = { version = "0.22.0", optional = true }
+mint = { version = "0.5.9", optional = true }
 
 #[[example]]
 #name = "ball"
