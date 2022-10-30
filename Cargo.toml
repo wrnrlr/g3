@@ -9,7 +9,6 @@ resolver = "2"
 #crate-type = ["cdylib"]
 
 [dependencies]
-std_float = { git = "https://github.com/rust-lang/stdsimd", package = "std_float", rev = "cad7434" }
 glam = { version = "0.22.0", optional = true }
 
 #[[example]]
