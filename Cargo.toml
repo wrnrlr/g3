@@ -1,9 +1,16 @@
 [package]
 name = "g3"
 version = "0.1.0"
+description = "Neat library for computer graphics based on geometric algebra"
 authors = ["Werner Laurensse <werner@alman.ax>"]
 edition = "2021"
 resolver = "2"
+homepage = "https://github.com/wrnrlr/g3"
+repository = "https://github.com/wrnrlr/g3"
+readme = "readme.md"
+license = "ISC"
+keywords = ["math", "graphics", "geometry"]
+categories = ["graphics", "mathematics", "wasm"]
 
 [lib]
 
