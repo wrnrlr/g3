@@ -1,6 +1,7 @@
 use std::simd::{f32x4,mask32x4};
 use crate::maths::{b0a1a2a3, shuffle_xxzz, shuffle_xyxy,util::{dp, flip_signs, rcp_nr1, shuffle_xxxx, shuffle_yyzw, shuffle_wxxx, shuffle_yzwy, shuffle_ywyz, shuffle_zyzw, shuffle_zxxx, shuffle_wwyz, shuffle_zzwy, shuffle_yxxx, shuffle_xwyz, shuffle_xzwy, shuffle_wzwy, shuffle_zwyz, add_ss, f32x4_xor, sub_ss, mul_ss, shuffle_yzyw, shuffle_yywz, shuffle_wywz, shuffle_wzyw, shuffle_zzww}};
 
+/// a + b*e23 + c*e31 + d*e12 + e*e01 + f*e02 + g*e03 + h*e0123
 // plane * plane
 pub fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   // (a1 b1 + a2 b2 + a3 b3) +

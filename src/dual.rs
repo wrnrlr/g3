@@ -1,10 +1,8 @@
 use std::{simd::{f32x2},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not}};
-#[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 pub const fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 
 // A dual number is a multivector of the form p + e_0123.
-#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Dual { p:f32x2 }
 

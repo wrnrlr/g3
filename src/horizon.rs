@@ -1,13 +1,11 @@
 use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
 use crate::{Dual, Plane, Point, Line, Branch, Translator,maths::{flip_signs, hi_dp, dotilp}};
-#[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 pub const fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 
 // A horizon represents a line at infinity and corresponds to the multivector:
 //
 // $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
-#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Horizon { pub p2:f32x4 }
 

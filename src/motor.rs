@@ -1,12 +1,10 @@
 use std::{convert::From,fmt::{Display,Formatter,Result},simd::{f32x4,mask32x4,SimdFloat},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
 use crate::{Rotor,Translator,Point,Line,Plane,Origin,maths::{flip_signs,logarithm,rcp_nr1, dp_bc, bits_wwww, f32x4_abs, rsqrt_nr1, exp, gp11, gprt, gpmm, gpdl, gp21, sw012, sw312, swml, swo12, f32x4_xor}};
-#[cfg(feature = "bevy")] use bevy::prelude::Component;
 use crate::maths::to_bits;
 
 /// A Motor is a combination of a translation along a line combined
 /// with a rotation about an axis parallel to that line.
 /// In other words, it is the geometric product of a Translator and a Rotor.
-#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 pub struct Motor { pub p1:f32x4, pub p2:f32x4 }
 

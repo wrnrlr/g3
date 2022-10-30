@@ -1,6 +1,5 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4},ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn}};
 use crate::{Dual, Point, Line, Horizon, Branch, Motor,maths::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc, rsqrt_nr1, sqrt_nr1, sw00, sw10, sw20, sw30, ext00, ext02, ext03, extpb, gp00, gp03, dot00, dot03, dotpil, dotpl}};
-#[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 pub const E0:Plane = plane(1.0,0.0,0.0,0.0);
 pub const E1:Plane = plane(0.0,1.0,0.0,0.0);
@@ -11,7 +10,6 @@ pub const E3:Plane = plane(0.0,0.0,0.0,1.0);
 #[inline] pub const fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
 // p0: (e0, e1, e2, e3)
-#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Plane (pub f32x4);
 

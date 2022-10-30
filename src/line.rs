@@ -1,10 +1,8 @@
 use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
 use crate::{Dual, Plane, Point, Motor, Branch, Horizon,maths::{gpll, exp, f32x4_abs, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rcp_nr1, rsqrt_nr1, dot11, dotlp}};
-#[cfg(feature = "bevy")] use bevy::prelude::Component;
 
 pub const fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
-#[cfg_attr(feature="bevy",derive(Component))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Line {pub p1:f32x4, pub p2:f32x4}
 
