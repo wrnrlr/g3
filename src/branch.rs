@@ -28,7 +28,7 @@ pub const fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 //     no translational components, the branch is given its own type for
 //     efficiency.
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Branch(pub f32x4);
+pub struct Branch(pub(crate) f32x4);
 
 impl Branch {
   #[inline] pub fn e12(&self)->f32 { self.0[3] }

@@ -172,7 +172,7 @@ mod tests {
   }
 
   #[test] fn normalize_rotor() {
-    let r = Rotor(f32x4::from_array([4.0, -3.0, 3.0, 28.0]));
+    let r:Rotor = [4.0, -3.0, 3.0, 28.0].into();
     r.normalized();
     let norm = r * r.inverse();
     approx_eq([norm.scalar(), 0.0, 0.0], [1.0, 0.0, 0.0]);

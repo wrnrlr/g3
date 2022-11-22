@@ -6,7 +6,7 @@ use crate::maths::to_bits;
 /// with a rotation about an axis parallel to that line.
 /// In other words, it is the geometric product of a Translator and a Rotor.
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
-pub struct Motor { pub p1:f32x4, pub p2:f32x4 }
+pub struct Motor { pub(crate) p1:f32x4, pub(crate) p2:f32x4 }
 
 pub const fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
 

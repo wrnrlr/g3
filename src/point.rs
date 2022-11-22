@@ -21,7 +21,7 @@ pub struct Origin {} impl Into<Point> for Origin { fn into(self)->Point { Point:
 /// p3: (e123, e032, e013, e021)
 #[cfg_attr(feature = "bytemuck", repr(C), derive(bytemuck::Pod, bytemuck::Zeroable))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Point (pub f32x4);
+pub struct Point (pub(crate) f32x4);
 
 impl Point {
   #[inline] pub fn w(&self)->f32 { self.0[0] }

@@ -4,7 +4,7 @@ use crate::maths::{refined_reciprocal,hi_dp_bc,rsqrt_nr1};
 // Directions in are represented using points at infinity (homogeneous coordinate 0).
 // Having a homogeneous coordinate of zero ensures that directions are translation-invariant.
 #[derive(Default,Debug,Clone,PartialEq)]
-pub struct Direction(pub f32x4);
+pub struct Direction(pub(crate) f32x4);
 
 impl Direction {
   pub fn x(&self)->f32 { self.0[1] }

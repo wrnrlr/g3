@@ -7,7 +7,7 @@ pub const fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 //
 // $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Horizon { pub p2:f32x4 }
+pub struct Horizon { pub(crate) p2:f32x4 }
 
 impl Horizon {
   #[inline] pub fn e01(&self)->f32 { self.p2[1] }

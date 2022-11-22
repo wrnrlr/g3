@@ -126,7 +126,7 @@ mod tests {
   }
 
   #[test] fn mul_rotor_translator() {
-    let r = Rotor(f32x4::from([1.0, 0.0, 0.0, 1.0]));
+    let r:Rotor = [1.0, 0.0, 0.0, 1.0].into();
     let t = Translator{p2: f32x4::from([0.0, 0.0, 0.0, 1.0])};
     let m = r * t;
     approx_eq([m.scalar(), m.e01(), m.e02(), m.e03()], [1.0, 0.0, 0.0, 1.0]);
@@ -134,7 +134,7 @@ mod tests {
   }
 
   #[test] fn mul_translator_rotor() {
-    let r = Rotor(f32x4::from([1.0, 0.0, 0.0, 1.0]));
+    let r:Rotor = [1.0, 0.0, 0.0, 1.0].into();
     let t = Translator{p2: f32x4::from([0.0, 0.0, 0.0, 1.0])};
     let m = t * r;
     approx_eq([m.scalar(), m.e01(), m.e02(), m.e03()], [1.0, 0.0, 0.0, 1.0]);
@@ -142,25 +142,25 @@ mod tests {
   }
 
   #[test] fn mul_motor_rotor() {
-    let r1 = Rotor(f32x4::from([1.0, 2.0, 3.0, 4.0]));
+    let r1:Rotor = [1.0, 2.0, 3.0, 4.0].into();
     let t = Translator{p2: f32x4::from([3.0, -2.0, 1.0, -3.0])};
-    let r2 = Rotor(f32x4::from([-4.0, 2.0, -3.0, 1.0]));
+    let r2:Rotor = [-4.0, 2.0, -3.0, 1.0].into();
     let m1 = (t * r1) * r2;
     let m2 = t * (r1 * r2);
     assert_eq!(m1, m2);
   }
 
   #[test] fn mul_rotor_motor() {
-    let r1 = Rotor(f32x4::from([1.0, 2.0, 3.0, 4.0]));
+    let r1:Rotor = [1.0, 2.0, 3.0, 4.0].into();
     let t = Translator{p2: f32x4::from([3.0, -2.0, 1.0, -3.0])};
-    let r2 = Rotor(f32x4::from([-4.0, 2.0, -3.0, 1.0]));
+    let r2:Rotor = [-4.0, 2.0, -3.0, 1.0].into();
     let m1 = r2 * (r1 * t);
     let m2 = (r2 * r1) * t;
     assert_eq!(m1, m2);
   }
 
   #[test] fn mul_motor_translator() {
-    let r = Rotor(f32x4::from([1.0, 2.0, 3.0, 4.0]));
+    let r:Rotor = [1.0, 2.0, 3.0, 4.0].into();
     let t1 = Translator{p2: f32x4::from([3.0, -2.0, 1.0, -3.0])};
     let t2 = Translator{p2: f32x4::from([-4.0, 2.0, -3.0, 1.0])};
     let m1 = (r * t1) * t2;
@@ -169,7 +169,7 @@ mod tests {
   }
 
   #[test] fn mul_translator_motor() {
-    let r = Rotor(f32x4::from([1.0, 2.0, 3.0, 4.0]));
+    let r:Rotor = [1.0, 2.0, 3.0, 4.0].into();
     let t1 = Translator{p2: f32x4::from([3.0, -2.0, 1.0, -3.0])};
     let t2 = Translator{p2: f32x4::from([-4.0, 2.0, -3.0, 1.0])};
     let m1 = t2 * (r * t1);

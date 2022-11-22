@@ -11,7 +11,7 @@ pub const E3:Plane = plane(0.0,0.0,0.0,1.0);
 
 // p0: (e0, e1, e2, e3)
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Plane (pub f32x4);
+pub struct Plane (pub(crate) f32x4);
 
 impl Plane {
   #[inline] pub fn d(&self)->f32 { self.0[0] }

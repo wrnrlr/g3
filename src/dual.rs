@@ -4,7 +4,7 @@ pub const fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 
 // A dual number is a multivector of the form p + e_0123.
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Dual { p:f32x2 }
+pub struct Dual { pub(crate) p:f32x2 }
 
 impl Dual {
   #[inline] pub fn scalar(&self)->f32 { self.p[0] }

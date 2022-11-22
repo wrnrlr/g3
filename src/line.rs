@@ -4,7 +4,7 @@ use crate::{Dual, Plane, Point, Motor, Branch, Horizon,maths::{gpll, exp, f32x4_
 pub const fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Line {pub p1:f32x4, pub p2:f32x4}
+pub struct Line {pub(crate) p1:f32x4, pub(crate) p2:f32x4}
 
 impl Line {
   #[inline] pub fn e12(&self)->f32 { self.p1[3] }
