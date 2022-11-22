@@ -1,9 +1,9 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4},ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
 use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp33, dotptl, dot33, ext03, gp30}};
 
-pub const E032:Point = point(1.0,0.0,0.0);
-pub const E012:Point = point(1.0,0.0,0.0);
-pub const E023:Point = point(0.0,1.0,0.0);
+pub const E032:Point = point(1.0,0.0,0.0); // ???
+pub const E012:Point = point(1.0,0.0,0.0); // ???
+pub const E023:Point = point(0.0,1.0,0.0); // ???
 pub const ORIGIN:Point = point(0.0,0.0,0.0);
 
 pub const fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
@@ -19,6 +19,7 @@ pub struct Origin {} impl Into<Point> for Origin { fn into(self)->Point { Point:
 /// implementation detail.
 /// p3: (w,    x,    y,    z)
 /// p3: (e123, e032, e013, e021)
+#[cfg_attr(feature = "bytemuck", repr(C), derive(bytemuck::Pod, bytemuck::Zeroable))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Point (pub f32x4);
 

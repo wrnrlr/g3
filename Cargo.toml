@@ -17,6 +17,7 @@ categories = ["graphics", "mathematics", "wasm"]
 [dependencies]
 glam = { version = "0.22.0", optional = true }
 mint = { version = "0.5.9", optional = true }
+bytemuck = { version = "1.12", optional = true, features = ["nightly_portable_simd"] }
 
 #[[example]]
 #name = "ball"
