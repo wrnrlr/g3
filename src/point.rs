@@ -56,6 +56,7 @@ impl Sub for Point {type Output=Self;fn sub(self,p:Self)->Self{Self(self.0-p.0)}
 impl AddAssign for Point {fn add_assign(&mut self,p:Self){self.0+=p.0}}
 impl SubAssign for Point {fn sub_assign(&mut self,p:Self){self.0-=p.0}}
 impl Mul<f32> for Point {type Output=Self;fn mul(self, s:f32) -> Self { Point(self.0*f32x4::splat(s)) } }
+impl Mul<Point> for f32 {type Output=Point;fn mul(self, p:Point) -> Point { p*self } }
 impl Div<f32> for Point {type Output=Self;fn div(self, s:f32) -> Self { Point(self.0/f32x4::splat(s)) } }
 impl MulAssign<f32> for Point {fn mul_assign(&mut self, s: f32) { self.0 = &self.0*f32x4::splat(s) }}
 impl DivAssign<f32> for Point {fn div_assign(&mut self, s: f32) { self.0 = &self.0/f32x4::splat(s) }}
