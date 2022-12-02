@@ -12,7 +12,7 @@ Let's break down what we mean by plane-based, projective and geometric-algebra i
 ### Geometric algebra
 Of the history of mathematics it is often said that it where the Arabs or Indians that discovered the number zero.
 It might be hard for today's people with all their modern technology to fully appreciate the difficulties of solving
-quadratic equations using roman numerals. What was life like before GPS and cell phones? Harder still to fathom that 
+quadratic equations using roman numerals. Harder still to fathom that 
 like the mathematicians of old, without the number zero, one is missing some numbers that can make life easier,
 and one is to take this quite literally.
 
