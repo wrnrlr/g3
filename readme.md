@@ -1,15 +1,49 @@
 # g3
 
-Rust crate for plane-based projective geometric-algebra for 3D aka the Clifford Algebra with signature P(R*<sub>3,0,1</sub>).
+This is a neat library for 3D computer graphics based on geometric algebra for the Rust programing language.
+Specifically it implements the plane-based projective geometric-algebra aka. the Clifford Algebra with signature P(R*<sub>3,0,1</sub>).
+At first this may sound like a strange and esoteric idea to use in
+contrast to the linear algebra you might already be familiar with.
+However, one will find it to be a more intuitive and powerful formalism to describe operations for three-dimensional euclidean/flat space.
 
 
-## API
+Let's break down what we mean by plane-based, projective and geometric-algebra in reverse order.
 
-## Plane
+### Geometric algebra
+Of the history of mathematics it is often said that it where the Arabs or Indians that discovered the number zero.
+It might be hard for today's people with all their modern technology to fully appreciate the difficulties of solving
+quadratic equations using roman numerals. What was life like before GPS and cell phones? Harder still to fathom that 
+like the mathematicians of old, without the number zero, one is missing some numbers that can make life easier,
+and one is to take this quite literally.
 
-## Point
+Most know about Complex numbers as the non-real solution of equation *x = √-1*.
+Less known is the non-real solution for *x = √1* called the Hyperbolic numbers
+and the non-real solution for *x = √0* called the Dual numbers.
 
-## Line
+Together the complex numbers *p*, the hyperbolic numbers *q*
+and the dual numbers *r* describe a space *R<sub>p,q,r</sub>*.
+
+### (Hyper)planes
+
+
+### Projections
+The first thing to realise is that to represent all possible transformations of 3D space one needs an extra 4th dimension.
+
+
+## Elements
+
+This library exports the following basic elements:
+* Plane: the basis vector from which all other elements are build
+* Line: the intersection of two planes \
+  There are two special cases for lines:
+  * Branch, a line through the origin
+  * Horizon, a line infinitely far away
+* Point: the intersection of three planes
+* Rotor: a rotation
+* Translator: a translation
+* Motor: a combination of a Rotor and a Translator
+
+## Geometric Operations
 
 ### Meet Operation `^`
 
@@ -23,30 +57,13 @@ Rust crate for plane-based projective geometric-algebra for 3D aka the Clifford 
 
 ### Sandwich Product `a(b)`
 
+`a(b) = a*b*a⁻¹`
+
 ### Dual Operator `!`
 
 ## Get Started
 
-This software uses some of Rust experimental feautures like `fn_traits` so make sure to compile using the nightly release.
-
-```bash
-rustup update -- nightly
-```
-
-```bash
-cargo +nightly build
-```
-
-## Build Doc
-
-```RUSTDOCFLAGS="--html-in-header src/doc.html" cargo doc --open```
-
-## Run example
-
-
-```
-cargo +nightly run --example elements --features="mirror"
-```
+TODO
 
 ## Awesome Links
 
