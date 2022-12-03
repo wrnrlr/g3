@@ -1,6 +1,6 @@
 [package]
 name = "g3"
-version = "0.1.0"
+version = "0.1.1"
 description = "Neat library for computer graphics based on geometric algebra"
 authors = ["Werner Laurensse <werner@alman.ax>"]
 edition = "2021"

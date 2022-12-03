@@ -6,7 +6,6 @@ At first this may sound like a strange and esoteric idea to use in
 contrast to the linear algebra you might already be familiar with.
 However, one will find it to be a more intuitive and powerful formalism to describe operations for three-dimensional euclidean/flat space.
 
-
 Let's break down what we mean by plane-based, projective and geometric-algebra in reverse order.
 
 ### Geometric algebra
@@ -28,7 +27,6 @@ and the dual numbers *r* describe a space *R<sub>p,q,r</sub>*.
 
 ### Projections
 The first thing to realise is that to represent all possible transformations of 3D space one needs an extra 4th dimension.
-
 
 ## Elements
 
