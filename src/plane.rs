@@ -6,7 +6,7 @@ pub const E1:Plane = plane(0.0,1.0,0.0,0.0);
 pub const E2:Plane = plane(0.0,0.0,1.0,0.0);
 pub const E3:Plane = plane(0.0,0.0,0.0,1.0);
 
-/// $$ax + by + cz + d $$
+/// ae₁ + be₂ + ce₃ + de₀
 #[inline] pub const fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
 // p0: (e0, e1, e2, e3)

@@ -6,6 +6,7 @@ pub const E012:Point = point(1.0,0.0,0.0); // ???
 pub const E023:Point = point(0.0,1.0,0.0); // ???
 pub const ORIGIN:Point = point(0.0,0.0,0.0);
 
+/// xe₀₃₂ + ye₀₁₃ + ze₀₂₁ + e₁₂₃
 pub const fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 
 #[derive(Default,Debug,Clone,Copy,PartialEq)]

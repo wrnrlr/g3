@@ -38,6 +38,7 @@ impl Translator {
     Translator{ p2: data.into()}
   }
 
+  // TODO broken???
   pub fn normalized(&self)->Translator {
     let inv_norm = rsqrt_nr1(&dp_bc(&self.p2,&self.p2));
     Translator{p2: &self.p2 * inv_norm}
@@ -49,16 +50,16 @@ impl Translator {
 
   // Compute the logarithm of the translator, producing a horizon axis.
   // In practice, the logarithm of a translator is simply the horizon partition
-  // (without the scalar $1$).
+  // (without the scalar $1$).f
   // pub fn log(&self)->IdealLine { IdealLine{p2: self.p2} } TODO
 
   // Compute the square root of the provided translator $t$.
-  #[inline] pub fn sqrt(self)->Translator { self * 0.5 }
+  #[inline] pub fn sqrt(&self)->Translator { *self * 0.5 }
 
   // Compute the logarithm of the translator, producing an horizon axis.
   // In practice, the logarithm of a translator is simply the horizon partition
   // (without the scalar $1$).
-  pub fn log(self)-> Horizon { Horizon {p2: self.p2} }
+  pub fn log(&self)-> Horizon { Horizon {p2: self.p2} }
 }
 
 impl Display for Translator {
