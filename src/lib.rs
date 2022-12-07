@@ -37,3 +37,5 @@ pub use {matrix::*};
 mod matrix;
 
 pub mod prelude;
+
+#[cfg(feature = "renderer")] mod render;
