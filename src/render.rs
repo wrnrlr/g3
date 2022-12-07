@@ -23,7 +23,7 @@ impl Renderer {
     unsafe {gl.polygon_mode(glow::FRONT_AND_BACK, glow::LINE)};
     unsafe {gl.use_program(Some(self.point.raw))};
     // unsafe {gl.draw_arrays(glow::TRIANGLES, 0, 3 as i32)};
-    mesh.vertex_attribute(gl, glow::POINTS, self.point.vao, self.point.vbo);
+    unsafe { mesh.vertex_attribute(gl, glow::POINTS, self.point.vao, self.point.vbo) };
     // mesh.vertex_attribute(gl, glow::TRIANGLES, self.point.vao, self.point.vbo);
     unsafe {gl.polygon_mode(glow::FRONT_AND_BACK, glow::FILL)};
   }
