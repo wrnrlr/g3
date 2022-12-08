@@ -4,13 +4,15 @@ use crate::{Point};
 pub struct Renderer {
   world: hecs::World,
   point: Program,
+  uniforms: UniformBuffer
 }
 
 impl Renderer {
   pub fn new(gl:&glow::Context, world: hecs::World)->Self {
-    Self{
+    Self {
       world,
-      point: unsafe { Program::new(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE) }
+      point: unsafe { Program::new(gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE) },
+      uniforms: UniformBuffer::new()
     }
   }
   pub fn paint(&mut self, gl: &glow::Context) {
@@ -18,14 +20,14 @@ impl Renderer {
     for (id, (p,&c)) in self.world.query_mut::<(&mut Point, &i32)>() {
       points.push(*p);
     };
-    println!("points: {:?}", points);
     let mesh = Mesh{positions: points};
-    unsafe {gl.polygon_mode(glow::FRONT_AND_BACK, glow::LINE)};
-    unsafe {gl.use_program(Some(self.point.raw))};
-    // unsafe {gl.draw_arrays(glow::TRIANGLES, 0, 3 as i32)};
-    unsafe { mesh.vertex_attribute(gl, glow::POINTS, self.point.vao, self.point.vbo) };
-    // mesh.vertex_attribute(gl, glow::TRIANGLES, self.point.vao, self.point.vbo);
-    unsafe {gl.polygon_mode(glow::FRONT_AND_BACK, glow::FILL)};
+    unsafe {
+      gl.polygon_mode(glow::FRONT_AND_BACK, glow::LINE);
+      gl.use_program(Some(self.point.raw));
+      self.point.load(gl, &self.uniforms);
+      mesh.vertex_attribute(gl, glow::POINTS, self.point.vao, self.point.vbo);
+      gl.polygon_mode(glow::FRONT_AND_BACK, glow::FILL);
+    }
   }
 }
 
@@ -38,9 +40,9 @@ struct UniformBuffer {
 impl UniformBuffer {
   fn new()->Self {
     Self{
-      model: [4.045084971874737, 0.0, 2.938926261462366, 0.0, 1.7274575140626314, 4.045084971874737, -2.377641290737884, 0.0, -2.377641290737884, 2.938926261462366, 3.2725424859373686, 0.0, 0.0, 0.0, 0.0, 1.0],
-      view: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -17.45006258016331, 1.0],
-      projection: [0.5913978494623657, 0.0, 0.0, 0.0, 0.0, 1.0000000000000002, 0.0, 0.0, 0.0, 0.0, -1.040816326530612, -1.0, 0.0, 0.0, -2.0408163265306123, 0.0]
+      model: [4.0, 0.0, 3.0, 0.0, 1.7, 4.0, -2.4, 0.0, -2.4, 3.0, 3.3, 0.0, 0.0, 0.0, 0.0, 1.0],
+      view: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -17.5, 1.0],
+      projection: [0.6, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, -2.0, 0.0]
     }
   }
 }
@@ -63,24 +65,24 @@ impl Program {
     let raw = gl.create_program().expect("Cannot create program");
     create_shader(gl, raw, glow::VERTEX_SHADER, vertex);
     create_shader(gl, raw, glow::FRAGMENT_SHADER, fragment);
-    let model = gl.get_uniform_location(raw, "projection");
-    let view = gl.get_uniform_location(raw, "view");
-    let projection = gl.get_uniform_location(raw, "projection");
     let vao = Some(gl.create_vertex_array().unwrap());
     let vbo = Some(gl.create_buffer().unwrap());
-    unsafe {gl.bind_vertex_array(vao)};
-    unsafe {gl.bind_buffer(glow::ARRAY_BUFFER, vbo)};
+    gl.bind_vertex_array(vao);
+    gl.bind_buffer(glow::ARRAY_BUFFER, vbo);
     gl.enable_vertex_attrib_array(0);
     gl.vertex_attrib_pointer_f32(0, 4, glow::FLOAT, false, (std::mem::size_of::<f32>()*4) as i32, 0);
     gl.link_program(raw);
+    let model = gl.get_uniform_location(raw, "model");
+    let view = gl.get_uniform_location(raw, "view");
+    let projection = gl.get_uniform_location(raw, "projection");
     Self{raw, locations: Locations{ model, view, projection }, vao, vbo}
   }
 
   unsafe fn load(&self, gl: &glow::Context, uniforms:&UniformBuffer) {
     // gl.use_program(Some(self.raw));
-    // gl.uniform_matrix_4_f32_slice(self.locations.model.as_ref(), false, &uniforms.model);
-    // gl.uniform_matrix_4_f32_slice(self.locations.view.as_ref(), false, &uniforms.view);
-    // gl.uniform_matrix_4_f32_slice(self.locations.projection.as_ref(), false, &uniforms.projection);
+    gl.uniform_matrix_4_f32_slice(self.locations.model.as_ref(), false, &uniforms.model);
+    gl.uniform_matrix_4_f32_slice(self.locations.view.as_ref(), false, &uniforms.view);
+    gl.uniform_matrix_4_f32_slice(self.locations.projection.as_ref(), false, &uniforms.projection);
     // gl.bind_buffer(glow::ARRAY_BUFFER, self.vbo);
   }
 }
@@ -93,7 +95,6 @@ impl Mesh {
   unsafe fn vertex_attribute(&self, gl: &glow::Context, mode: u32, vao: Option<NativeVertexArray>, vbo: Option<NativeBuffer>) {
     let mut l = vec![];
     for p in &self.positions { l.push([p.x(), p.y(), p.z(), p.w()]) }
-    println!("{:?}", l);
     let buffer = bytemuck::cast_slice(&l);
     gl.bind_buffer(glow::ARRAY_BUFFER, vbo);
     gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, buffer, glow::DYNAMIC_DRAW);
@@ -119,6 +120,7 @@ unsafe fn create_shader(gl: &glow::Context, program: glow::Program, shader_type:
 
 const VERTEX_SHADER_SOURCE:&str = r#"
   layout(location=0) in vec4 in_position;
+  // layout(location=1) in vec4 color;
   uniform mat4 model;
   uniform mat4 view;
   uniform mat4 projection;
@@ -126,19 +128,19 @@ const VERTEX_SHADER_SOURCE:&str = r#"
   void main() {
       // gl_Position = projection * view * model * vec4(in_position.xyz, 1.0);
       // gl_Position = vertices[gl_VertexID];
-      gl_Position = in_position;
-      gl_PointSize = 500.0;
+      gl_PointSize = 20.0;
+      gl_Position = projection * view * model * in_position;
   }
 "#;
 const FRAGMENT_SHADER_SOURCE:&str = r#"
   precision mediump float;
+  in vec4 in_color;
   out vec4 out_color;
   void main() {
     if (dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25)
 			discard;
 		else
 			out_color = vec4(1, 0, 0, 1.0 );
-      // out_color = vec4(1, 0, 0, 1);
   }
 "#;
 

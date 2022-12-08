@@ -40,6 +40,7 @@ fn main() {
 
   let mut world = World::new();
 
+  let origin = world.spawn((point(0.0,0.0,0.0), 0xff0000));
   let a = world.spawn((point(0.0,1.0,0.0), 0xff0000));
   let b = world.spawn((point(-1.0,-1.0,0.0), 0xff0000));
   let c = world.spawn((point(1.0,-1.0,0.0), 0xff0000));
