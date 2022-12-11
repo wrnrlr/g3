@@ -16,15 +16,16 @@ impl Renderer {
     }
   }
   pub fn paint(&mut self, gl: &glow::Context) {
+    self.draw_points(gl);
+  }
+  fn draw_points(&mut self, gl:glow::Context) {
     let mut points = vec![];
     let mut colors = vec![];
-    for (id, (p,c)) in self.world.query_mut::<(&Point, &Color)>() {
+    for (_id, (p,c)) in self.world.query_mut::<(&Point, &Color)>() {
       points.push(*p);
       colors.push(*c);
     };
-    // let mesh = Mesh{positions: points};
     unsafe {
-      gl.polygon_mode(glow::FRONT_AND_BACK, glow::LINE);
       gl.use_program(Some(self.point.raw));
       gl.bind_vertex_array(self.point.vao);
       gl.bind_buffer(glow::ARRAY_BUFFER, self.point.vbo);
@@ -39,12 +40,9 @@ impl Renderer {
       let buffer = bytemuck::cast_slice(&l);
       gl.bind_buffer(glow::ARRAY_BUFFER, self.point.vbo);
       gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, buffer, glow::DYNAMIC_DRAW);
-      // unsafe { gl.vertex_attrib_4_f32(0, 0.0, 0.0, 0.0, 1.0); }
       gl.enable(glow::PROGRAM_POINT_SIZE);
       gl.bind_vertex_array(self.point.vao);
       gl.draw_arrays(glow::POINTS, 0, points.len() as i32);
-      // mesh.vertex_attribute(gl, glow::POINTS, self.point.vao, self.point.vbo);
-      gl.polygon_mode(glow::FRONT_AND_BACK, glow::FILL);
     }
   }
 }
