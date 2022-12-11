@@ -17,15 +17,33 @@ impl Renderer {
   }
   pub fn paint(&mut self, gl: &glow::Context) {
     let mut points = vec![];
-    for (id, (p,&c)) in self.world.query_mut::<(&mut Point, &i32)>() {
+    let mut colors = vec![];
+    for (id, (p,c)) in self.world.query_mut::<(&Point, &Color)>() {
       points.push(*p);
+      colors.push(*c);
     };
-    let mesh = Mesh{positions: points};
+    // let mesh = Mesh{positions: points};
     unsafe {
       gl.polygon_mode(glow::FRONT_AND_BACK, glow::LINE);
       gl.use_program(Some(self.point.raw));
+      gl.bind_vertex_array(self.point.vao);
+      gl.bind_buffer(glow::ARRAY_BUFFER, self.point.vbo);
+      gl.enable_vertex_attrib_array(0);
+      gl.enable_vertex_attrib_array(1);
+      gl.vertex_attrib_pointer_f32(0, 4, glow::FLOAT, false, 0 as i32, 0);
+      gl.vertex_attrib_pointer_f32(1, 4, glow::FLOAT, false, 0 as i32, (std::mem::size_of::<f32>()*4*points.len()) as i32);
       self.point.load(gl, &self.uniforms);
-      mesh.vertex_attribute(gl, glow::POINTS, self.point.vao, self.point.vbo);
+      let mut l = vec![];
+      for p in &points { l.push([p.x(), p.y(), p.z(), p.w()]) }
+      for c in &colors { l.push([c.red(), c.green(), c.blue(), c.alpha()]) }
+      let buffer = bytemuck::cast_slice(&l);
+      gl.bind_buffer(glow::ARRAY_BUFFER, self.point.vbo);
+      gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, buffer, glow::DYNAMIC_DRAW);
+      // unsafe { gl.vertex_attrib_4_f32(0, 0.0, 0.0, 0.0, 1.0); }
+      gl.enable(glow::PROGRAM_POINT_SIZE);
+      gl.bind_vertex_array(self.point.vao);
+      gl.draw_arrays(glow::POINTS, 0, points.len() as i32);
+      // mesh.vertex_attribute(gl, glow::POINTS, self.point.vao, self.point.vbo);
       gl.polygon_mode(glow::FRONT_AND_BACK, glow::FILL);
     }
   }
@@ -67,10 +85,6 @@ impl Program {
     create_shader(gl, raw, glow::FRAGMENT_SHADER, fragment);
     let vao = Some(gl.create_vertex_array().unwrap());
     let vbo = Some(gl.create_buffer().unwrap());
-    gl.bind_vertex_array(vao);
-    gl.bind_buffer(glow::ARRAY_BUFFER, vbo);
-    gl.enable_vertex_attrib_array(0);
-    gl.vertex_attrib_pointer_f32(0, 4, glow::FLOAT, false, (std::mem::size_of::<f32>()*4) as i32, 0);
     gl.link_program(raw);
     let model = gl.get_uniform_location(raw, "model");
     let view = gl.get_uniform_location(raw, "view");
@@ -120,27 +134,62 @@ unsafe fn create_shader(gl: &glow::Context, program: glow::Program, shader_type:
 
 const VERTEX_SHADER_SOURCE:&str = r#"
   layout(location=0) in vec4 in_position;
-  // layout(location=1) in vec4 color;
+  layout(location=1) in vec4 color;
   uniform mat4 model;
   uniform mat4 view;
   uniform mat4 projection;
-  const vec4 vertices[3] = vec4[3](vec4(0,1,0,1), vec4(-1,-1,0,1), vec4(1,-1,0,1));
+  out vec4 f_color;
   void main() {
       // gl_Position = projection * view * model * vec4(in_position.xyz, 1.0);
       // gl_Position = vertices[gl_VertexID];
       gl_PointSize = 20.0;
       gl_Position = projection * view * model * in_position;
+      f_color = color;
   }
 "#;
 const FRAGMENT_SHADER_SOURCE:&str = r#"
   precision mediump float;
-  in vec4 in_color;
+  in vec4 f_color;
   out vec4 out_color;
   void main() {
     if (dot(gl_PointCoord-0.5,gl_PointCoord-0.5)>0.25)
 			discard;
 		else
-			out_color = vec4(1, 0, 0, 1.0 );
+			out_color = f_color;
   }
 "#;
 
+#[derive(Clone, Copy, Debug, Hash, PartialEq, PartialOrd)]
+pub struct Color(pub u32);
+
+impl Color {
+  pub const BLACK: Self = Self(0x000000FF);
+  pub const WHITE: Self = Self(0xFFFFFFFF);
+  pub const GREY: Self = Self(0xFF888888);
+  pub const RED: Self = Self(0xFF0000FF);
+  pub const GREEN: Self = Self(0x00FF00FF);
+  pub const BLUE: Self = Self(0x0000FFFF);
+  pub const YELLOW: Self = Self(0xFFFF00FF);
+  pub const CYAN: Self = Self(0x00FFFFFF);
+  pub const MAGENTA: Self = Self(0xFF00FFFF);
+
+  pub fn red(&self)->f32 { ((self.0 >> 24) & 0xff) as f32 / 255.0 }
+  pub fn green(&self)->f32 { ((self.0 >> 16) & 0xff) as f32 / 255.0 }
+  pub fn blue(&self)->f32 { ((self.0 >> 8) & 0xff) as f32 / 255.0 }
+  pub fn alpha(&self)->f32 { ((self.0) & 0xff) as f32 / 255.0 }
+}
+
+impl Into<[f32;4]> for Color {
+  fn into(self) -> [f32;4] { [self.red(), self.green(), self.blue(), self.alpha()] }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test] fn color() {
+    assert_eq!([Color::RED.red(), Color::RED.green(), Color::RED.blue(), Color::RED.alpha()], [1.0, 0.0, 0.0, 1.0]);
+    assert_eq!([Color::GREEN.red(), Color::GREEN.green(), Color::GREEN.blue(), Color::GREEN.alpha()], [0.0, 1.0, 0.0, 1.0]);
+    assert_eq!([Color::BLUE.red(), Color::BLUE.green(), Color::BLUE.blue(), Color::BLUE.alpha()], [0.0, 0.0, 1.0, 1.0]);
+  }
+}

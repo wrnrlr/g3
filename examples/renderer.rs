@@ -20,7 +20,7 @@ impl eframe::App for Demo {
   fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
     CentralPanel::default().show(ctx, |ui| {
       let size = ui.available_size();
-      let (rect, response) = ui.allocate_exact_size(size, egui::Sense::drag());
+      let (rect, _response) = ui.allocate_exact_size(size, egui::Sense::drag());
 
       let renderer = self.renderer.clone();
 
@@ -40,12 +40,13 @@ fn main() {
 
   let mut world = World::new();
 
-  let origin = world.spawn((point(0.0,0.0,0.0), 0xff0000));
-  let a = world.spawn((point(0.0,1.0,0.0), 0xff0000));
-  let b = world.spawn((point(-1.0,-1.0,0.0), 0xff0000));
-  let c = world.spawn((point(1.0,-1.0,0.0), 0xff0000));
-  // let d = world.spawn((point(0.0,2.0,0.0), 0x00ff00));
-  let e = world.spawn((plane(1.0,0.0,0.0,1.0), 0x00ff00));
+  world.spawn_batch([
+    (point(0.0,0.0,0.0), Color::MAGENTA),
+    (point(0.0,1.0,0.0), Color::RED),
+    (point(-1.0,-1.0,0.0), Color::GREEN),
+    (point(1.0,-1.0,0.0), Color::YELLOW),
+    // (plane(1.0,0.0,0.0,1.0), 0x00ff00)
+  ]);
 
   eframe::run_native("Renderer", eframe::NativeOptions::default(),
     Box::new(|cc| Box::new(Demo::new(cc, world)))
