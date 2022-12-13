@@ -35,17 +35,33 @@ impl eframe::App for Demo {
 }
 
 fn main() {
-  // Log to stdout (if you run with `RUST_LOG=debug`).
-  // tracing_subscriber::fmt::init();
-
   let mut world = World::new();
+
+  let m = (E1*E2).sqrt();
+  let p = E1;
+  let a = m(point(-1.0,0.0,-1.0));
+  let b = m(point(-1.0,0.0,1.0));
+  let c = m(point(1.0,0.0,1.0));
+  let d = m(point(1.0,0.0,-1.0));
 
   world.spawn_batch([
     (point(0.0,0.0,0.0), Color::MAGENTA),
     (point(0.0,1.0,0.0), Color::RED),
     (point(-1.0,-1.0,0.0), Color::GREEN),
     (point(1.0,-1.0,0.0), Color::YELLOW),
-    // (plane(1.0,0.0,0.0,1.0), 0x00ff00)
+
+    (a, Color::CYAN),
+    (b, Color::CYAN),
+    (c, Color::CYAN),
+    (d, Color::CYAN),
+  ]);
+
+  world.spawn_batch([
+    (E1, Color::RED),
+    // (E2, Color::GREEN),
+    // (E3, Color::BLUE),
+    // (plane(0.0,1.0,0.0,0.0), Color::GREEN),
+    // (plane(0.0,0.0,1.0,0.0), Color::BLUE)
   ]);
 
   eframe::run_native("Renderer", eframe::NativeOptions::default(),
