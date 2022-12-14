@@ -39,7 +39,7 @@ impl From<Rotor> for EulerAngles {
 // To apply the rotor to a supported entity, the call operator is available.
 // p1: scalar, e12, e31, e23
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct Rotor(pub(crate) f32x4);
+pub struct Rotor(pub f32x4);
 
 impl Rotor {
   #[inline] pub fn scalar(&self)->f32 { self.0[0] }
