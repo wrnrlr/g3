@@ -11,8 +11,8 @@ pub struct Renderer {
 impl Renderer {
   pub fn new(gl:&glow::Context, world: hecs::World)->Self {
     unsafe {
-      // gl.enable(glow::BLEND);
-      // gl.blend_func(glow::SRC_ALPHA, glow::ONE_MINUS_CONSTANT_ALPHA);
+      gl.enable(glow::BLEND);
+      gl.blend_func(glow::SRC_ALPHA, glow::ONE_MINUS_CONSTANT_ALPHA);
     }
     Self {
       world,
