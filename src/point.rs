@@ -1,4 +1,4 @@
-use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4},ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle},mem::transmute,ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
 use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::{flip_signs, rcp_nr1, shuffle_xxxx, gp33, dotptl, dot33, ext03, gp30}};
 
 pub const E032:Point = point(1.0,0.0,0.0); // ???
@@ -100,6 +100,11 @@ impl BitAnd<Plane> for Point {type Output = Dual;fn bitand(self, p: Plane)->Dual
 #[cfg(feature = "mint")] impl From<mint::Point3<f32>> for Point { #[inline(always)] fn from(v: mint::Point3<f32>)->Point { Self::new(v.x,v.y,v.z) } }
 #[cfg(feature = "mint")] impl From<Point> for mint::Point3<f32> { #[inline(always)] fn from(v: Point) -> Self { Self { x: v.x(), y: v.y(), z: v.z() } } }
 
+/// Returns `&[x,y,z,w]`
+impl From<&Point> for [f32;4] { #[inline(always)] fn from(v: &Point) -> Self { unsafe { transmute::<f32x4,[f32;4]>(simd_swizzle!(v.0, [1,2,3,0])) } } }
+/// Returns `[x,y,z,w]`
+impl From<Point> for [f32;4] { #[inline(always)] fn from(v: Point) -> Self { unsafe { transmute::<f32x4,[f32;4]>(simd_swizzle!(v.0, [1,2,3,0])) } } }
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -175,6 +180,11 @@ mod tests {
     assert_eq!(p.y(),y);
     assert_eq!(p.z(),z);
     assert_eq!(p.w(),w);
+  }
+
+  #[test] fn point_xyzw() {
+    assert_eq!(&<[f32;4]>::from(&point(4.0,3.0,2.0)), &[4f32,3.0,2.0,1.0]);
+    assert_eq!(<[f32;4]>::from(point(4.0,3.0,2.0)), [4f32,3.0,2.0,1.0]);
   }
 
   // #[test] fn constants() {
