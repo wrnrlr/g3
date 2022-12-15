@@ -1,9 +1,10 @@
 use glow::{HasContext, NativeBuffer, NativeVertexArray};
-use crate::{Plane,Point,E2,point};
+use crate::{Plane,Point,Line,E2,point,plane};
 
 pub struct Renderer {
   world: hecs::World,
   point: Program,
+  line: Program,
   plane: Program,
   uniforms: UniformBuffer
 }
@@ -17,12 +18,14 @@ impl Renderer {
     Self {
       world,
       plane: unsafe { Program::new(gl, PLANE_VERTEX_SHADER, PLANE_FRAGMENT_SHADER) },
+      line: unsafe { Program::new(gl, LINE_VERTEX_SHADER, LINE_FRAGMENT_SHADER) },
       point: unsafe { Program::new(gl, POINT_VERTEX_SHADER, POINT_FRAGMENT_SHADER) },
       uniforms: UniformBuffer::new()
     }
   }
   pub fn paint(&mut self, gl: &glow::Context) {
     self.draw_planes(gl);
+    self.draw_lines(gl);
     self.draw_points(gl);
   }
   fn draw_planes(&mut self, gl:&glow::Context) {
@@ -54,6 +57,37 @@ impl Renderer {
       gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, buffer, glow::DYNAMIC_DRAW);
       gl.bind_vertex_array(self.plane.vao);
       gl.draw_arrays(glow::TRIANGLES, 0, planes.len() as i32);
+    }
+  }
+  fn draw_lines(&mut self, gl:&glow::Context) {
+    let size = 1.0;
+    let eps = 0.001;
+    let cube = &[plane(size, 0.0, 0.0, 1.0), plane(size, 0.0, 0.0, -1.0), plane(0.0, size, 0.0, 1.0), plane(0.0, size, 0.0, -1.0), plane(0.0, 0.0, size, 1.0), plane(0.0, 0.0, size, -1.0)];
+    let mut points = vec![];
+    let mut colors = vec![];
+    for (_id, (l,c)) in self.world.query_mut::<(&Line, &Color)>() {
+      cube.iter().map(|p|(*l^*p).normalized())
+        .filter(|p|p.x()<=size&&p.y()<=size&&p.z()<=size)
+        .for_each(|p|{points.push(p); colors.push(*c);});
+    };
+    unsafe {
+      gl.use_program(Some(self.line.raw));
+      gl.bind_vertex_array(self.line.vao);
+      gl.bind_buffer(glow::ARRAY_BUFFER, self.line.vbo);
+      gl.enable_vertex_attrib_array(0);
+      gl.enable_vertex_attrib_array(1);
+      gl.vertex_attrib_pointer_f32(0, 4, glow::FLOAT, false, 0 as i32, 0);
+      gl.vertex_attrib_pointer_f32(1, 4, glow::FLOAT, false, 0 as i32, (std::mem::size_of::<f32>()*4*points.len()) as i32);
+      self.line.load(gl, &self.uniforms);
+      let mut l = vec![];
+      for p in &points { l.push([p.x(), p.y(), p.z(), p.w()]) }
+      for c in &colors { l.push([c.red(), c.green(), c.blue(), c.alpha()]) }
+      let buffer = bytemuck::cast_slice(&l);
+      gl.bind_buffer(glow::ARRAY_BUFFER, self.line.vbo);
+      gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, buffer, glow::DYNAMIC_DRAW);
+      gl.enable(glow::PROGRAM_POINT_SIZE);
+      gl.bind_vertex_array(self.line.vao);
+      gl.draw_arrays(glow::LINES, 0, points.len() as i32);
     }
   }
   fn draw_points(&mut self, gl:&glow::Context) {
@@ -181,6 +215,26 @@ const PLANE_VERTEX_SHADER:&str = r#"
   }
 "#;
 const PLANE_FRAGMENT_SHADER:&str = r#"
+  precision mediump float;
+  in vec4 f_color;
+  out vec4 out_color;
+  void main() {
+		out_color = f_color;
+  }
+"#;
+const LINE_VERTEX_SHADER:&str = r#"
+  layout(location=0) in vec4 in_position;
+  layout(location=1) in vec4 color;
+  uniform mat4 model;
+  uniform mat4 view;
+  uniform mat4 projection;
+  out vec4 f_color;
+  void main() {
+      gl_Position = projection * view * model * in_position;
+      f_color = color;
+  }
+"#;
+const LINE_FRAGMENT_SHADER:&str = r#"
   precision mediump float;
   in vec4 f_color;
   out vec4 out_color;
