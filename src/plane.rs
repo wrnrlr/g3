@@ -3,7 +3,7 @@ use crate::{Dual, Point, Line, Horizon, Branch, Motor,maths::{flip_signs, f32x4_
 
 pub const E0:Plane = plane(0.0,0.0,0.0,1.0);
 pub const E1:Plane = plane(1.0,0.0,0.0,0.0);
-pub const E2:Plane = plane(0.0,1.0,1.0,0.0);
+pub const E2:Plane = plane(0.0,1.0,0.0,0.0);
 pub const E3:Plane = plane(0.0,0.0,1.0,0.0);
 
 /// ae₁ + be₂ + ce₃ + de₀
