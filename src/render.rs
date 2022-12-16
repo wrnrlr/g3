@@ -17,8 +17,8 @@ impl Renderer {
     }
     Self {
       world,
-      plane: unsafe { Program::new(gl, PLANE_VERTEX_SHADER, PLANE_FRAGMENT_SHADER) },
-      line: unsafe { Program::new(gl, LINE_VERTEX_SHADER, LINE_FRAGMENT_SHADER) },
+      plane: unsafe { Program::new(gl, COLOR_VERTEX_SHADER, COLOR_FRAGMENT_SHADER) },
+      line: unsafe { Program::new(gl, COLOR_VERTEX_SHADER, COLOR_FRAGMENT_SHADER) },
       point: unsafe { Program::new(gl, POINT_VERTEX_SHADER, POINT_FRAGMENT_SHADER) },
       uniforms: UniformBuffer::new()
     }
@@ -128,9 +128,9 @@ struct UniformBuffer {
 impl UniformBuffer {
   fn new()->Self {
     Self{
-      model: [4.0, 0.0, 3.0, 0.0, 1.7, 4.0, -2.4, 0.0, -2.4, 3.0, 3.3, 0.0, 0.0, 0.0, 0.0, 1.0],
-      view: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -17.5, 1.0],
-      projection: [0.6, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, -2.0, 0.0]
+      model: [4.0, 0.0, 3.0, 0.0, 1.7, 4.0, -2.4, 0.0, -2.4, 3.0, 3.3, 0.0, 0.0, 0.0, 0.0, 1.0], // move model around
+      view: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -17.5, 1.0], // move camera around
+      projection: [0.6, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, 0.0, 0.0, -2.0, 0.0] // camera lens settings
     }
   }
 }
@@ -202,7 +202,7 @@ unsafe fn create_shader(gl: &glow::Context, program: glow::Program, shader_type:
   gl.attach_shader(program, shader);
 }
 
-const PLANE_VERTEX_SHADER:&str = r#"
+const COLOR_VERTEX_SHADER:&str = r#"
   layout(location=0) in vec4 in_position;
   layout(location=1) in vec4 color;
   uniform mat4 model;
@@ -214,27 +214,7 @@ const PLANE_VERTEX_SHADER:&str = r#"
       f_color = color;
   }
 "#;
-const PLANE_FRAGMENT_SHADER:&str = r#"
-  precision mediump float;
-  in vec4 f_color;
-  out vec4 out_color;
-  void main() {
-		out_color = f_color;
-  }
-"#;
-const LINE_VERTEX_SHADER:&str = r#"
-  layout(location=0) in vec4 in_position;
-  layout(location=1) in vec4 color;
-  uniform mat4 model;
-  uniform mat4 view;
-  uniform mat4 projection;
-  out vec4 f_color;
-  void main() {
-      gl_Position = projection * view * model * in_position;
-      f_color = color;
-  }
-"#;
-const LINE_FRAGMENT_SHADER:&str = r#"
+const COLOR_FRAGMENT_SHADER:&str = r#"
   precision mediump float;
   in vec4 f_color;
   out vec4 out_color;
