@@ -1,6 +1,5 @@
 use std::{simd::{f32x4,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
-use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI, maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb, zero_first}};
-
+use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI, maths::{sw01, swrl, add_ss, dp_bc, flip_signs, f32x4_xor, f32x4_abs, hi_dp_bc, rcp_nr1, rsqrt_nr1, f32x4_and, gp11, gp12, gprt, swrb, zero_first, mat4x4_12}};
 pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)
 }
@@ -312,9 +311,16 @@ impl Div<Motor> for Rotor {
   }
 }
 
+impl From<Rotor> for [f32;16] {
+  fn from(r:Rotor)->Self {
+    let m = mat4x4_12(&r.0);
+    unsafe { std::mem::transmute::<[f32x4; 4], [f32; 16]>([m.0, m.1, m.2, m.3]) }
+  }
+}
+
 #[cfg(test)]
 mod tests {
-  use super::Rotor;
+  use super::{Rotor,PI};
 
   #[test] fn rotor_constrained() {
     let r1 = Rotor::new(1.0, 2.0, 3.0, 4.0);
@@ -323,5 +329,15 @@ mod tests {
     let r3 = -r1;
     let r4 = r1.constrained();
     assert_eq!(r3, -r4);
+  }
+
+  #[test] fn rotor_into_mat4() {
+    let r = Rotor::new(PI, 1.0, 0.0, 0.0);
+    let m = [
+      1.0, 0.0, 0.0, 0.0,
+      0.0, PI.cos(), -PI.sin(), 0.0,
+      0.0, PI.sin(), PI.cos(), 0.0,
+      0.0, 0.0, 0.0, 1.0];
+    assert_eq!(<[f32;16]>::from(r), m);
   }
 }
