@@ -8,9 +8,9 @@ struct Demo {
 }
 
 impl Demo {
-  pub fn new(cc: &eframe::CreationContext<'_>, world:World)->Self {
+  pub fn new(cc: &eframe::CreationContext<'_>, world:World, run: Option<fn(&mut World)>) ->Self {
     let gl = cc.gl.as_ref().unwrap();
-    Self{renderer: Arc::new(Mutex::new(Renderer::new(gl, world)))}
+    Self{renderer: Arc::new(Mutex::new(Renderer::new(gl, world, run)))}
   }
 }
 
@@ -44,17 +44,21 @@ fn main() {
   let c = m(point(1.0,0.0,1.0));
   let d = m(point(1.0,0.0,-1.0));
 
-  world.spawn_batch([
-    (point(0.0,0.0,0.0), Color::MAGENTA),
-    (point(0.0,1.0,0.0), Color::RED),
-    (point(-1.0,-1.0,0.0), Color::GREEN),
-    (point(1.0,-1.0,0.0), Color::YELLOW),
+  // world.spawn_batch([
+    // (point(0.0,0.0,0.0), Color::MAGENTA),
+    // (point(0.0,1.0,0.0), Color::RED),
+    // (point(-1.0,-1.0,0.0), Color::GREEN),
+    // (point(1.0,-1.0,0.0), Color::YELLOW),
 
-    (a, Color::CYAN),
-    (b, Color::CYAN),
-    (c, Color::CYAN),
-    (d, Color::CYAN),
-  ]);
+    // (a, Color::CYAN),
+    // (b, Color::CYAN),
+    // (c, Color::CYAN),
+    // (d, Color::CYAN),
+  // ]);
+
+  world.spawn((E1^E2, Color::BLUE));
+  world.spawn((E2^E3, Color::GREEN));
+  world.spawn((E3^E1, Color::RED));
 
   world.spawn_batch([
     (E1, Color(0xff000088)),
@@ -64,7 +68,13 @@ fn main() {
     // (plane(0.0,0.0,1.0,0.0), Color::BLUE)
   ]);
 
+  fn run(world:&mut World) {
+    for (_id, (l,c)) in world.query_mut::<(&Line, &Color)>() {
+      println!("{:?}", l);
+    }
+  }
+
   eframe::run_native("Renderer", eframe::NativeOptions::default(),
-    Box::new(|cc| Box::new(Demo::new(cc, world)))
+    Box::new(|cc| Box::new(Demo::new(cc, world, Some(run))))
   );
 }
