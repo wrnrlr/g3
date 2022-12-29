@@ -3,7 +3,6 @@ mod dot;
 mod gp;
 mod ext;
 mod sw;
-mod playground;
 mod exp;
 mod logarithm;
 mod mat;
