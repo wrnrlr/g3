@@ -38,11 +38,8 @@ mod tests {
   }
 
   #[test] fn euler_angles() {
-    let rx = rotor(1.0, 1.0, 0.0, 0.0);
-    let ry = rotor(1.0, 0.0, 1.0, 0.0);
-    let rz = rotor(1.0, 0.0, 0.0, 1.0);
-    let r1 = rx * ry * rz;
-    let ea:EulerAngles = r1.into();
+    let r1 = rotor(1.0, 1.0, 0.0, 0.0) * rotor(1.0, 0.0, 1.0, 0.0) * rotor(1.0, 0.0, 0.0, 1.0);
+    let ea = EulerAngles::from(r1);
     approx_eq(ea.roll, 1.0);
     approx_eq(ea.pitch, 1.0);
     approx_eq(ea.yaw, 1.0);

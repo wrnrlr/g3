@@ -155,11 +155,10 @@ impl Into<Rotor> for [f32;4] {
 
 impl FnMut<(Plane,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (Plane,))->Plane {self.call(args)} }
 impl FnOnce<(Plane,)> for Rotor { type Output = Plane; extern "rust-call" fn call_once(self, args: (Plane,))->Plane { self.call(args) }}
-impl Fn<(Plane,)> for Rotor {
-  extern "rust-call" fn call(&self, args: (Plane,))->Plane {
-    Plane(sw01(&args.0.0, &self.0))
-  }
-}
+impl Fn<(Plane,)> for Rotor { extern "rust-call" fn call(&self, args: (Plane,))->Plane { Plane(sw01(&args.0.0, &self.0)) } }
+impl FnMut<(&Plane,)> for Rotor { extern "rust-call" fn call_mut(&mut self, args: (&Plane,))->Plane {self.call(args)} }
+impl FnOnce<(&Plane,)> for Rotor { type Output = Plane; extern "rust-call" fn call_once(self, args: (&Plane,))->Plane { self.call(args) }}
+impl Fn<(&Plane,)> for Rotor { extern "rust-call" fn call(&self, args: (&Plane,))->Plane { Plane(sw01(&args.0.0, &self.0)) } }
 
 // TODO operator()(plane* in, plane* out, size_t count) const noexcept
 

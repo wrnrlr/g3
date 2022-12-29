@@ -6,20 +6,13 @@ pub const E012:Point = point(1.0,0.0,0.0); // ???
 pub const E023:Point = point(0.0,1.0,0.0); // ???
 pub const ORIGIN:Point = point(0.0,0.0,0.0);
 
-/// xe₀₃₂ + ye₀₁₃ + ze₀₂₁ + e₁₂₃
 pub const fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 
+/// e₁₂₃
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Origin {} impl Into<Point> for Origin { fn into(self)->Point { Point::new(0.0,0.0,0.0) } }
 
-/// A point is represented as the multivector
-/// $x\mathbf{e}_{032} + y\mathbf{e}_{013} + z\mathbf{e}_{021} +
-/// \mathbf{e}_{123}$. The point has a trivector representation because it is
-/// the fixed point of 3 planar reflections (each of which is a grade-1
-/// multivector). In practice, the coordinate mapping can be thought of as an
-/// implementation detail.
-/// p3: (w,    x,    y,    z)
-/// p3: (e123, e032, e013, e021)
+/// xe₀₃₂ + ye₀₁₃ + ze₀₂₁ + e₁₂₃
 #[cfg_attr(feature = "bytemuck", repr(C), derive(bytemuck::Pod, bytemuck::Zeroable))]
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Point (pub(crate) f32x4);
@@ -37,8 +30,9 @@ impl Point {
   /// Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
   pub const fn new(x:f32,y:f32,z:f32)->Self{ Point(f32x4::from_array([1.0,x,y,z])) }
 
+  /// x/w + y/w + z/w + w/w
   pub fn normalized(&self)->Self{Self(&self.0 * rcp_nr1(&shuffle_xxxx(&self.0)))}
-
+  /// x(1/w) + y(1/w) + z(1/w) + w(1/w)
   pub fn inverse(&self)->Self { let inv_norm = &rcp_nr1(&shuffle_xxxx(&self.0));Self(inv_norm * inv_norm * &self.0) }
 
   pub fn reverse(&self)->Point { Point(flip_signs(&self.0, mask32x4::from_array([false,true,true,true]))) }

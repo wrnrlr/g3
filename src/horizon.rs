@@ -37,7 +37,7 @@ impl Horizon {
   #[inline] pub fn exp(self)->Translator { Translator{p2: self.p2} }
 
   pub fn reverse(self)-> Horizon {
-    Horizon {p2: flip_signs(&self.p2, mask32x4::from_array([false,true,true,true]))}
+    Horizon {p2: flip_signs(&self.p2, mask32x4::from([false,true,true,true]))}
   }
 }
 

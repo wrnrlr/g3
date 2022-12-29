@@ -1,5 +1,6 @@
-use std::{fmt::{Display, Formatter, Result},simd::{f32x4},ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg,Fn}};
-use crate::{Dual, Point, Line, Horizon, Branch, Motor,maths::{flip_signs, f32x4_abs, hi_dp, hi_dp_bc, rsqrt_nr1, sqrt_nr1, sw00, sw10, sw20, sw30, ext00, ext02, ext03, extpb, gp00, gp03, dot00, dot03, dotpil, dotpl}};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4},ops::*};
+use std::simd::SimdFloat;
+use crate::{Dual, Point, Line, Horizon, Branch, Motor,maths::*};
 
 pub const E0:Plane = plane(0.0,0.0,0.0,1.0);
 pub const E1:Plane = plane(1.0,0.0,0.0,0.0);
@@ -54,7 +55,7 @@ impl Plane {
     Plane(inv_norm * inv_norm * &self.0)
   }
 
-  pub fn approx_eq(&self, other:Plane, epsilon:f32)->bool {f32x4_abs(&self.0 - other.0) < f32x4::splat(epsilon)}
+  pub fn approx_eq(&self, other:Plane, epsilon:f32)->bool {(&self.0 - other.0).abs() < f32x4::splat(epsilon)}
 
   /// Project a plane onto a point. Given a plane $p$ and point $P$, produces the
   /// plane through $P$ that is parallel to $p$.

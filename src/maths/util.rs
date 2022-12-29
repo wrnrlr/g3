@@ -1,47 +1,22 @@
-use std::simd::{f32x4, mask32x4, u32x4, StdFloat as _, simd_swizzle as swizzle, Which::{First, Second}, SimdFloat};
-// #[cfg(target_arch = "x86_64")] use std::{arch::x86_64::{_mm_rsqrt_ps,_mm_rcp_ps,_mm_xor_ps},mem::transmute};
-// use std::arch::x86_64::{__m128, _mm_dp_ps};
+use std::simd::{*, simd_swizzle as swizzle, Which::{First, Second}, StdFloat as _};
 
 // Workaround for to_bits issue, TODO remove if fixed
-pub fn to_bits(a:&f32x4)->u32x4 {
-  unsafe { std::mem::transmute::<f32x4, u32x4>((*a).clone()) }
-}
-
-// #[cfg(target_arch = "x86_64")]
-// #[inline] fn rsqrt(a:f32x4)->f32x4 {
-//   unsafe { transmute::<__m128, f32x4>(_mm_rsqrt_ps(transmute::<f32x4,__m128>(a))) }
-// }
-// #[cfg(not(target_arch = "x86_64"))]
+pub fn to_bits(a:&f32x4)->u32x4 { unsafe { std::mem::transmute::<f32x4, u32x4>((*a).clone()) } }
 fn rsqrt(a:&f32x4)->f32x4 { f32x4::splat(1.0) / a.sqrt() } // TODO fast rsqrt...
-// #[cfg(target_arch = "x86_64")]
-// #[inline] fn rcp(a:&f32x4)->f32x4 {
-//   unsafe { transmute::<__m128,&f32x4>(_mm_rcp_ps(transmute::<&f32x4,&__m128>(a))) }
-// }
-// #[cfg(not(target_arch = "x86_64"))]
 #[inline] fn rcp(a:&f32x4)->f32x4 { f32x4::splat(1.0) / a }
-// #[cfg(target_arch = "x86_64")]
-// #[inline] pub fn f32x4_xor(a:&f32x4,b:&f32x4)->f32x4 {
-//   unsafe { transmute::<__m128, f32x4>(_mm_xor_ps(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b))) }
-// }
-// #[cfg(not(target_arch = "x86_64"))]
 #[inline] pub fn f32x4_xor(a:&f32x4,b:&f32x4)->f32x4 {
   f32x4::from_bits(to_bits(&a) ^ to_bits(&b))
 }
-
-pub fn refined_reciprocal(s:f32)->f32x4 { rcp_nr1(&f32x4::splat(s)) }
-
-pub fn sqrt_nr1(a:&f32x4)->f32x4 {
-  a * rsqrt_nr1(&a) // TODO either write faster rsqrt_nr1, or derive sqrt_nr1 yourself...
-}
+#[inline] pub fn refined_reciprocal(s:f32)->f32x4 { rcp_nr1(&f32x4::splat(s)) }
+#[inline] pub fn sqrt_nr1(a:&f32x4)->f32x4 { a * rsqrt_nr1(&a) } // TODO either write faster rsqrt_nr1, or derive sqrt_nr1 yourself...
 
 // Reciprocal sqrt with an additional single Newton-Raphson refinement.
+// f(x) = 1/x^2 - a
+// f'(x) = -1/(2x^(3/2))
+// Let x_n be the estimate, and x_{n+1} be the refinement
+// x_{n+1} = x_n - f(x)/f'(x)
+//         = 0.5 * x_n * (3 - a x_n^2)
 pub fn rsqrt_nr1(a:&f32x4)->f32x4 {
-  // f(x) = 1/x^2 - a
-  // f'(x) = -1/(2x^(3/2))
-  // Let x_n be the estimate, and x_{n+1} be the refinement
-  // x_{n+1} = x_n - f(x)/f'(x)
-  //         = 0.5 * x_n * (3 - a x_n^2)
-
   // TODO find portable version of _mm_rsqrt_ps in core_simd
   // From Intel optimization manual: expected performance is ~5.2x
   // baseline (sqrtps + divps) with ~22 bits of accuracy
@@ -52,21 +27,15 @@ pub fn rsqrt_nr1(a:&f32x4)->f32x4 {
 }
 
 // Reciprocal with an additional single Newton-Raphson refinement
+// f(x) = 1/x - a
+// f'(x) = -1/x^2
+// x_{n+1} = x_n - f(x)/f'(x)
+//         = 2x_n - a x_n^2 = x_n (2 - a x_n)
 #[inline] pub fn rcp_nr1(a:&f32x4)->f32x4 {
-  // f(x) = 1/x - a
-  // f'(x) = -1/x^2
-  // x_{n+1} = x_n - f(x)/f'(x)
-  //         = 2x_n - a x_n^2 = x_n (2 - a x_n)
   let xn = &rcp(a);
   xn * (f32x4::splat(2.0) - a * xn)
 }
 
-// #[cfg(target_arch = "x86_64")]
-// #[inline] pub fn hi_dp(a:&f32x4,b:&f32x4)->f32x4 {
-//   unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11100001>(transmute::<f32x4,__m128>(a.clone()),transmute::<f32x4,__m128>(b.clone()))) }
-// }
-
-// #[cfg(not(target_arch = "x86_64"))]
 pub fn hi_dp(a:&f32x4, b:&f32x4)->f32x4 {
   let mut ab = a * b;
   ab = shuffle_zwzw(&(shuffle_yyww(&ab) + ab + shuffle_xxyy(&ab)));
@@ -112,22 +81,13 @@ pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 }
 
 #[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) } // TODO find a faster way
-
 #[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() & b.to_bits()) }
-
 #[inline] pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(!a.to_bits() & b.to_bits()) }
-
 // Is this faster then f32x4::abs, which is implemented in rust?
 #[inline] pub fn f32x4_abs(a:f32x4)->f32x4 { f32x4_andnot(f32x4::splat(-0.0), a) }
-
 #[inline] pub fn flip_signs(x:&f32x4, mask:mask32x4)->f32x4 { mask.select(-x.clone(), x.clone())}
-
-// #[cfg(target_arch = "x86_64")] #[inline] pub fn add_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_add_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
-// #[cfg(not(target_arch = "x86_64"))] #[inline]
 pub fn add_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a + b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
 #[inline] pub fn sub_ss(a:&f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
-// #[cfg(target_arch = "x86_64")] #[inline] pub fn mul_ss(a:f32x4,b:f32x4)->f32x4 { unsafe {transmute::<__m128,f32x4>(_mm_mul_ss(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))} }
-// #[cfg(not(target_arch = "x86_64"))] #[inline]
 pub fn mul_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a * b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
 
 #[inline] pub fn b2b3a2a3(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a.clone(), b.clone(), [Second(2),Second(3),First(2),First(3)]) }
@@ -185,7 +145,6 @@ pub fn mul_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a * b, a.clone(), [First(0), 
 mod tests {
   use super::*;
   use std::{simd::{f32x4}};
-  // use std::{arch::x86_64::{__m128,_mm_dp_ps},mem::transmute};
 
   fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
     const EPSILON: f32 = 0.02;
@@ -195,34 +154,6 @@ mod tests {
       assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
     }
   }
-
-  // #[test] fn dp_test() {
-  //   let a = [1.0, 2.0, 3.0, 5.0].into();
-  //   let b = [-4.0, -3.0, -2.0, -1.0].into();
-  //   assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11110001>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, dp(&a, &b));
-  //   assert_eq!(dp(&a, &b), [-21.0, 0.0, 0.0, 0.0].into());
-  // }
-  //
-  // #[test] fn hi_dp_test() {
-  //   let a = [1.0, 2.0, 3.0, 5.0].into();
-  //   let b = [-4.0, -3.0, -2.0, -1.0].into();
-  //   assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11100001>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, hi_dp(&a, &b));
-  //   assert_eq!(hi_dp(&a, &b), [-17.0, 0.0, 0.0, 0.0].into());
-  // }
-  //
-  // #[test] fn hi_dp_bc_test() {
-  //   let a = [1.0, 2.0, 3.0, 5.0].into();
-  //   let b = [-4.0, -3.0, -2.0, -1.0].into();
-  //   assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0b11101111>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, hi_dp_bc(&a, &b));
-  //   assert_eq!(hi_dp_bc(&a, &b), [-17.0, -17.0, -17.0, -17.0].into());
-  // }
-  //
-  // #[test] fn dp_bc_test() {
-  //   let a = [1.0, 2.0, 3.0, 5.0].into();
-  //   let b = [-4.0, -3.0, -2.0, -1.0].into();
-  //   assert_eq!(unsafe { transmute::<__m128, f32x4>(_mm_dp_ps::<0xff>(transmute::<f32x4,__m128>(a),transmute::<f32x4,__m128>(b)))}, dp_bc(&a, &b));
-  //   assert_eq!(dp_bc(&a, &b), [-21.0, -21.0, -21.0, -21.0].into());
-  // }
 
   #[test] fn hi_dp_ss_test() {
     let a:f32x4 = [1.0, 2.0, 3.0, 5.0].into();
@@ -241,24 +172,24 @@ mod tests {
   }
 
   #[test] fn multiply_first() {
-    let a:f32x4 = [2.0, 2.0, 3.0, 4.0].into();
+    let a = <f32x4>::from([2.0, 2.0, 3.0, 4.0]);
     assert_eq!(mul_ss(&a, &a), [4.0, 2.0, 3.0, 4.0].into());
   }
 
   #[test] fn inverse_sqrt() {
-    let a:f32x4 = [4.0, 9.0, 16.0, 25.0].into();
+    let a = <f32x4>::from([4.0, 9.0, 16.0, 25.0]);
     assert_eq!(a.sqrt(), [2.0, 3.0, 4.0, 5.0].into());
     assert_eq!(f32x4::splat(1.0)/a.sqrt(), [1.0/2.0, 1.0/3.0, 1.0/4.0, 1.0/5.0].into());
   }
 
   #[test] fn rcp_nr1_test() {
-    let a:f32x4 = [1.0, 2.0, 3.0, 4.0].into();
+    let a = <f32x4>::from([1.0, 2.0, 3.0, 4.0]);
     let b = rcp_nr1(&a);
     approx_eq(*b.as_array(), [1.0, 0.5, 1.0/3.0, 0.25]);
   }
 
   #[test] fn f32x4_abs_test() {
-    assert_eq!(f32x4_abs([1.0, 0.0, -1.0, -0.0].into()), [1.0, 0.0, 1.0, 0.0].into());
+    assert_eq!(f32x4_abs(<f32x4>::from([1.0, 0.0, -1.0, -0.0])), [1.0, 0.0, 1.0, 0.0].into());
   }
 
   #[test] #[ignore] fn sqrt_nr1_test() {}
