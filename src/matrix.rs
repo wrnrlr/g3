@@ -33,6 +33,7 @@ impl Into<Mat4> for Rotor {
 
 // http://projectivegeometricalgebra.org/wiki/index.php?title=Motor#Conversion_from_Motor_to_Matrix
 
+
 impl Into<Mat4> for Motor {
   fn into(self)->Mat4 {
     let cols = mat4x4_12_m(&self.p1, &self.p2);

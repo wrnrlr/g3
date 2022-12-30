@@ -4,35 +4,28 @@ use crate::maths::*;
 /// a + b*e23 + c*e31 + d*e12 + e*e01 + f*e02 + g*e03 + h*e0123
 // plane * plane
 pub fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
-  // (a1 b1 + a2 b2 + a3 b3) +
-  //
-  // (a2 b3 - a3 b2) e23 +
-  // (a3 b1 - a1 b3) e31 +
-  // (a1 b2 - a2 b1) e12 +
-  //
-  // (a0 b1 - a1 b0) e01 +
-  // (a0 b2 - a2 b0) e02 +
-  // (a0 b3 - a3 b0) e03
-  let mut p1_out = shuffle_yzwy(a) * shuffle_ywyz(b);
-  p1_out = p1_out - (f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(shuffle_zwyz(a) * shuffle_zzwy(b))));
+  // (a1b1 + a2b2 + a3b3) + (a2b3 - a3b2)e23 + (a3b1 - a1b3)e31 + (a1b2 - a2b1)e12 +
+  // (a0b1 - a1b0)e01 + (a0b2 - a2b0)e02 + (a0b3 - a3b0)e03
+  let mut p1_out = a.yzwy() * b.ywyz();
+  p1_out = p1_out - (f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(a.zwyz() * b.zzwy())));
   // Add a3 b3 to the lowest component
-  p1_out = add_ss(&p1_out, &(shuffle_wxxx(a) * shuffle_wxxx(b)));
+  p1_out = add_ss(&p1_out, &(a.wxxx() * b.wxxx()));
   // (a0 b0, a0 b1, a0 b2, a0 b3)
-  let mut p2_out = shuffle_xxxx(a) * b;
+  let mut p2_out = a.xxxx() * b;
   // Sub (a0 b0, a1 b0, a2 b0, a3 b0)
   // Note that the lowest component cancels
-  p2_out = p2_out - a * shuffle_xxxx(b);
+  p2_out = p2_out - a * b.xxxx();
   return (p1_out, p2_out);
 }
 
 // point * plane
 pub fn gp30(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
-  let mut p1 = a * shuffle_xxxx(b);
+  let mut p1 = a * b.xxxx();
   p1 = b0a1a2a3(&p1, &f32x4::splat(0.0));
 
   // (_, a3 b2, a1 b3, a2 b1)
-  let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
-  p2 -= shuffle_xzwy(a) * shuffle_xwyz(b);
+  let mut p2 = a.xwyz() * b.xzwy();
+  p2 -= a.xzwy() * b.xwyz();
   // Compute a0 b0 + a1 b1 + a2 b2 + a3 b3 and store it in the low component
   let mut tmp = dp(a, b);
   tmp = flip_signs(&tmp, [true, false, false, false].into());
@@ -42,16 +35,10 @@ pub fn gp30(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
 
 // plane * point
 pub fn gp03(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
-  let mut p1 = a * shuffle_xxxx(b);
-  p1 = b0a1a2a3(&p1, &f32x4::splat(0.0));
-
   // (_, a3 b2, a1 b3, a2 b1)
-  let mut p2 = shuffle_xwyz(a) * shuffle_xzwy(b);
-  p2 -= shuffle_xzwy(a) * shuffle_xwyz(b);
   // Compute a0 b0 + a1 b1 + a2 b2 + a3 b3 and store it in the low component
-  let tmp = dp(a, b);
-  p2 = p2 + tmp;
-  (p1,p2)
+  (b0a1a2a3(&(a * b.xxxx()), &f32x4::splat(0.0)),
+   a.xwyz() * b.xzwy() - a.xzwy() * b.xwyz() + dp(a, b))
 }
 
 // p1: (1, e23, e31, e12)
@@ -65,12 +52,12 @@ pub fn gp11(a:&f32x4, b:&f32x4)->f32x4 {
   // coefficients with cartesian coordinates
 
   // In general, we can get rid of at most one swizzle
-  let mut p1_out = shuffle_xxxx(a) * b;
-  p1_out -= shuffle_yzwy(a) * shuffle_ywyz(b);
+  let mut p1_out = a.xxxx() * b;
+  p1_out -= a.yzwy() * b.ywyz();
   // In a separate register, accumulate the later components so we can
   // negate the lower single-precision element with a single instruction
-  let tmp1 = shuffle_zyzw(a) * shuffle_zxxx(b);
-  let tmp2 = shuffle_wwyz(a) * shuffle_wzwy(b);
+  let tmp1 = a.zyzw() * b.zxxx();
+  let tmp2 = a.wwyz() * b.wzwy();
   let tmp = f32x4_xor(&(tmp1 + tmp2), &[-0.0, 0.0, 0.0, 0.0].into());
   p1_out + tmp
 }
@@ -82,16 +69,16 @@ pub fn gp33(a:&f32x4, b:&f32x4)->f32x4 {
   // (-a0 b3 + a3 b0) e03
   //
   // Produce a translator by dividing all terms by a0 b0
-  let mut tmp = shuffle_xxxx(a) * b;
+  let mut tmp = a.xxxx() * b;
   // -2a0b0        | -a0b1        | -a0b2        | -a0b3
   tmp *= f32x4::from_array([-2.0, -1.0, -1.0, -1.0]);
   // -2a0b0 + a0b0 | -a0b1 + a1b0 | -a0b2 + a2b0 | -a0b3 + a3b0
   // -a0b0         | -a0b1 + a1b0 | -a0b2 + a2b0 | -a0b3 + a3b0
-  tmp += a * shuffle_xxxx(b);
+  tmp += a * b.xxxx();
 
   // (0, 1, 2, 3) -> (0, 0, 2, 2)
-  let mut ss = shuffle_xxzz(&tmp);
-  ss = shuffle_xyxy(&ss);
+  let mut ss = tmp.xxzz();
+  ss = ss.xyxy();
   tmp = tmp * rcp_nr1(&ss);
 
   // TODO, in klein their is an extra `and`
@@ -106,9 +93,9 @@ pub fn gptr(a:&f32x4, b:&f32x4)->f32x4 {
   // (a0 b1 + a2 b3 - a3 b2) e01 +
   // (a0 b2 + a3 b1 - a1 b3) e02 +
   // (a0 b3 + a1 b2 - a2 b1) e03
-  let mut p2 = shuffle_yxxx(a) * shuffle_yyzw(b);
-  p2 += shuffle_zzwy(a) * shuffle_zwyz(b);
-  let tmp = shuffle_wwyz(a) * shuffle_wzwy(b);
+  let mut p2 = a.yxxx() * b.yyzw();
+  p2 += a.zzwy() * b.zwyz();
+  let tmp = a.wwyz() * b.wzwy();
   p2 - f32x4_xor(&tmp, &[-0.0,0.0,0.0,0.0].into())
 }
 
@@ -117,39 +104,39 @@ pub fn gprt(a:&f32x4, b:&f32x4)->f32x4 {
   // (a0 b1 + a3 b2 - a2 b3) e01 +
   // (a0 b2 + a1 b3 - a3 b1) e02 +
   // (a0 b3 + a2 b1 - a1 b2) e03
-  let mut p2 = shuffle_yxxx(a) * shuffle_yyzw(b);
-  p2 += shuffle_zwyz(a) * shuffle_zzwy(b);
-  let tmp = shuffle_wzwy(a) * shuffle_wwyz(b);
+  let mut p2 = a.yxxx() * b.yyzw();
+  p2 += a.zwyz() * b.zzwy();
+  let tmp = a.wzwy() * b.wwyz();
   p2 - f32x4_xor(&tmp, &[-0.0,0.0,0.0,0.0].into())
 }
 
 pub fn gp12(a:&f32x4, b:&f32x4)->f32x4 {
   let p2 = gprt(a, b);
-  let tmp = a * shuffle_xxxx(b);
+  let tmp = a * b.xxxx();
   p2 - flip_signs(&tmp, mask32x4::from_array([true,false,false,false]))
 }
 
 pub fn gp21(a:&f32x4, b:&f32x4)->f32x4 {
   let p2 = gptr(a, b);
-  let tmp = a * shuffle_xxxx(b);
+  let tmp = a * b.xxxx();
   p2 - flip_signs(&tmp, mask32x4::from_array([true,false,false,false]))
 }
 
 pub fn gpll(a:&f32x4, d:&f32x4, b:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   let flip = &[-0.0,0.0,0.0,0.0].into();
-  let mut p1 = shuffle_yzyw(a) * shuffle_yywz(b);
+  let mut p1 = a.yzyw() * b.yywz();
   p1 = f32x4_xor(&p1, flip);
-  p1 -= shuffle_wywz(a) * shuffle_wzyw(b);
-  let a2 = &shuffle_zzww(a);
-  let b2 = &shuffle_zzww(b);
-  let p1 = sub_ss(&p1, mul_ss(a2, b2));
+  p1 -= a.wywz() * b.wzyw();
+  let a2 = a.zzww();
+  let b2 = b.zzww();
+  let p1 = sub_ss(&p1, mul_ss(&a2, &b2));
 
-  let mut p2 = shuffle_ywyz(a) * shuffle_yzwy(c);
-  p2 -= f32x4_xor(flip, &(shuffle_wzwy(a) * shuffle_wwyz(c)));
-  p2 += shuffle_yzwy(b) * shuffle_ywyz(d);
-  p2 -= f32x4_xor(flip, &(shuffle_wwyz(b) * shuffle_wzwy(d)));
-  let c2 = shuffle_zzww(c);
-  let d2 = shuffle_zzww(d);
+  let mut p2 = a.ywyz() * c.yzwy();
+  p2 -= f32x4_xor(flip, &(a.wzwy() * c.wwyz()));
+  p2 += b.yzwy() * d.ywyz();
+  p2 -= f32x4_xor(flip, &(b.wwyz() * d.wzwy()));
+  let c2 = c.zzww();
+  let d2 = d.zzww();
   p2 = add_ss(&p2, &(a2*c2));
   p2 = add_ss(&p2, &(b2*d2));
   (p1, p2)
@@ -167,32 +154,32 @@ pub fn gpmm(a:&f32x4, b:&f32x4, c:&f32x4, d:&f32x4)->(f32x4,f32x4) {
   // (a0 d2 + b2 c0 + a1 d3 + b1 c3 - a2 d0 - a3 d1 - b0 c2 - b3 c1) e02 +
   // (a0 d3 + b3 c0 + a2 d1 + b2 c1 - a3 d0 - a1 d2 - b0 c3 - b1 c2) e03
 
-  let a_xxxx = &shuffle_xxxx(a);
-  let a_zyzw = &shuffle_zyzw(a);
-  let a_ywyz = &shuffle_ywyz(a);
-  let a_wzwy = &shuffle_wzwy(a);
-  let c_wwyz = &shuffle_wwyz(c);
-  let c_yzwy = &shuffle_yzwy(c);
+  let a_xxxx = a.xxxx();
+  let a_zyzw = a.zyzw();
+  let a_ywyz = a.ywyz();
+  let a_wzwy = a.wzwy();
+  let c_wwyz = c.wwyz();
+  let c_yzwy = c.yzwy();
   let s_flip = mask32x4::from_array([true, false, false, false]);
 
   let mut e = a_xxxx * c;
   let mut t = a_ywyz * c_yzwy;
 
-  t += a_zyzw * shuffle_zxxx(c);
+  t += a_zyzw * c.zxxx();
   t = flip_signs(&t, s_flip);
 
   e = e + t;
   e = e - a_wzwy * c_wwyz;
 
   let mut f = a_xxxx * d;
-  f += b * shuffle_xxxx(c);
-  f += a_ywyz * shuffle_yzwy(d);
-  f += shuffle_ywyz(b) * c_yzwy;
+  f += b * c.xxxx();
+  f += a_ywyz * d.yzwy();
+  f += b.ywyz() * c_yzwy;
 
-  let mut t = a_zyzw * shuffle_zxxx(d);
-  t += a_wzwy * shuffle_wwyz(d);
-  t += shuffle_zxxx(b) * shuffle_zyzw(c);
-  t += shuffle_wzwy(b) * c_wwyz;
+  let mut t = a_zyzw * d.zxxx();
+  t += a_wzwy * d.wwyz();
+  t += b.zxxx() * c.zyzw();
+  t += b.wzwy() * c_wwyz;
   t = f32x4_xor(&t, &[-0.0,0.0,0.0,0.0].into());
 
   f = f - t;

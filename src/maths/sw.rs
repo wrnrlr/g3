@@ -1,5 +1,5 @@
 use std::simd::{f32x4,mask32x4,simd_swizzle as swizzle,Which::{First,Second}};
-use crate::maths::util::{add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1, shuffle_xxxx, shuffle_wwyz, shuffle_wyzw, shuffle_yyzw, shuffle_yyww, shuffle_yzwy, shuffle_zwyz, shuffle_zyzw, shuffle_ywyz, shuffle_wzwy, shuffle_xzwy, shuffle_zzwy, shuffle_xwyz, shuffle_yxxx, shuffle_zxxx, shuffle_wxxx, mul_ss, shuffle_zwwy, shuffle_wzyz};
+use crate::maths::util::{Shuffle, add_ss, flip_signs, f32x4_xor, hi_dp, rcp_nr1,mul_ss};
 
 // p3: (w,    x,    y,    z)
 // p3: (e123, e032, e013, e021)
@@ -21,20 +21,20 @@ pub fn sw00(a:&f32x4,b:&f32x4)->f32x4 {
   // (2a1(a2 b2 + a3 b3)         + b1(a1^2 - a2^2 - a3^2)) e1 +
   // (2a2(a3 b3 + a1 b1)         + b2(a2^2 - a3^2 - a1^2)) e2 +
   // (2a3(a1 b1 + a2 b2)         + b3(a3^2 - a1^2 - a2^2)) e3
-  let a_zzwy = &shuffle_zzwy(a);
-  let a_wwyz = &shuffle_wwyz(a);
+  let a_zzwy = a.zzwy();
+  let a_wwyz = a.wwyz();
 
   // Left block
-  let mut tmp = a_zzwy * shuffle_zzwy(b);
-  tmp += a_wwyz * shuffle_wwyz(b);
+  let mut tmp = a_zzwy * b.zzwy();
+  tmp += a_wwyz * b.wwyz();
 
-  let a1 = &shuffle_yyww(a);
-  let b1 = &shuffle_yyww(b);
+  let a1 = &a.yyww();
+  let b1 = &b.yyww();
   tmp = add_ss(&tmp, &mul_ss(a1, b1));
   tmp *= a + a;
 
   // Right block
-  let a_yyzw = &shuffle_yyzw(a);
+  let a_yyzw = &a.yyzw();
   let mut tmp2 = f32x4_xor(&(a_yyzw * a_yyzw), &[-0.0, 0.0, 0.0, 0.0].into());
   tmp2 -= a_zzwy * a_zzwy;
   tmp2 -= a_wwyz * a_wwyz;
@@ -53,10 +53,10 @@ pub fn sw10(a:&f32x4,b:&f32x4)->(f32x4,f32x4) {
   // 2a0(a2 b3 - a3 b2) e01 +
   // 2a0(a3 b1 - a1 b3) e02
 
-  let a_zyzw = &shuffle_zyzw(a);
-  let a_ywyz = &shuffle_ywyz(a);
-  let a_wzwy = &shuffle_wzwy(a);
-  let b_xzwy = &shuffle_xzwy(b);
+  let a_zyzw = &a.zyzw();
+  let a_ywyz = &a.ywyz();
+  let a_wzwy = &a.wzwy();
+  let b_xzwy = &b.xzwy();
 
   let two_zero:f32x4 = [0.0, 2.0, 2.0, 2.0].into(); // TODO is this right?
   let mut p1 = a * b;
@@ -67,14 +67,14 @@ pub fn sw10(a:&f32x4,b:&f32x4)->(f32x4,f32x4) {
   tmp += a_wzwy * a_wzwy;
   tmp = f32x4_xor(&tmp, &[-0.0, 0.0, 0.0, 0.0].into());
   tmp = (a_ywyz * a_ywyz) - tmp;
-  tmp = shuffle_xwyz(b) * tmp;
+  tmp = b.xwyz() * tmp;
 
-  let p1 = shuffle_xzwy(&(p1 + tmp));
+  let p1 = (p1 + tmp).xzwy();
 
   let mut p2 = a_zyzw * b_xzwy;
   p2 = p2 - a_wzwy * b;
-  p2 = p2 * shuffle_xxxx(a) * two_zero;
-  p2 = shuffle_xzwy(&p2);
+  p2 = p2 * a.xxxx() * two_zero;
+  p2 = p2.xzwy();
 
   (p1,p2)
 }
@@ -84,19 +84,19 @@ pub fn sw20(a:&f32x4,b:&f32x4)->f32x4 {
   // (-2a3(a1 b1 + a2 b2) + b3(a1^2 + a2^2 - a3^2)) e03
   // (-2a1(a2 b2 + a3 b3) + b1(a2^2 + a3^2 - a1^2)) e01 +
   // (-2a2(a3 b3 + a1 b1) + b2(a3^2 + a1^2 - a2^2)) e02 +
-  let a_zzwy = &shuffle_zzwy(a);
-  let a_wwyz = &shuffle_wwyz(a);
+  let a_zzwy = a.zzwy();
+  let a_wwyz = a.wwyz();
 
   let mut p2 = a * b;
-  p2 += a_zzwy * shuffle_xzwy(b);
+  p2 += a_zzwy * b.xzwy();
   p2 *= a_wwyz * &[0.0, -2.0, -2.0, -2.0].into();
 
-  let a_yyzw = &shuffle_yyzw(a);
+  let a_yyzw = a.yyzw();
   let mut tmp = a_yyzw * a_yyzw;
   tmp = f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(tmp + a_zzwy * a_zzwy));
   tmp -= a_wwyz * a_wwyz;
-  p2 += tmp * shuffle_xwyz(b);
-  shuffle_xzwy(&p2)
+  p2 += tmp * b.xwyz();
+  p2.xzwy()
 }
 
 // reflect point through plane
@@ -106,16 +106,16 @@ pub fn sw30(a:&f32x4, b:&f32x4) ->f32x4 {
   // (-2a2(a0 b0 + a1 b1 + a3 b3) + b2(a3^2 + a1^2 - a2^2)) e013 +
   // (-2a3(a0 b0 + a2 b2 + a1 b1) + b3(a1^2 + a2^2 - a3^2)) e021
 
-  let a_zwyz = &shuffle_zwyz(a); // a2, a3, a1, a2
-  let a_yzwy = &shuffle_yzwy(a); // a1, a2, a3, a1
-  let a_wyzw = &shuffle_wyzw(a); // a3, a1, a2, a3
+  let a_zwyz = &a.zwyz(); // a2, a3, a1, a2
+  let a_yzwy = &a.yzwy(); // a1, a2, a3, a1
+  let a_wyzw = &a.wyzw(); // a3, a1, a2, a3
 
   //     a0 b0              |      a0 b0              |      a0 b0              |      a0 b0
-  let mut p3_out = shuffle_xxxx(a) * shuffle_xxxx(b);
+  let mut p3_out = a.xxxx() * b.xxxx();
   //     a0 b0+a2 b0        |      a0 b0+a3 b3        |      a0 b0+a1 b1        |      a0 b0+a3 b2
-  p3_out += a_zwyz * shuffle_xwyz(b);
+  p3_out += a_zwyz * b.xwyz();
   //     a0 b0+a2 b0+a1 b0  |      a0 b0+a3 b3+a2 b2  |      a0 b0+a1 b0+a3 b3  |      a0 b0+a3 b2+a1 b1
-  p3_out += a_yzwy * shuffle_xzwy(b);
+  p3_out += a_yzwy * b.xzwy();
   // 0b0(a0 b0+a2 b0+a1 b0) | -2a1(a0 b0+a3 b3+a2 b2) | -2a2(a0 b0+a1 b0+a3 b3) | -2a3(a0 b0+a3 b2+a1 b1)
   p3_out *= a * f32x4::from_array([0.0,-2.0,-2.0,-2.0]);
   //                        | -2a1(a0 b0+a3 b3+a2 b2) | -2a2(a0 b0+a1 b0+a3 b3) | -2a3(a0 b0+a3 b2+a1 b1)
@@ -135,17 +135,17 @@ pub fn sw30(a:&f32x4, b:&f32x4) ->f32x4 {
 // rotor(point), rotor(plane), rotor(direction): false, false
 pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   let dc_scale = f32x4::from_array([1.0,2.0,2.0,2.0]);
-  let b_xwyz = &shuffle_xwyz(b);
-  let b_xzwy = &shuffle_xzwy(b);
-  let b_xxxx = &shuffle_xxxx(b);
+  let b_xwyz = &b.xwyz();
+  let b_xzwy = &b.xzwy();
+  let b_xxxx = &b.xxxx();
 
-  let mut tmp1 = shuffle_zxxx(b) * shuffle_zwyz(b);
-  tmp1 += shuffle_yzwy(b) * shuffle_yyzw(b);
+  let mut tmp1 = b.zxxx() * b.zwyz();
+  tmp1 += b.yzwy() * b.yyzw();
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
   let true_falses:mask32x4 = [true,false,false,false].into();
-  tmp2 -= flip_signs(&(shuffle_wxxx(b) * shuffle_wzwy(b)), true_falses);
+  tmp2 -= flip_signs(&(b.wxxx() * b.wzwy()), true_falses);
   tmp2 *= dc_scale;
 
   let mut tmp3 = b * b;
@@ -155,8 +155,8 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
 
   let mut out:f32x4;
 
-  out = tmp1 * shuffle_xzwy(a);
-  out += tmp2 * shuffle_xwyz(a);
+  out = tmp1 * a.xzwy();
+  out += tmp2 * a.xwyz();
   out += tmp3 * a;
 
   out
@@ -166,17 +166,17 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
 pub fn sw012(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   // Double-cover scale
   let dc_scale = f32x4::from_array([1.0,2.0,2.0,2.0]);
-  let b_xwyz = &shuffle_xwyz(b);
-  let b_xzwy = &shuffle_xzwy(b);
-  let b_xxxx = &shuffle_xxxx(b);
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
+  let b_xxxx = b.xxxx();
 
-  let mut tmp1 = shuffle_zxxx(b) * shuffle_zwyz(b);
-  tmp1 += shuffle_yzwy(b) * shuffle_yyzw(b);
+  let mut tmp1 = b.zxxx() * b.zwyz();
+  tmp1 += b.yzwy() * b.yyzw();
   // Scale later with (a0, a2, a3, a1)
   tmp1 *= dc_scale;
 
   let mut tmp2 = b * b_xwyz;
-  tmp2 -= f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(shuffle_wxxx(b) * shuffle_wzwy(b)));
+  tmp2 -= f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(b.wxxx() * b.wzwy()));
   // Scale later with (a0, a3, a1, a2)
   tmp2 *= dc_scale;
 
@@ -187,15 +187,15 @@ pub fn sw012(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   tmp3 -= b_xzwy * b_xzwy;
 
   let mut tmp4 = b_xxxx * c;
-  tmp4 += b_xzwy * shuffle_xwyz(c);
-  tmp4 += b * shuffle_xxxx(c);
+  tmp4 += b_xzwy * c.xwyz();
+  tmp4 += b * c.xxxx();
 
   // NOTE: The high component of tmp4 is meaningless here
-  tmp4 -= b_xwyz * shuffle_xzwy(c);
+  tmp4 -= b_xwyz * c.xzwy();
   tmp4 *= dc_scale;
 
-  let mut p = tmp1 * shuffle_xzwy(a); // TODO a[1]...
-  p += tmp2 * shuffle_xwyz(a);
+  let mut p = tmp1 * a.xzwy(); // TODO a[1]...
+  p += tmp2 * a.xwyz();
   p += tmp3 * a; // TODO should be a[1]
 
   let tmp5 = hi_dp(&tmp4, a);
@@ -205,21 +205,21 @@ pub fn sw012(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
 
 // motor(line), swmm<false, true, true>
 pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
-  let b_xwyz = &shuffle_xwyz(b);
-  let b_xzwy = &shuffle_xzwy(b);
-  let b_yxxx = &shuffle_yxxx(b);
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
+  let b_yxxx = b.yxxx();
   let b_yxxx_2 = b_yxxx * b_yxxx;
 
   let mut tmp = b * b;
   tmp = tmp + b_yxxx_2;
-  let b_tmp = &shuffle_zwyz(b);
+  let b_tmp = b.zwyz();
   let mut tmp2 = b_tmp * b_tmp;
-  let b_tmp = &shuffle_wzwy(b);
+  let b_tmp = b.wzwy();
   tmp2 += b_tmp * b_tmp;
   let true_falses:mask32x4 = [true,false,false,false].into();
   tmp -= flip_signs(&tmp2, true_falses);
 
-  let b_xxxx = &shuffle_xxxx(b);
+  let b_xxxx = b.xxxx();
   let zero_twos = f32x4::from_array([0.0, 2.0, 2.0, 2.0]);
   let scale = &zero_twos;
   tmp2 = b_xxxx * b_xwyz;
@@ -230,14 +230,14 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   tmp3 -= b_xxxx * b_xzwy;
   tmp3 = tmp3 * scale;
 
-  let czero = &shuffle_xxxx(c);
-  let c_xzwy = &shuffle_xzwy(c);
-  let c_xwyz = &shuffle_xwyz(c);
+  let czero = c.xxxx();
+  let c_xzwy = c.xzwy();
+  let c_xwyz = c.xwyz();
 
   let mut tmp4 = b * c;
-  tmp4 -= b_yxxx * shuffle_yxxx(c);
-  tmp4 -= shuffle_zwwy(b) * shuffle_zwwy(c);
-  tmp4 -= shuffle_wzyz(b) * shuffle_wzyz(c);
+  tmp4 -= b_yxxx * c.yxxx();
+  tmp4 -= b.zwwy() * c.zwwy();
+  tmp4 -= b.wzyz() * c.wzyz();
   tmp4 = tmp4 + tmp4;
 
   let mut tmp5 = b * c_xwyz;
@@ -252,16 +252,16 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   tmp6 -= b_xwyz * czero;
   tmp6 = tmp6 * scale;
 
-  let p1_in_xzwy = &shuffle_xzwy(a1);
-  let p1_in_xwyz = &shuffle_xwyz(a1);
+  let p1_in_xzwy = a1.xzwy();
+  let p1_in_xwyz = a1.xwyz();
 
   let mut p1_out = tmp * a1;
   p1_out = p1_out + tmp2 * p1_in_xzwy;
   p1_out = p1_out + tmp3 * p1_in_xwyz;
 
   let mut p2_out = tmp * a2;
-  p2_out += tmp2 * shuffle_xzwy(a2);
-  p2_out += tmp3 * shuffle_xwyz(a2);
+  p2_out += tmp2 * a2.xzwy();
+  p2_out += tmp3 * a2.xwyz();
 
   p2_out += tmp4 * a1;
   p2_out += tmp5 * p1_in_xwyz;
@@ -271,59 +271,40 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
 }
 
 pub fn swrl(a1:&f32x4, a2:&f32x4, b:&f32x4)->(f32x4,f32x4) {
-  let b_xwyz = &shuffle_xwyz(b);
-  let b_xzwy = &shuffle_xzwy(b);
-  let b_yxxx = &shuffle_yxxx(b);
-  let b_yxxx_2 = b_yxxx * b_yxxx;
-
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
+  let b_yxxx = b.yxxx();
+  let b_xxxx = b.xxxx();
   let mut tmp = b * b;
-  tmp = tmp + b_yxxx_2;
-  let b_tmp = &shuffle_zwyz(b);
+  tmp = tmp + b_yxxx * b_yxxx;
+  let b_tmp = b.zwyz();
   let mut tmp2 = b_tmp * b_tmp;
-  let b_tmp = &shuffle_wzwy(b);
+  let b_tmp = b.wzwy();
   tmp2 += b_tmp * b_tmp;
   tmp -= flip_signs(&tmp2, [true, false, false, false].into());
-
-  let b_xxxx = &shuffle_xxxx(b);
   let scale = &[0.0, 2.0, 2.0, 2.0].into();
-  tmp2 = b_xxxx * b_xwyz;
-  tmp2 += b * b_xzwy;
-  tmp2 = tmp2 * scale;
-
-  let mut tmp3 = b * b_xwyz;
-  tmp3 -= b_xxxx * b_xzwy;
-  tmp3 = tmp3 * scale;
-
-  let p1_in_xzwy = shuffle_xzwy(a1);
-  let p1_in_xwyz = shuffle_xwyz(a1);
-
-  let mut p1_out = tmp * a1;
-  p1_out = p1_out + tmp2 * p1_in_xzwy;
-  p1_out = p1_out + tmp3 * p1_in_xwyz;
-
-  let mut p2_out = tmp * a2;
-  p2_out += tmp2 * shuffle_xzwy(a2);
-  p2_out += tmp3 * shuffle_xwyz(a2);
-
-  (p1_out, p2_out)
+  let tmp2 = (b_xxxx * b_xwyz + b * b_xzwy) * scale;
+  let tmp3 = (b * b_xwyz - b_xxxx * b_xzwy) * scale;
+  (tmp * a1 + tmp2 * a1.xzwy() + tmp3 * a1.xwyz(),
+   tmp * a2 + tmp2 * a2.xzwy() + tmp3 * a2.xwyz())
 }
 
 // swmm<false, false, false>
 pub fn swrb(a:&f32x4,b:&f32x4)->f32x4 {
-  let b_xwyz = &shuffle_xwyz(b);
-  let b_xzwy = &shuffle_xzwy(b);
-  let b_yxxx = &shuffle_yxxx(b);
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
+  let b_yxxx = b.yxxx();
   let b_yxxx_2 = b_yxxx * b_yxxx;
 
   let mut tmp = b * b;
   tmp += b_yxxx_2;
-  let b_tmp = &shuffle_zwyz(b);
+  let b_tmp = b.zwyz();
   let mut tmp2 = b_tmp * b_tmp;
-  let b_tmp = &shuffle_wzwy(b);
+  let b_tmp = b.wzwy();
   tmp2 += b_tmp * b_tmp;
   tmp -= f32x4_xor(&tmp2, &[-0.0, 0.0, 0.0, 0.0].into());
 
-  let b_xxxx = &shuffle_xxxx(b);
+  let b_xxxx = b.xxxx();
   let scale:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
   let mut tmp2 = b_xxxx * b_xwyz;
   tmp2 += b * b_xzwy;
@@ -333,8 +314,8 @@ pub fn swrb(a:&f32x4,b:&f32x4)->f32x4 {
   tmp3 -= b_xxxx * b_xzwy;
   tmp3 *= &scale;
 
-  let a_xzwy = shuffle_xzwy(a);
-  let a_xwyz = shuffle_xwyz(a);
+  let a_xzwy = a.xzwy();
+  let a_xwyz = a.xwyz();
 
   let mut out = tmp * a;
   out += tmp2 * a_xzwy;
@@ -388,7 +369,7 @@ pub fn sw32(a:&f32x4, b:&f32x4)->f32x4 {
   // (a1 - 2 a0 b1) e032 +
   // (a2 - 2 a0 b2) e013 +
   // (a3 - 2 a0 b3) e021
-  a + shuffle_xxxx(&a) * b * f32x4::from_array([0.0, -2.0, -2.0, -2.0])
+  a + a.xxxx() * b * f32x4::from_array([0.0, -2.0, -2.0, -2.0])
 }
 
 // Apply a translator to a line
@@ -403,10 +384,10 @@ pub fn swl2(a:&f32x4, d:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   // (2(a2 c3 - a3 c2 - a1 c0) + d1) e01 +
   // (2(a3 c1 - a1 c3 - a2 c0) + d2) e02 +
   // (2(a1 c2 - a2 c1 - a3 c0) + d3) e03
-  let mut p2_out = shuffle_xzwy(a) * shuffle_xwyz(c);
+  let mut p2_out = a.xzwy() * c.xwyz();
   // Add and subtract the same quantity in the low component to produce a cancellation
-  p2_out -= shuffle_xwyz(a) * shuffle_xzwy(c);
-  p2_out -= flip_signs(&(a * shuffle_xxxx(c)), mask32x4::from_array([true, false, false, false]));
+  p2_out -= a.xwyz() * c.xzwy();
+  p2_out -= flip_signs(&(a * c.xxxx()), mask32x4::from_array([true, false, false, false]));
   (a.clone(), p2_out + p2_out + d)
 }
 
@@ -415,35 +396,35 @@ pub fn sw312(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   // for point: false, true
   // todo: add count param, support direction (variadic)
   let two = f32x4::from_array([0.0, 2.0, 2.0, 2.0]);
-  let b_xxxx = &shuffle_xxxx(b);
-  let b_xwyz = &shuffle_xwyz(b);
-  let b_xzwy = &shuffle_xzwy(b);
+  let b_xxxx = b.xxxx();
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
 
   let tmp1 = (     b * b_xwyz - b_xxxx * b_xzwy) * two;
   let tmp2 = (b_xxxx * b_xwyz + b_xzwy * b) * two;
 
   let mut tmp3 = b * b;
-  let mut b_tmp = shuffle_yxxx(b);
+  let mut b_tmp = b.yxxx();
   tmp3 += b_tmp * &b_tmp;
-  b_tmp = shuffle_zwyz(b);
+  b_tmp = b.zwyz();
 
   let mut tmp4 = &b_tmp * &b_tmp;
-  b_tmp = shuffle_wzwy(b);
+  b_tmp = b.wzwy();
   tmp4 += &b_tmp * &b_tmp;
   tmp3 -= flip_signs(&tmp4, mask32x4::from_array([true, false, false, false]));
 
-  tmp4 = b_xzwy * shuffle_xwyz(c);
+  tmp4 = b_xzwy * c.xwyz();
   tmp4 -= b_xxxx * c;
-  tmp4 -= b_xwyz * shuffle_xzwy(c);
-  tmp4 -= b * shuffle_xxxx(c);
+  tmp4 -= b_xwyz * c.xzwy();
+  tmp4 -= b * c.xxxx();
 
   tmp4 = tmp4 * two;
 
-  let mut p = tmp1 * shuffle_xwyz(a);
-  p += tmp2 * shuffle_xzwy(a);
+  let mut p = tmp1 * a.xwyz();
+  p += tmp2 * a.xzwy();
   p += tmp3 * a;
 
-  p + tmp4 * shuffle_xxxx(a)
+  p + tmp4 * a.xxxx()
 }
 
 // Conjugate origin with motor. Unlike other operations the motor MUST be
@@ -454,14 +435,11 @@ pub fn swo12(b:&f32x4, c:&f32x4)->f32x4 {
   // 2(b2 c3 - b1 c0 - b0 c1 - b3 c2) e032 +
   // 2(b3 c1 - b2 c0 - b0 c2 - b1 c3) e013 +
   // 2(b1 c2 - b3 c0 - b0 c3 - b2 c1) e021
-  let mut tmp:f32x4 = b * shuffle_xxxx(c);
-  tmp += shuffle_xxxx(b) * c;
-  tmp += shuffle_xwyz(b) * shuffle_xzwy(c);
-  tmp = (shuffle_xzwy(b) * shuffle_xwyz(c)) - tmp;
-  let zero_twos:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
-  tmp = tmp * zero_twos;
+  let mut tmp:f32x4 = b * c.xxxx();
+  tmp += b.xxxx() * c;
+  tmp += b.xwyz() * c.xzwy();
+  tmp = (b.xzwy() * c.xwyz()) - tmp;
   // b0^2 + b1^2 + b2^2 + b3^2 assumed to equal 1
   // Set the low component to unity
-  let one_zeros:f32x4 = [1.0, 0.0, 0.0, 0.0].into();
-  tmp + one_zeros
+  tmp * <f32x4>::from([0.0, 2.0, 2.0, 2.0]) + <f32x4>::from([1.0, 0.0, 0.0, 0.0])
 }

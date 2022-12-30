@@ -29,7 +29,6 @@ impl Plane {
   #[inline] pub const fn new(a:f32,b:f32,c:f32,d:f32)->Plane { Plane(f32x4::from_array([d,a,b,c]))}
 
   /// Normalize this plane $p$ such that $p \cdot p = 1$.
-  ///
   /// In order to compute the cosine of the angle between planes via the
   /// inner product operator `|`, the planes must be normalized. Producing a
   /// normalized rotor between two planes with the geometric product `*` also
@@ -42,7 +41,6 @@ impl Plane {
 
   /// Compute the plane norm, which is often used to compute distances
   /// between points and lines.
-  ///
   /// Given a normalized point $P$ and normalized line $\ell$, the plane
   /// $P\vee\ell$ containing both $\ell$ and $P$ will have a norm equivalent
   /// to the distance between $P$ and $\ell$.
@@ -59,7 +57,6 @@ impl Plane {
 
   /// Project a plane onto a point. Given a plane $p$ and point $P$, produces the
   /// plane through $P$ that is parallel to $p$.
-  ///
   /// Intuitively, the point is represented dually in terms of a _pencil of
   /// planes_ that converge on the point itself. When we compute $p | P$, this
   /// selects the line perpendicular to $p$ through $P$. Subsequently, taking the
@@ -69,7 +66,6 @@ impl Plane {
 
   /// Project a plane onto a line. Given a plane $p$ and line $\ell$, produces the
   /// plane through $\ell$ that is parallel to $p$ if $p \parallel \ell$.
-  ///
   /// If $p \nparallel \ell$, the result will be the plane $p'$ containing $\ell$
   /// that maximizes $p \cdot p'$ (that is, $p'$ is as parallel to $p$ as
   /// possible).
@@ -125,7 +121,8 @@ impl BitXor<Plane> for Plane {type Output = Line;fn bitxor(self, p:Plane) -> Lin
 impl BitXor<Line> for Plane {type Output = Point;fn bitxor(self, l:Line) -> Point {Point(extpb(&self.0,&l.p1)+ext02(&self.0,&l.p2))}}
 impl BitXor<Horizon> for Plane {type Output = Point;fn bitxor(self, l: Horizon) -> Point { Point(ext02(&self.0, &l.p2)) }}
 impl BitXor<Branch> for Plane {type Output = Point;fn bitxor(self, b:Branch) -> Point {Point(extpb(&self.0, &b.0)) }}
-impl BitXor<Point> for Plane {type Output = Dual;fn bitxor(self, p:Point) -> Dual{Dual::new(0.0, ext03::<false>(&self.0,&p.0)[0])}}
+/// (a0 b0 + a1 b1 + a2 b2 + a3 b3) e0123
+impl BitXor<Point> for Plane {type Output = Dual;fn bitxor(self, p:Point) -> Dual{Dual::new(0.0, dp(&self.0,&p.0)[0])}}
 impl BitAnd<Point> for Plane {type Output = Dual;fn bitand(self, p: Point) -> Dual {!(!self ^ !p)}}
 impl Not for Plane {type Output = Point;fn not(self)->Point{Point(self.0)}}
 

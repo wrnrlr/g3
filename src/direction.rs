@@ -10,31 +10,20 @@ impl Direction {
   pub fn x(&self)->f32 { self.0[1] }
   pub fn y(&self)->f32 { self.0[2] }
   pub fn z(&self)->f32 { self.0[3] }
-
-  // Create a normalized direction
-  pub fn new(x:f32,y:f32,z:f32)->Direction {
-    Direction(f32x4::from_array([0.0,x,y,z])).normalized()
-  }
-
-  // Data should point to four floats with memory layout `(0.f, x, y, z)`
-  // where the zero occupies the lowest address in memory.
+  /// Create a normalized direction
+  pub fn new(x:f32,y:f32,z:f32)->Direction { Direction(f32x4::from_array([0.0,x,y,z])).normalized() }
+  /// Data should point to four floats with memory layout `(0.f, x, y, z)`
+  /// where the zero occupies the lowest address in memory.
   pub fn from_bits(bits:u32x4)->Direction {
     Direction(f32x4::from_bits(bits))
   }
-
   /// Normalize this direction by dividing all components by the
   /// magnitude (by default, `rsqrtps` is used with a single Newton-Raphson
   /// refinement iteration)
-  pub fn normalized(&self)->Direction {
-    Direction(&self.0 * rsqrt_nr1(&hi_dp_bc(&self.0, &self.0)))
-  }
+  pub fn normalized(&self)->Direction { Direction(&self.0 * rsqrt_nr1(&hi_dp_bc(&self.0, &self.0))) }
 }
 
-impl Into<[f32;3]> for Direction {
-  fn into(self) -> [f32; 3] {
-    [self.x(), self.y(), self.z()]
-  }
-}
+impl Into<[f32;3]> for Direction { fn into(self) -> [f32; 3] { [self.x(), self.y(), self.z()] } }
 
 impl Add<Direction> for Direction {
   type Output = Direction;

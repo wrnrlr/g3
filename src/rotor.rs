@@ -4,36 +4,6 @@ pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)
 }
 
-#[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct EulerAngles {
-  pub roll:f32,
-  pub pitch:f32,
-  pub yaw:f32
-}
-
-const PI2:f32 = PI/2.0;
-impl From<Rotor> for EulerAngles {
-  fn from(r:Rotor)->Self {
-    let buf:[f32;4] = r.into();
-    let test = buf[1] * buf[2] * buf[3] * buf[0];
-    if test > 0.4999 {
-      return EulerAngles{roll: 2.0 * buf[1].atan2(buf[0]), pitch: PI2, yaw: 0.0};
-    } else if test < -0.4999 {
-      return EulerAngles{roll: -2.0 * buf[1].atan2(buf[0]), pitch: -PI2, yaw: 0.0};
-    }
-    let buf1_2 = buf[1] * buf[1];
-    let buf2_2 = buf[2] * buf[2];
-    let buf3_2 = buf[3] * buf[3];
-
-    let roll = (2.0 * (buf[0] * buf[1] + buf[2] * buf[3])).atan2(1.0 - 2.0 * (buf1_2 + buf2_2));
-    let sinp = 2.0 * (buf[0] * buf[2] - buf[1] * buf[3]);
-    let pitch = if sinp.abs() > 1.0 { PI2.copysign(sinp) } else { sinp.asin() };
-    let yaw = (2.0 * (buf[0] * buf[3] + buf[1] * buf[2])).atan2(1.0 - 2.0 * (buf2_2 + buf3_2));
-
-    EulerAngles{roll, pitch, yaw}
-  }
-}
-
 // The rotor is an entity that represents a rigid rotation about an axis.
 // To apply the rotor to a supported entity, the call operator is available.
 // p1: scalar, e12, e31, e23
@@ -131,12 +101,6 @@ impl Rotor {
   pub fn sqrt(&self)->Rotor {
     let p1 = add_ss(&self.0, &[1.0, 0.0, 0.0, 0.0].into());
     Rotor(p1).normalized() // TODO avoid extra copy...
-  }
-}
-
-impl From<EulerAngles> for Rotor {
-  fn from(ea:EulerAngles)->Self {
-    Rotor::from_euler_angles(ea.roll,ea.pitch,ea.yaw)
   }
 }
 
@@ -310,12 +274,39 @@ impl Div<Motor> for Rotor {
   }
 }
 
-impl From<Rotor> for [f32;16] {
+impl From<Rotor> for [f32;16] { fn from(r:Rotor)->Self { let m = mat4x4_12(&r.0);unsafe { std::mem::transmute::<[f32x4; 4], [f32; 16]>([m.0, m.1, m.2, m.3]) } } }
+
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
+pub struct EulerAngles {
+  pub roll:f32,
+  pub pitch:f32,
+  pub yaw:f32
+}
+
+const PI2:f32 = PI/2.0;
+impl From<Rotor> for EulerAngles {
   fn from(r:Rotor)->Self {
-    let m = mat4x4_12(&r.0);
-    unsafe { std::mem::transmute::<[f32x4; 4], [f32; 16]>([m.0, m.1, m.2, m.3]) }
+    let buf:[f32;4] = r.into();
+    let test = buf[1] * buf[2] * buf[3] * buf[0];
+    if test > 0.4999 {
+      return EulerAngles{roll: 2.0 * buf[1].atan2(buf[0]), pitch: PI2, yaw: 0.0};
+    } else if test < -0.4999 {
+      return EulerAngles{roll: -2.0 * buf[1].atan2(buf[0]), pitch: -PI2, yaw: 0.0};
+    }
+    let buf1_2 = buf[1] * buf[1];
+    let buf2_2 = buf[2] * buf[2];
+    let buf3_2 = buf[3] * buf[3];
+
+    let roll = (2.0 * (buf[0] * buf[1] + buf[2] * buf[3])).atan2(1.0 - 2.0 * (buf1_2 + buf2_2));
+    let sinp = 2.0 * (buf[0] * buf[2] - buf[1] * buf[3]);
+    let pitch = if sinp.abs() > 1.0 { PI2.copysign(sinp) } else { sinp.asin() };
+    let yaw = (2.0 * (buf[0] * buf[3] + buf[1] * buf[2])).atan2(1.0 - 2.0 * (buf2_2 + buf3_2));
+
+    EulerAngles{roll, pitch, yaw}
   }
 }
+
+impl From<EulerAngles> for Rotor { fn from(ea:EulerAngles)->Self { Rotor::from_euler_angles(ea.roll,ea.pitch,ea.yaw) } }
 
 #[cfg(test)]
 mod tests {
