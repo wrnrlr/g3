@@ -1,6 +1,5 @@
-use std::{fmt::{Display, Formatter, Result},simd::{f32x4},ops::*};
-use std::simd::SimdFloat;
-use crate::{Dual, Point, Line, Horizon, Branch, Motor,maths::*};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4, SimdFloat},ops::*};
+use crate::{*,maths::*};
 
 pub const E0:Plane = plane(0.0,0.0,0.0,1.0);
 pub const E1:Plane = plane(1.0,0.0,0.0,0.0);
@@ -109,13 +108,11 @@ impl Neg for Plane {type Output = Self;fn neg(self)->Self::Output { Plane(flip_s
 impl Mul<Point> for Plane { type Output = Motor;fn mul(self, a: Point) -> Motor { let (p1,p2) = gp03(&self.0,&a.0);Motor{p1,p2} } }
 impl Mul<Plane> for Plane { type Output = Motor;fn mul(self, p: Plane) -> Motor { let (p1,p2) = gp00(&self.0,&p.0);Motor{p1,p2} } }
 impl Div<Plane> for Plane {type Output = Motor;fn div(self, p: Plane) -> Motor {self * p.inverse()}}
-
 /// Inner Product |
 impl BitOr<Plane> for Plane {type Output = f32;fn bitor(self, p:Plane) -> f32 { dot00(&self.0,&p.0)[0]}}
 impl BitOr<Line> for Plane {type Output = Plane;fn bitor(self, l:Line) -> Plane {let p0 = dotpl(&self.0,&l.p1,&l.p2);Plane(p0)}}
 impl BitOr<Horizon> for Plane {type Output = Plane;fn bitor(self, l: Horizon) -> Plane {let p0 = dotpil(&self.0,&l.p2);Plane(p0)}}
 impl BitOr<Point> for Plane {type Output = Line;fn bitor(self, a:Point) -> Line { let (p1,p2) = dot03(&self.0,&a.0);Line{p1,p2}} }
-
 /// Meet Operator, Exterior Product, ^
 impl BitXor<Plane> for Plane {type Output = Line;fn bitxor(self, p:Plane) -> Line {let (p1,p2) = ext00(&self.0,&p.0);Line{p1,p2}} }
 impl BitXor<Line> for Plane {type Output = Point;fn bitxor(self, l:Line) -> Point {Point(extpb(&self.0,&l.p1)+ext02(&self.0,&l.p2))}}
@@ -133,6 +130,45 @@ impl Not for Plane {type Output = Point;fn not(self)->Point{Point(self.0)}}
 //     self * a.inverse()
 //   }
 // }
+
+// a1 b1 + a2 b2 + a3 b3
+fn dot00(a:&f32x4, b:&f32x4)->f32x4 {
+  hi_dp(a,b)
+}
+
+fn dot03(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
+  // (a2b1 - a1b2)e03 + (a3b2 - a2b3)e01 + (a1b3 - a3b1)e02 + a1b0e23 + a2b0e31 + a3b0e12
+  let mut p1_out = a * b.xxxx();
+  p1_out = zero_first(p1_out);
+  (p1_out, (a.xzwy()*b - a*b.xzwy()).xzwy())
+}
+
+fn dotpl(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
+  let mut p0 = a.xzwy() * b;
+  p0 -= a * b.xzwy();
+  sub_ss(&(p0.xzwy()), hi_dp_ss(a, c))
+}
+
+fn ext00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
+  // (a1 b2 - a2 b1) e12 + (a2 b3 - a3 b2) e23 + (a3 b1 - a1 b3) e31 +
+  // (a0 b1 - a1 b0) e01 + (a0 b2 - a2 b0) e02 + (a0 b3 - a3 b0) e03
+  // For both outputs above, we don't zero the lowest component because
+  // we've arranged a cancelation TODO wdym???
+  ((a * b.xzwy() - a.xzwy() * b).xzwy(),
+   a.xxxx() * b - a * b.xxxx())
+}
+
+// p0 ^ p2 = p2 ^ p0
+fn ext02(a:&f32x4, b:&f32x4)->f32x4 {
+  // (a1 b2 - a2 b1) e021 + (a2 b3 - a3 b2) e032 + (a3 b1 - a1 b3) e013 +
+  (a * b.xzwy() - a.xzwy() * b).xzwy()
+}
+
+fn extpb(a:&f32x4, b:&f32x4)->f32x4 {
+  // (a1 b1 + a2 b2 + a3 b3) e123 + (-a0 b1) e032 + (-a0 b2) e013 + (-a0 b3) e021
+  let p3_out = &flip_signs(&(a.yxxx() * b), mask32x4::from_array([false,true,true,true]));
+  return add_ss(p3_out, &hi_dp(a,b));
+}
 
 #[cfg(test)]
 mod tests {

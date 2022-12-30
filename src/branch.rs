@@ -1,17 +1,17 @@
 use std::{simd::{f32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd}};
-use crate::{Dual, Plane, Point, Rotor, Line, Horizon,maths::{gp11, flip_signs, hi_dp, hi_dp_bc, hi_dp_ss, rsqrt_nr1, sqrt_nr1}};
+use crate::{Dual, Plane, Point, Rotor, Line, Horizon,maths::*};
 
 pub const fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 
-// The `Branch` both a line through the origin and also the principal branch of
-// the logarithm of a rotor.
-//
-// The rotor branch will be most commonly constructed by taking the
-// logarithm of a normalized rotor. The branch may then be linearily scaled
-// to adjust the "strength" of the rotor, and subsequently re-exponentiated
-// to create the adjusted rotor.
-//
-// !!! example
+/// The `Branch` both a line through the origin and also the principal branch of
+/// the logarithm of a rotor.
+///
+/// The rotor branch will be most commonly constructed by taking the
+/// logarithm of a normalized rotor. The branch may then be linearily scaled
+/// to adjust the "strength" of the rotor, and subsequently re-exponentiated
+/// to create the adjusted rotor.
+///
+// !! example
 //
 //     Suppose we have a rotor $r$ and we wish to produce a rotor
 //     $\sqrt[4]{r}$ which performs a quarter of the rotation produced by
@@ -22,7 +22,7 @@ pub const fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 //         let r_4 = (0.25f * b).exp();
 //     ```
 //
-// !!! note
+// !! note
 //
 //     The branch of a rotor is technically a `Line`, but because there are
 //     no translational components, the branch is given its own type for
@@ -56,7 +56,7 @@ impl Branch {
   // normalized). Returns $d^2 + e^2 + f^2$.
   pub fn squared_norm(self)->f32 { hi_dp(&self.0, &self.0)[0] }
 
-  // Returns the square root of the quantity produced by `squared_norm`.
+  /// Returns the square root of the quantity produced by `squared_norm`.
   pub fn norm(self)->f32 { self.squared_norm().sqrt() }
 
   // TODO normalize
@@ -89,7 +89,7 @@ impl Branch {
     Rotor(p1).normalized()
   }
 
-  // Reversion
+  /// Reversion
   pub fn reverse(self)->Branch {
     Branch(flip_signs(&self.0, [false,true,true,true].into()))
   }
@@ -104,58 +104,49 @@ impl Add<Branch> for Branch {
     Branch(self.0+b.0)
   }
 }
-
 impl AddAssign for Branch {
   fn add_assign(&mut self, b: Self) {
     self.0 += b.0;
   }
 }
-
 impl Sub<Branch> for Branch {
   type Output = Branch;
   fn sub(self, b: Branch) -> Branch {
     Branch(self.0-b.0)
   }
 }
-
 impl SubAssign for Branch {
   fn sub_assign(&mut self, b: Self) {
     self.0 -= b.0;
   }
 }
-
 impl Mul<f32> for Branch {
   type Output = Branch;
   fn mul(self, s: f32) -> Branch {
     Branch(self.0*f32x4::splat(s))
   }
 }
-
 impl Mul<Branch> for Branch {
   type Output = Rotor;
   fn mul(self, b: Branch) -> Rotor {
     Rotor(gp11(&self.0, &b.0))
   }
 }
-
 impl Div<Branch> for Branch {
   type Output = Rotor;
   fn div(self, b: Branch) -> Rotor {
     self * b.inverse()
   }
 }
-
 impl MulAssign<f32> for Branch {
   fn mul_assign(&mut self, s: f32) {
     self.0 *= f32x4::splat(s)
   }
 }
-
 impl Div<f32> for Branch {
   type Output = Branch;
   fn div(self, s: f32) -> Branch { Branch(self.0/f32x4::splat(s)) }
 }
-
 impl DivAssign<f32> for Branch {
   fn div_assign(&mut self, s: f32) {
     self.0 /= f32x4::splat(s)

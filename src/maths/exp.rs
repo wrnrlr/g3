@@ -1,11 +1,11 @@
 use std::simd::{f32x4};
-use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
+use crate::maths::*;
 
 // a + b is a general bivector but it is most likely *non-simple* meaning
 // that it is neither purely real nor purely ideal.
 // Exponentiates the bivector and returns the motor defined by partitions 1
 // and 2.
-pub fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
+pub(crate) fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   // The exponential map produces a continuous group of rotations about an
   // axis. We'd *like* to evaluate the exp(a + b) as exp(a)exp(b) but we
   // cannot do that in general because a and b do not commute (consider
@@ -102,9 +102,4 @@ pub fn exp(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let tmp:f32x4 = [minus_vsinu, 0.0, 0.0, 0.0].into();
   p2_out = tmp + p2_out;
   return (p1_out,p2_out);
-}
-
-#[cfg(test)]
-mod tests {
-
 }

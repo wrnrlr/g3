@@ -2,7 +2,7 @@ use std::{simd::{f32x2},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Di
 
 pub const fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 
-// A dual number is a multivector of the form p + e_0123.
+/// A dual number is a multivector of the form p + e_0123.
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Dual { pub(crate) p:f32x2 }
 

@@ -1,5 +1,5 @@
 use std::simd::{f32x4};
-use crate::maths::{hi_dp_bc, rcp_nr1, rsqrt_nr1};
+use crate::maths::*;
 
 pub fn logarithm(p1:&f32x4, p2:&f32x4) ->(f32x4, f32x4) {
   // The logarithm follows from the derivation of the exponential. Working

@@ -106,9 +106,9 @@ pub fn sw30(a:&f32x4, b:&f32x4) ->f32x4 {
   // (-2a2(a0 b0 + a1 b1 + a3 b3) + b2(a3^2 + a1^2 - a2^2)) e013 +
   // (-2a3(a0 b0 + a2 b2 + a1 b1) + b3(a1^2 + a2^2 - a3^2)) e021
 
-  let a_zwyz = &a.zwyz(); // a2, a3, a1, a2
-  let a_yzwy = &a.yzwy(); // a1, a2, a3, a1
-  let a_wyzw = &a.wyzw(); // a3, a1, a2, a3
+  let a_zwyz = a.zwyz(); // a2, a3, a1, a2
+  let a_yzwy = a.yzwy(); // a1, a2, a3, a1
+  let a_wyzw = a.wyzw(); // a3, a1, a2, a3
 
   //     a0 b0              |      a0 b0              |      a0 b0              |      a0 b0
   let mut p3_out = a.xxxx() * b.xxxx();
@@ -135,9 +135,9 @@ pub fn sw30(a:&f32x4, b:&f32x4) ->f32x4 {
 // rotor(point), rotor(plane), rotor(direction): false, false
 pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   let dc_scale = f32x4::from_array([1.0,2.0,2.0,2.0]);
-  let b_xwyz = &b.xwyz();
-  let b_xzwy = &b.xzwy();
-  let b_xxxx = &b.xxxx();
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
+  let b_xxxx = b.xxxx();
 
   let mut tmp1 = b.zxxx() * b.zwyz();
   tmp1 += b.yzwy() * b.yyzw();

@@ -62,32 +62,6 @@ pub fn gp11(a:&f32x4, b:&f32x4)->f32x4 {
   p1_out + tmp
 }
 
-pub fn gp33(a:&f32x4, b:&f32x4)->f32x4 {
-  // (-a0 b0) +
-  // (-a0 b1 + a1 b0) e01 +
-  // (-a0 b2 + a2 b0) e02 +
-  // (-a0 b3 + a3 b0) e03
-  //
-  // Produce a translator by dividing all terms by a0 b0
-  let mut tmp = a.xxxx() * b;
-  // -2a0b0        | -a0b1        | -a0b2        | -a0b3
-  tmp *= f32x4::from_array([-2.0, -1.0, -1.0, -1.0]);
-  // -2a0b0 + a0b0 | -a0b1 + a1b0 | -a0b2 + a2b0 | -a0b3 + a3b0
-  // -a0b0         | -a0b1 + a1b0 | -a0b2 + a2b0 | -a0b3 + a3b0
-  tmp += a * b.xxxx();
-
-  // (0, 1, 2, 3) -> (0, 0, 2, 2)
-  let mut ss = tmp.xxzz();
-  ss = ss.xyxy();
-  tmp = tmp * rcp_nr1(&ss);
-
-  // TODO, in klein their is an extra `and`
-  // flip_signs(tmp, mask32x4::from([false, true, true, true]))
-  // mask32x4::from_array([false, true, true, true]).select(tmp, f32x4::splat(0.0))
-  // f32x4_and(tmp, f32x4::from([0.0, -1.0, -1.0, -1.0]))
-  tmp
-}
-
 pub fn gptr(a:&f32x4, b:&f32x4)->f32x4 {
   // (a1 b1 + a2 b2 + a3 b3) e0123 +
   // (a0 b1 + a2 b3 - a3 b2) e01 +
@@ -122,7 +96,7 @@ pub fn gp21(a:&f32x4, b:&f32x4)->f32x4 {
   p2 - flip_signs(&tmp, mask32x4::from_array([true,false,false,false]))
 }
 
-pub fn gpll(a:&f32x4, d:&f32x4, b:&f32x4, c:&f32x4)->(f32x4, f32x4) {
+pub(crate) fn gpll(a:&f32x4, d:&f32x4, b:&f32x4, c:&f32x4)->(f32x4, f32x4) {
   let flip = &[-0.0,0.0,0.0,0.0].into();
   let mut p1 = a.yzyw() * b.yywz();
   p1 = f32x4_xor(&p1, flip);

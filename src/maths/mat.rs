@@ -1,5 +1,5 @@
 use std::simd::{f32x4};
-use crate::maths::{Shuffle, f32x4_xor};
+use crate::maths::*;
 
 // false, false, for rotor
 pub fn mat4x4_12(b:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {

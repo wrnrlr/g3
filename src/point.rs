@@ -1,5 +1,5 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle},mem::transmute,ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
-use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::{Shuffle, flip_signs, dp, rcp_nr1, gp33, dotptl, dot33, gp30}};
+use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::*};
 
 pub const E032:Point = point(1.0,0.0,0.0); // ???
 pub const E012:Point = point(1.0,0.0,0.0); // ???
@@ -80,6 +80,19 @@ impl From<Point> for [f32;4] { #[inline(always)] fn from(v: Point) -> Self { uns
 //Do not exist because
 // impl BitXor<Line> for Point { type Output = Point;fn bitxor(self, l:Line) -> Point {} }}
 // impl BitXor<Point> for Point { type Output = Dual;fn bitxor(self, a:Point) -> Dual {} }
+
+fn gp33(a:&f32x4, b:&f32x4)->f32x4 {
+  // (-a0 b0) +
+  // (-a0 b1 + a1 b0) e01 +
+  // (-a0 b2 + a2 b0) e02 +
+  // (-a0 b3 + a3 b0) e03
+  let tmp = a.xxxx() * b * f32x4::from_array([-2.0, -1.0, -1.0, -1.0]) + a * b.xxxx();
+  tmp * rcp_nr1(&tmp.xxzz().xyxy())
+  // TODO, in klein their is an extra `and`
+  // flip_signs(tmp, mask32x4::from([false, true, true, true]))
+  // mask32x4::from_array([false, true, true, true]).select(tmp, f32x4::splat(0.0))
+  // f32x4_and(tmp, f32x4::from([0.0, -1.0, -1.0, -1.0]))
+}
 
 #[cfg(test)]
 mod tests {

@@ -16,7 +16,9 @@ mod rotor;
 mod direction;
 mod translator;
 
+/// π
 pub use std::f32::consts::PI;
+/// τ
 pub const TAU:f32 = PI*2.0;
 
 pub use dual::{Dual,dual};

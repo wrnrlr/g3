@@ -1,5 +1,5 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn}};
-use crate::{Plane, Line, Point, Motor, Rotor, Horizon,maths::{dp_bc, flip_signs, rsqrt_nr1, sw02, sw32, swl2, gptr}};
+use crate::{Plane, Line, Point, Motor, Rotor, Horizon,maths::*};
 
 pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
   Translator::new(delta,x,y,z)
@@ -21,8 +21,7 @@ impl Translator {
     let norm:f32 = (x * x + y * y + z * z).sqrt();
     let inv_norm:f32 = 1.0 / norm;
     let half_d = -0.5 * delta;
-    let mut p2:f32x4 = f32x4::splat(half_d) * f32x4::from_array([0.0,x,y,z]);
-    p2 = p2 * f32x4::from_array([0.0,inv_norm,inv_norm,inv_norm]);
+    let mut p2 = f32x4::splat(half_d) * f32x4::from_array([0.0,x,y,z]) * f32x4::from_array([0.0,inv_norm,inv_norm,inv_norm]);
     Translator{p2}
   }
 

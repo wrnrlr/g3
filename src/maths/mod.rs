@@ -1,17 +1,15 @@
 mod util;
 mod dot;
 mod gp;
-mod ext;
 mod sw;
 mod exp;
 mod logarithm;
 mod mat;
 
-pub use util::*;
-pub use dot::*;
-pub use gp::*;
-pub use ext::*;
-pub use sw::*;
-pub use exp::exp;
-pub use logarithm::logarithm;
-pub use mat::*;
+pub use self::util::*;
+pub use self::dot::*;
+pub use self::gp::*;
+pub use self::sw::*;
+pub use self::exp::*;
+pub use self::logarithm::*;
+pub use self::mat::*;

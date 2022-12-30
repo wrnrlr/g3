@@ -24,7 +24,6 @@ and the dual numbers *r* describe a space *R<sub>p,q,r</sub>*.
 
 ### (Hyper)planes
 
-
 ### Projections
 The first thing to realise is that to represent all possible transformations of 3D space one needs an extra 4th dimension.
 
@@ -43,21 +42,30 @@ This library exports the following basic elements:
 
 ## Geometric Operations
 
-### Meet Operation `^`
+### Meet Operation `^` (Exterior/Outer/Wedge Product)
+Grade increasing
 
-### Join Operator `&`
+### Join Operator `&` (Regressive Product)
+Grade decreasing
 
-### Inner Product `|`
+### Contraction Operator `|` (Inner/Dot Product)
+(De)similarity measure 
 
 ### Geometric Product `*`
 
-`a*b = a|b + a^b`
+ab = a|b + a^b
 
 ### Sandwich Product `a(b)`
 
-`a(b) = a*b*a⁻¹`
+a(b) = aba⁻¹
 
 ### Dual Operator `!`
+
+```
+let a:Point = !plane(1.0, 0.0, 0.0, 0.0);
+let p:Plane = !point(0.0, 1.0, 0.0)
+let l:Line = !line(0.0, 1.0, 0.0, 0.0, 1.0, 0.0)
+```
 
 ## Get Started
 
@@ -66,6 +74,7 @@ TODO
 ## Awesome Links
 
 * [Bivector](https://bivector.net/), community site with more info on geometric algebra including videos, software and a discrord server.
+  * [GA4CS](https://bivector.net/PGA4CS.html), Geometric Algebra for Computer Science
 * Videos:
   * [Siggraph2019 Geometric Algebra](https://www.youtube.com/watch?v=tX4H_ctggYo), Talk explaining the why and a bit of the how of GA.
 * Software:
@@ -78,7 +87,7 @@ TODO
 * [Cheat Sheet](https://enki.ws/ganja.js/examples/coffeeshop.html#V3k2baxG2&fullscreen)
 * [May the forque be with you: Rigid body dynamics in PGA](https://enki.ws/ganja.js/examples/pga_dyn.html)
 * [The Geometry of 3DPGA products](https://enki.ws/ganja.js/examples/coffeeshop.html#ydDtaGu0a&fullscreen)
-* [PGA Easy](https://enki.ws/PGAEasy/PGAEasy%20GAppendix.html)
+* [PGA Easy](https://enki.ws/PGAEasy/PGAEasy%20GAppend.html)
 * [Automatic differentiation](https://discourse.bivector.net/t/automatic-differentiation/289)
 * [Paper with CGA](https://www.researchgate.net/profile/Leo-Dorst/publication/266149530_Total_Least_Squares_Fitting_of_k-Spheres_in_n-D_Euclidean_Space_Using_an_n2-D_Isometric_Representation/links/561431ce08ae4ce3cc6391ac/Total-Least-Squares-Fitting-of-k-Spheres-in-n-D-Euclidean-Space-Using-an-n-2-D-Isometric-Representation.pdf)
 * [New Developments in Projective Geometric Algebra](http://terathon.com/gdc21_lengyel.pdf)
@@ -89,5 +98,6 @@ TODO
 * [Geometric Calculus Talk](https://www.youtube.com/watch?v=ItGlUbFBFfc)
 * [Lecture playlist](https://www.youtube.com/playlist?list=PLv6uM2DOOtPY28m4RE_oGxyrf6w-Erq5b)
 * [TensorFlow-based framework for Geometric Algebra](https://tfgap.warlock.ai/#/)
+* [QED Prerequisites Geometric Algebra: Introduction and Motivation](https://www.youtube.com/watch?v=WN_4j8v6cXo)
 
 https://enki.ws/ganja.js/examples/coffeeshop.html#ydDtaGu0a
