@@ -68,6 +68,8 @@ fn main() {
     // (plane(0.0,0.0,1.0,0.0), Color::BLUE)
   ]);
 
+  world.spawn((Box::new(||{E1}),));
+
   fn run(world:&mut World) {
     for (_id, (l,c)) in world.query_mut::<(&Line, &Color)>() {
       println!("{:?}", l);

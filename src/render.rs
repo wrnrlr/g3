@@ -38,6 +38,9 @@ impl Renderer {
   fn draw_planes(&mut self, gl:&glow::Context) {
     let mut planes = vec![];
     let mut colors = vec![];
+    // for f in self.world.query_mut::<(&Box<dyn Fn()->Plane + Send + Sync>,)>() {
+    //
+    // }
     for (_id, (p,color)) in self.world.query_mut::<(&Plane, &Color)>() {
       let m = (p.normalized()*E2).sqrt();
       let a = m(point(-1.0,0.0,-1.0));
@@ -134,11 +137,12 @@ struct UniformBuffer {
 
 impl UniformBuffer {
   fn new()->Self {
-    let model = [
-      1.0, 0.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 0.0,
-      0.0, 0.0, 1.0, 0.0,
-      0.0, 0.0, 0.0, 1.0]; // move model around
+    // let model = [
+    //   1.0, 0.0, 0.0, 0.0,
+    //   0.0, 1.0, 0.0, 0.0,
+    //   0.0, 0.0, 1.0, 0.0,
+    //   0.0, 0.0, 0.0, 1.0]; // move model around
+    let model = <[f32;16]>::from(Rotor::new(PI/4.0, 0.0, 1.0, 0.0));
     let view = [
       1.0, 0.0, 0.0, 0.0,
       0.0, 1.0, 0.0, 0.0,
@@ -323,11 +327,11 @@ impl Camera {
 //     }
 //   }
 //
-//   pub fn mouse_scroll(&mut self, delta: f32) {
-//     if let MouseState::Free(pos) = self.mouse {
-//       self.scale(1.0 + delta / 200.0, pos);
-//     }
-//   }
+  pub fn mouse_scroll(&mut self, delta: f32) {
+    if let MouseState::Free(pos) = self.mouse {
+      self.scale(1.0 + delta / 200.0, pos);
+    }
+  }
 //
 //   pub fn fit_verts(&mut self, verts: &[Vertex]) {
 //     let xb = verts.iter().map(|v| v.pos.x).minmax().into_option().unwrap();
