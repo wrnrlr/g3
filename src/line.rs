@@ -7,19 +7,6 @@ pub const fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d
 pub struct Line {pub(crate) p1:f32x4, pub(crate) p2:f32x4}
 
 impl Line {
-  #[inline] pub fn e12(&self)->f32 { self.p1[3] }
-  #[inline] pub fn e21(&self)->f32 { -self.e12() }
-  #[inline] pub fn e31(&self)->f32 { self.p1[2] }
-  #[inline] pub fn e13(&self)->f32 { -self.e31() }
-  #[inline] pub fn e23(&self)->f32 { self.p1[1] }
-  #[inline] pub fn e32(&self)->f32 { -self.e23() }
-  #[inline] pub fn e01(&self)->f32 { self.p2[1] }
-  #[inline] pub fn e10(&self)->f32 { -self.e01() }
-  #[inline] pub fn e02(&self)->f32 { self.p2[2] }
-  #[inline] pub fn e20(&self)->f32 { -self.e02() }
-  #[inline] pub fn e03(&self)->f32 { self.p2[3] }
-  #[inline] pub fn e30(&self)->f32 { -self.e03() }
-
   pub const fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line {
     Line{p1:f32x4::from_array([0.0,d,e,f]), p2:f32x4::from_array([0.0,a,b,c])}
   }
@@ -33,7 +20,7 @@ impl Line {
   // normalized). Returns $d^2 + e^2 + f^2$.
   pub fn squared_norm(&self)->f32 { hi_dp(&self.p1, &self.p1)[0] }
 
-  // Normalize a line such that $\ell^2 = -1$.
+  /// Normalize a line such that $\ell^2 = -1$.
   pub fn normalized(&self)->Line {
     // l = b + c where b is p1 and c is p2
     // l * ~l = |b|^2 - 2(b1 c1 + b2 c2 + b3 c3)e0123
@@ -79,11 +66,11 @@ impl Line {
     cmp1 && cmp2
   }
 
-  // Exponentiate a line to produce a motor that has this line
-  // as its axis. This routine will be used most often when this line is
-  // produced as the logarithm of an existing rotor, then scaled to subdivide
-  // or accelerate the motor's action. The line need not be a _simple bivector_
-  // for the operation to be well-defined.
+  /// Exponentiate a line to produce a motor that has this line
+  /// as its axis. This routine will be used most often when this line is
+  /// produced as the logarithm of an existing rotor, then scaled to subdivide
+  /// or accelerate the motor's action. The line need not be a _simple bivector_
+  /// for the operation to be well-defined.
   pub fn exp(&self)->Motor {
     let (p1,p2) = exp(&self.p1, &self.p2);
     Motor{p1,p2}
@@ -102,6 +89,19 @@ impl Line {
 
   // Project a line onto a plane
   pub fn project_plane(self, p:Plane)->Line { (self | p) ^ p }
+
+  #[inline] pub fn e12(&self)->f32 { self.p1[3] }
+  #[inline] pub fn e21(&self)->f32 { -self.e12() }
+  #[inline] pub fn e31(&self)->f32 { self.p1[2] }
+  #[inline] pub fn e13(&self)->f32 { -self.e31() }
+  #[inline] pub fn e23(&self)->f32 { self.p1[1] }
+  #[inline] pub fn e32(&self)->f32 { -self.e23() }
+  #[inline] pub fn e01(&self)->f32 { self.p2[1] }
+  #[inline] pub fn e10(&self)->f32 { -self.e01() }
+  #[inline] pub fn e02(&self)->f32 { self.p2[2] }
+  #[inline] pub fn e20(&self)->f32 { -self.e02() }
+  #[inline] pub fn e03(&self)->f32 { self.p2[3] }
+  #[inline] pub fn e30(&self)->f32 { -self.e03() }
 }
 
 impl From<Branch> for Line {
@@ -245,6 +245,18 @@ impl Div<Line> for Line {
     self * other
   }
 }
+
+fn dot11(a:&f32x4, b:&f32x4)->f32x4 {
+  f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &hi_dp_ss(a, b))
+}
+
+
+fn dotlp(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
+  let mut p0 = a * b.xzwy();
+  p0 -= a.xzwy() * b;
+  add_ss(&(p0.xzwy()), &hi_dp_ss(a, c))
+}
+
 
 #[cfg(test)]
 mod tests {

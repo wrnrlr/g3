@@ -1,6 +1,7 @@
 use std::{simd::{f32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd}};
 use crate::{Dual, Plane, Point, Rotor, Line, Horizon,maths::*};
 
+/// ae23 + be31 + ce12
 pub const fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 
 /// The `Branch` both a line through the origin and also the principal branch of
@@ -41,19 +42,19 @@ impl Branch {
   #[inline] pub fn e32(&self)->f32 { -self.e23() }
   #[inline] pub fn x(&self)->f32 { self.e23() }
 
-  // Construct the branch as the following multivector:
-  //
-  // $$a \mathbf{e}_{23} + b\mathbf{e}_{31} + c\mathbf{e}_{12}$$
-  //
-  // To convince yourself this is a line through the origin, remember that
-  // such a line can be generated using the geometric product of two planes
-  // through the origin.
+  /// Construct the branch as the following multivector:
+  ///
+  /// $$a \mathbf{e}_{23} + b\mathbf{e}_{31} + c\mathbf{e}_{12}$$
+  ///
+  /// To convince yourself this is a line through the origin, remember that
+  /// such a line can be generated using the geometric product of two planes
+  /// through the origin.
   pub const fn new(a:f32, b:f32, c:f32)->Branch { Branch(f32x4::from_array([0.0, a, b, c])) }
 
-  // If a line is constructed as the regressive product (join) of
-  // two points, the squared norm provided here is the squared
-  // distance between the two points (provided the points are
-  // normalized). Returns $d^2 + e^2 + f^2$.
+  /// If a line is constructed as the regressive product (join) of
+  /// two points, the squared norm provided here is the squared
+  /// distance between the two points (provided the points are
+  /// normalized). Returns $d^2 + e^2 + f^2$.
   pub fn squared_norm(self)->f32 { hi_dp(&self.0, &self.0)[0] }
 
   /// Returns the square root of the quantity produced by `squared_norm`.
@@ -74,7 +75,7 @@ impl Branch {
     Branch(p1)
   }
 
-  // Exponentiate a branch to produce a rotor.
+  /// Exponentiate a branch to produce a rotor.
   pub fn exp(self)->Rotor {
     let ang = sqrt_nr1(&hi_dp(&self.0, &self.0))[0];
     let cos_ang = ang.cos();

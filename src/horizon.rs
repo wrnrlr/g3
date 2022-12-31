@@ -1,6 +1,7 @@
 use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
 use crate::{Dual, Plane, Point, Line, Branch, Translator,maths::*};
 
+/// $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
 pub const fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 
 /// A horizon represents a line at infinity and corresponds to the multivector:
@@ -10,13 +11,6 @@ pub const fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 pub struct Horizon { pub(crate) p2:f32x4 }
 
 impl Horizon {
-  #[inline] pub fn e01(&self)->f32 { self.p2[1] }
-  #[inline] pub fn e10(&self)->f32 { -self.e01() }
-  #[inline] pub fn e02(&self)->f32 { self.p2[2] }
-  #[inline] pub fn e20(&self)->f32 { -self.e02() }
-  #[inline] pub fn e03(&self)->f32 { self.p2[3] }
-  #[inline] pub fn e30(&self)->f32 { -self.e03() }
-
   pub const fn new(a:f32,b:f32,c:f32)->Horizon { Horizon {p2: f32x4::from_array([0.0, a, b, c])} }
   pub fn squared_ideal_norm(&self)->f32 {
     hi_dp(&self.p2, &self.p2)[0]
@@ -24,7 +18,7 @@ impl Horizon {
   pub fn ideal_norm(self)->f32 {
     self.squared_ideal_norm().sqrt()
   }
-  // Exponentiate a horizon to produce a translation.
+  /// Exponentiate a horizon to produce a translation.
   //
   // The exponential of an horizon
   // $a \mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$ is given as:
@@ -33,6 +27,12 @@ impl Horizon {
   // a\ee_{01} + b\ee_{02} + c\ee_{03}$$
   #[inline] pub fn exp(self)->Translator { Translator{p2: self.p2} }
   pub fn reverse(self)-> Horizon { Horizon {p2: flip_signs(&self.p2, mask32x4::from([false,true,true,true]))} }
+  #[inline] pub fn e01(&self)->f32 { self.p2[1] }
+  #[inline] pub fn e10(&self)->f32 { -self.e01() }
+  #[inline] pub fn e02(&self)->f32 { self.p2[2] }
+  #[inline] pub fn e20(&self)->f32 { -self.e02() }
+  #[inline] pub fn e03(&self)->f32 { self.p2[3] }
+  #[inline] pub fn e30(&self)->f32 { -self.e03() }
 }
 
 impl Add<Horizon> for Horizon { type Output = Horizon;fn add(self, other: Horizon) -> Horizon { Horizon { p2: self.p2+other.p2 } } }

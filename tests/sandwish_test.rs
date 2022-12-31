@@ -27,13 +27,6 @@ mod tests {
     }
   }
 
-  #[test] fn simd_sandwich() {
-    let a = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
-    let b = f32x4::from_array([-4.0, -3.0, -2.0, -1.0]);
-    let c = maths::sw02(&a, &b);
-    assert_eq!([c[0], c[1], c[2], c[3]], [9.0, 2.0, 3.0, 4.0]);
-  }
-
   #[test] fn reflect_pane() {
     let p1 = plane(3.0, 2.0, 1.0, -1.0);
     let p2 = plane(1.0, 2.0, -1.0, -3.0);
@@ -65,7 +58,7 @@ mod tests {
   }
 
   #[test] fn rotor_point() {
-    let r = rotor(PI*0.5, 0.0, 0.0, 1.0);
+    let r = rotor(pi*0.5, 0.0, 0.0, 1.0);
     let a = point(1.0, 0.0, 0.0);
     let b:Point = r(a);
     approx_eq([b.x(), b.y(), b.z()], [0f32, -1.0, 0.0]);
@@ -88,7 +81,7 @@ mod tests {
   }
 
   #[test] fn construct_motor() {
-    let r = rotor(PI * 0.5, 0.0, 0.0, 1.0);
+    let r = rotor(pi * 0.5, 0.0, 0.0, 1.0);
     let t = translator(1.0, 0.0, 0.0, 1.0);
     let m = r * t;
     let a = point(1.0, 0.0, 0.0);
@@ -105,7 +98,7 @@ mod tests {
   }
 
   #[test] fn construct_motor_via_screw_axis() {
-    let m = Motor::from_screw_axis(PI*0.5, 1.0, line(0.0,0.0,0.0,0.0,0.0,1.0));
+    let m = Motor::from_screw_axis(pi*0.5, 1.0, line(0.0,0.0,0.0,0.0,0.0,1.0));
     let a = point(1.0, 0.0, 0.0);
     let b = m(a);
     approx_eq([b.x(), b.y(), b.z()], [0.0, 1.0, 1.0]);
@@ -115,7 +108,7 @@ mod tests {
     let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
     let a = plane(3.0, 2.0, 1.0, -1.0);
     let b:Plane = m(a);
-    assert_eq!([b.x(), b.y(), b.z(), b.d()], [78.0, 60.0, 54.0, 358.0]);
+    assert_eq!([b.a(), b.b(), b.c(), b.d()], [78.0, 60.0, 54.0, 358.0]);
   }
 
   // #[test] fn motor_plane_variadic() {todo!()}
@@ -140,7 +133,7 @@ mod tests {
   // #[test] fn motor_line_variadic() {todo!()}
 
   #[test] fn motor_origin() {
-    let r = rotor(PI * 0.5, 0.0, 0.0, 1.0);
+    let r = rotor(pi * 0.5, 0.0, 0.0, 1.0);
     let t = translator(1.0, 0.0, 0.0, 1.0);
     let m = r * t;
     let p1:Point = m(point(0.0,0.0,0.0));
@@ -156,7 +149,7 @@ mod tests {
   }
 
   #[test] fn motor_sqrt() {
-    let m = Motor::from_screw_axis(PI/2.0, 3.0, line(3.0, 1.0, 3.0, 4.0, -2.0, 1.0).normalized());
+    let m = Motor::from_screw_axis(pi/2.0, 3.0, line(3.0, 1.0, 3.0, 4.0, -2.0, 1.0).normalized());
     let s = m.sqrt();
     let n = s * s;
     approx_eq([m.scalar(), m.e01(), m.e02()], [n.scalar(), n.e01(), n.e02()]);
@@ -165,7 +158,7 @@ mod tests {
   }
 
   #[test] fn rotor_sqrt() {
-    let r = rotor(PI * 0.5, 1.0, 2.0, 3.0);
+    let r = rotor(pi * 0.5, 1.0, 2.0, 3.0);
     let s = r.sqrt();
     let s = s * s;
     approx_eq4([s.scalar(), s.e23(), s.e31(), s.e12()], [r.scalar(), r.e23(), r.e31(), r.e12()]);

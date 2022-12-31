@@ -1,16 +1,20 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle},mem::transmute,ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
 use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::*};
 
-pub const E032:Point = point(1.0,0.0,0.0); // ???
-pub const E012:Point = point(1.0,0.0,0.0); // ???
-pub const E023:Point = point(0.0,1.0,0.0); // ???
-pub const ORIGIN:Point = point(0.0,0.0,0.0);
-
-pub const fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
-
+/// e₀₃₂
+pub const e032:Point = point(1.0, 0.0, 0.0); // ???
+/// e₀₁₂
+pub const e012:Point = point(1.0, 0.0, 0.0); // ???
+/// e₀₂₃
+pub const e023:Point = point(0.0, 1.0, 0.0); // ???
+/// e₁₂₃
+pub const e123:Origin = Origin{};
 /// e₁₂₃
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Origin {} impl Into<Point> for Origin { fn into(self)->Point { Point::new(0.0,0.0,0.0) } }
+
+/// xe₀₃₂ + ye₀₁₃ + ze₀₂₁ + e₁₂₃
+pub const fn point(x:f32,y:f32,z:f32)->Point { Point::new(x,y,z) }
 
 /// xe₀₃₂ + ye₀₁₃ + ze₀₂₁ + e₁₂₃
 #[cfg_attr(feature = "bytemuck", repr(C), derive(bytemuck::Pod, bytemuck::Zeroable))]
@@ -18,14 +22,6 @@ pub struct Origin {} impl Into<Point> for Origin { fn into(self)->Point { Point:
 pub struct Point (pub(crate) f32x4);
 
 impl Point {
-  #[inline] pub fn w(&self)->f32 { self.0[0] }
-  #[inline] pub fn e123(&self)->f32 { self.w() }
-  #[inline] pub fn x(&self)->f32 { self.0[1] }
-  #[inline] pub fn e032(&self)->f32 { self.x() }
-  #[inline] pub fn y(&self)->f32 { self.0[2] }
-  #[inline] pub fn e013(&self)->f32 { self.y() }
-  #[inline] pub fn z(&self)->f32 { self.0[3] }
-  #[inline] pub fn e021(&self)->f32 { self.z() }
   /// Component-wise constructor where homogeneous coordinate is automatically initialized to 1.
   pub const fn new(x:f32,y:f32,z:f32)->Self{ Point(f32x4::from_array([1.0,x,y,z])) }
   /// x/w + y/w + z/w + w/w
@@ -37,6 +33,14 @@ impl Point {
   pub fn project_line(self, l:Line)->Point { (self | l) ^ l }
   /// Project a point onto a plane
   pub fn project_plane(self, p:Plane)->Point { (self | p) ^ p }
+  #[inline] pub fn x(&self)->f32 { self.0[1] }
+  #[inline] pub fn y(&self)->f32 { self.0[2] }
+  #[inline] pub fn z(&self)->f32 { self.0[3] }
+  #[inline] pub fn w(&self)->f32 { self.0[0] }
+  #[inline] pub fn e032(&self)->f32 { self.x() }
+  #[inline] pub fn e013(&self)->f32 { self.y() }
+  #[inline] pub fn e021(&self)->f32 { self.z() }
+  #[inline] pub fn e123(&self)->f32 { self.w() }
 }
 
 impl Add for Point {type Output=Self;fn add(self,p:Self)->Self{Self(self.0+p.0)}}
@@ -56,8 +60,9 @@ impl Mul<Plane> for Point {type Output=Motor;fn mul(self,p:Plane)->Motor{let(p1,
 impl Div<Point> for Point {type Output=Translator;fn div(self,p:Point)->Translator{self*p.inverse()}}
 impl BitOr<Plane> for Point {type Output=Line;fn bitor(self, p:Plane) -> Line { p | self }}
 impl BitOr<Line> for Point {type Output=Plane;fn bitor(self, l:Line) -> Plane { Plane(dotptl(&self.0,&l.p1)) }}
+/// a|b = -a0 b0
 impl BitOr<Point> for Point {type Output=f32;fn bitor(self, a:Point) -> f32 {let out = dot33(&self.0,&a.0);out[0]}}
-/// (a0 b0 + a1 b1 + a2 b2 + a3 b3) e0123
+/// a^b = (a0 b0 + a1 b1 + a2 b2 + a3 b3) e0123
 impl BitXor<Plane> for Point {type Output=Dual;fn bitxor(self, p:Plane) -> Dual {let out = -dp(&p.0,&self.0);Dual::new(0.0,out[0])} }
 impl BitAnd<Point> for Point {type Output=Line;fn bitand(self, p: Point) -> Line { !(!self ^ (!p))}}
 impl BitAnd<Line> for Point {type Output=Plane;fn bitand(self, l: Line) -> Plane { !(!self ^ !l)}}
@@ -80,6 +85,18 @@ impl From<Point> for [f32;4] { #[inline(always)] fn from(v: Point) -> Self { uns
 //Do not exist because
 // impl BitXor<Line> for Point { type Output = Point;fn bitxor(self, l:Line) -> Point {} }}
 // impl BitXor<Point> for Point { type Output = Dual;fn bitxor(self, a:Point) -> Dual {} }
+
+fn dot33(a:&f32x4, b:&f32x4)->f32x4 {
+  // -a0 b0
+  f32x4::from_array([-1.0, 0.0, 0.0, 0.0]) * mul_ss(a, b)
+}
+
+fn dotptl(a:&f32x4, b:&f32x4)->f32x4 {
+  let dp = &hi_dp_ss(a, b);
+  let p0 = &a.xxxx() * b;
+  let p0 = &f32x4_xor(&p0, &[0.0, -0.0, -0.0, -0.0].into());
+  add_ss(p0, dp)
+}
 
 fn gp33(a:&f32x4, b:&f32x4)->f32x4 {
   // (-a0 b0) +

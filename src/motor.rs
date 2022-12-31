@@ -7,25 +7,10 @@ use crate::{Rotor,Translator,Point,Line,Plane,Origin,maths::*};
 #[derive(Default, Debug, Clone, PartialEq, Copy)]
 pub struct Motor { pub(crate) p1:f32x4, pub(crate) p2:f32x4 }
 
+/// a + b*e23 + c*e31 + d*e12 + e*e01 + f*e02 + g*e03 + h*e0123
 pub const fn motor(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor { Motor::new(a, b, c, d, e, f, g, h) }
 
 impl Motor {
-  pub fn e12(&self)->f32 { self.p1[3] }
-  pub fn e21(&self)->f32 { -self.e12() }
-  pub fn e31(&self)->f32 { self.p1[2] }
-  pub fn e13(&self)->f32 { -self.e31() }
-  pub fn e23(&self)->f32 { self.p1[1] }
-  pub fn e32(&self)->f32 { -self.e23() }
-  pub fn scalar(&self)->f32 { self.p1[0] }
-
-  pub fn e01(&self)->f32 { self.p2[1] }
-  pub fn e10(&self)->f32 { -self.e01() }
-  pub fn e02(&self)->f32 { self.p2[2] }
-  pub fn e20(&self)->f32 { -self.e02() }
-  pub fn e03(&self)->f32 { self.p2[3] }
-  pub fn e30(&self)->f32 { -self.e03() }
-  pub fn e0123(&self)->f32 { self.p2[0] }
-
   /// a + b*e23 + c*e31 + d*e12 + e*e01 + f*e02 + g*e03 + h*e0123
   pub const fn new(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32,g:f32,h:f32)->Motor {
     Motor{p1:f32x4::from_array([a,b,c,d]), p2:f32x4::from_array([h,e,f,g])}}
@@ -139,6 +124,22 @@ impl Motor {
     let cmp2 = f32x4_abs(&self.p2 - m.p2) < eps;
     cmp1 && cmp2
   }
+
+  pub fn e12(&self)->f32 { self.p1[3] }
+  pub fn e21(&self)->f32 { -self.e12() }
+  pub fn e31(&self)->f32 { self.p1[2] }
+  pub fn e13(&self)->f32 { -self.e31() }
+  pub fn e23(&self)->f32 { self.p1[1] }
+  pub fn e32(&self)->f32 { -self.e23() }
+  pub fn scalar(&self)->f32 { self.p1[0] }
+
+  pub fn e01(&self)->f32 { self.p2[1] }
+  pub fn e10(&self)->f32 { -self.e01() }
+  pub fn e02(&self)->f32 { self.p2[2] }
+  pub fn e20(&self)->f32 { -self.e02() }
+  pub fn e03(&self)->f32 { self.p2[3] }
+  pub fn e30(&self)->f32 { -self.e03() }
+  pub fn e0123(&self)->f32 { self.p2[0] }
 }
 
 impl Display for Motor {
@@ -371,7 +372,7 @@ impl Div<Motor> for Motor {
 
 #[cfg(test)]
 mod tests {
-  use crate::{Motor, Rotor, Translator, point, PI};
+  use crate::{Motor, Rotor, Translator, point, pi};
 
   #[test] fn motor_normalized() {
     let m = Motor::new(0.1,0.2,0.3,0.4,0.1,0.2,0.3,0.4).normalized();
@@ -392,7 +393,7 @@ mod tests {
   #[test] fn motor_from_rotor() {
     // Rotate point 90 degrees
     let a = point(2.0,0.0,0.0);
-    let m:Motor = Rotor::new(-PI/2.0,0.0,0.0,1.0).into();
+    let m:Motor = Rotor::new(-pi/2.0,0.0,0.0,1.0).into();
     assert_eq!(m(a).normalized(), point(0.0,2.0,0.0));
   }
 

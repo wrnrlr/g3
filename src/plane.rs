@@ -1,28 +1,23 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4, SimdFloat},ops::*};
 use crate::{*,maths::*};
 
-pub const E0:Plane = plane(0.0,0.0,0.0,1.0);
-pub const E1:Plane = plane(1.0,0.0,0.0,0.0);
-pub const E2:Plane = plane(0.0,1.0,0.0,0.0);
-pub const E3:Plane = plane(0.0,0.0,1.0,0.0);
+/// e₀
+pub const e0:Plane = plane(0.0, 0.0, 0.0, 1.0);
+/// e₁
+pub const e1:Plane = plane(1.0, 0.0, 0.0, 0.0);
+/// e₂
+pub const e2:Plane = plane(0.0, 1.0, 0.0, 0.0);
+/// e₃
+pub const e3:Plane = plane(0.0, 0.0, 1.0, 0.0);
 
 /// ae₁ + be₂ + ce₃ + de₀
 #[inline] pub const fn plane(a:f32,b:f32,c:f32,d:f32)->Plane { Plane::new(a,b,c,d) }
 
-// p0: (e0, e1, e2, e3)
+/// ae₁ + be₂ + ce₃ + de₀
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Plane (pub(crate) f32x4);
 
 impl Plane {
-  #[inline] pub fn d(&self)->f32 { self.0[0] }
-  #[inline] pub fn e0(&self)->f32 { self.d() }
-  #[inline] pub fn x(&self)->f32 { self.0[1] }
-  #[inline] pub fn e1(&self)->f32 { self.x() }
-  #[inline] pub fn y(&self)->f32 { self.0[2] }
-  #[inline] pub fn e2(&self)->f32 { self.y() }
-  #[inline] pub fn z(&self)->f32 { self.0[3] }
-  #[inline] pub fn e3(&self)->f32 { self.z() }
-
   /// The constructor performs the rearrangement so the plane can be specified
   /// in the familiar form: ax + by + cz + d
   #[inline] pub const fn new(a:f32,b:f32,c:f32,d:f32)->Plane { Plane(f32x4::from_array([d,a,b,c]))}
@@ -69,9 +64,18 @@ impl Plane {
   /// that maximizes $p \cdot p'$ (that is, $p'$ is as parallel to $p$ as
   /// possible).
   pub fn project_line(self, l:Line)->Plane {  (self | l) | l }
+
+  #[inline] pub fn a(&self) ->f32 { self.0[1] }
+  #[inline] pub fn b(&self) ->f32 { self.0[2] }
+  #[inline] pub fn c(&self) ->f32 { self.0[3] }
+  #[inline] pub fn d(&self)->f32 { self.0[0] }
+  #[inline] pub fn e0(&self)->f32 { self.d() }
+  #[inline] pub fn e1(&self)->f32 { self.a() }
+  #[inline] pub fn e2(&self)->f32 { self.b() }
+  #[inline] pub fn e3(&self)->f32 { self.c() }
 }
 
-impl Display for Plane {fn fmt(&self, f: &mut Formatter<'_>) -> Result {write!(f, "{}e1 + {}e2 + {}e2 + {}e0)", self.x(), self.y(), self.z(), self.d())}}
+impl Display for Plane {fn fmt(&self, f: &mut Formatter<'_>) -> Result {write!(f, "{}e1 + {}e2 + {}e2 + {}e0)", self.a(), self.b(), self.c(), self.d())}}
 
 /// Reflect another plane $p_2$ through this plane $p_1$. The operation
 /// performed via this call operator is an optimized routine equivalent to
@@ -136,8 +140,8 @@ fn dot00(a:&f32x4, b:&f32x4)->f32x4 {
   hi_dp(a,b)
 }
 
+// (a2b1 - a1b2)e03 + (a3b2 - a2b3)e01 + (a1b3 - a3b1)e02 + a1b0e23 + a2b0e31 + a3b0e12
 fn dot03(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
-  // (a2b1 - a1b2)e03 + (a3b2 - a2b3)e01 + (a1b3 - a3b1)e02 + a1b0e23 + a2b0e31 + a3b0e12
   let mut p1_out = a * b.xxxx();
   p1_out = zero_first(p1_out);
   (p1_out, (a.xzwy()*b - a*b.xzwy()).xzwy())
@@ -149,9 +153,13 @@ fn dotpl(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   sub_ss(&(p0.xzwy()), hi_dp_ss(a, c))
 }
 
+fn dotpil(a:&f32x4, c:&f32x4)->f32x4 {
+  f32x4_xor(&hi_dp(a, c), &[-0.0, 0.0, 0.0, 0.0].into())
+}
+
+// (a1 b2 - a2 b1) e12 + (a2 b3 - a3 b2) e23 + (a3 b1 - a1 b3) e31 +
+// (a0 b1 - a1 b0) e01 + (a0 b2 - a2 b0) e02 + (a0 b3 - a3 b0) e03
 fn ext00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
-  // (a1 b2 - a2 b1) e12 + (a2 b3 - a3 b2) e23 + (a3 b1 - a1 b3) e31 +
-  // (a0 b1 - a1 b0) e01 + (a0 b2 - a2 b0) e02 + (a0 b3 - a3 b0) e03
   // For both outputs above, we don't zero the lowest component because
   // we've arranged a cancelation TODO wdym???
   ((a * b.xzwy() - a.xzwy() * b).xzwy(),
@@ -195,9 +203,9 @@ mod tests {
   }
   #[test] fn plane_getters() {
     let p = plane(4.0,2.0,3.0,1.0);
-    assert_eq!(p.x(), 4.0);
-    assert_eq!(p.y(), 2.0);
-    assert_eq!(p.z(), 3.0);
+    assert_eq!(p.a(), 4.0);
+    assert_eq!(p.b(), 2.0);
+    assert_eq!(p.c(), 3.0);
     assert_eq!(p.d(), 1.0);
     assert_eq!(p.e1(), 4.0);
     assert_eq!(p.e2(), 2.0);
@@ -256,9 +264,9 @@ mod tests {
   }
 
   fn assert_plane(p:Plane,x:f32,y:f32,z:f32,d:f32) {
-    assert_eq!(p.x(), x);
-    assert_eq!(p.y(), y);
-    assert_eq!(p.z(), z);
+    assert_eq!(p.a(), x);
+    assert_eq!(p.b(), y);
+    assert_eq!(p.c(), z);
     assert_eq!(p.d(), d);
   }
 

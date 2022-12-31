@@ -8,8 +8,7 @@ However, one will find it to be a more intuitive and powerful formalism to descr
 
 Let's break down what we mean by plane-based, projective and geometric-algebra in reverse order.
 
-### Geometric algebra
-Of the history of mathematics it is often said that it where the Arabs or Indians that discovered the number zero.
+### Geometric algebrapepperit where the Arabs or Indians that discovered the number zero.
 It might be hard for today's people with all their modern technology to fully appreciate the difficulties of solving
 quadratic equations using roman numerals. Harder still to fathom that 
 like the mathematicians of old, without the number zero, one is missing some numbers that can make life easier,

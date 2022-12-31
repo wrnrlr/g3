@@ -1,8 +1,10 @@
 use std::{simd::{f32x2},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not}};
 
-pub const fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
+pub const e0123:Dual = dual(0.0,1.0);
 
-/// A dual number is a multivector of the form p + e_0123.
+/// p + qe₀₁₂₃
+pub const fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
+/// scalar + e₀₁₂₃
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Dual { pub(crate) p:f32x2 }
 

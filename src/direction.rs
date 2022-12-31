@@ -1,15 +1,12 @@
 use std::{simd::{f32x4,u32x4,SimdFloat},ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg}};
 use crate::maths::*;
 
-// Directions in are represented using points at infinity (homogeneous coordinate 0).
-// Having a homogeneous coordinate of zero ensures that directions are translation-invariant.
+/// Directions in are represented using points at infinity (homogeneous coordinate 0).
+/// Having a homogeneous coordinate of zero ensures that directions are translation-invariant.
 #[derive(Default,Debug,Clone,PartialEq)]
 pub struct Direction(pub(crate) f32x4);
 
 impl Direction {
-  pub fn x(&self)->f32 { self.0[1] }
-  pub fn y(&self)->f32 { self.0[2] }
-  pub fn z(&self)->f32 { self.0[3] }
   /// Create a normalized direction
   pub fn new(x:f32,y:f32,z:f32)->Direction { Direction(f32x4::from_array([0.0,x,y,z])).normalized() }
   /// Data should point to four floats with memory layout `(0.f, x, y, z)`
@@ -21,6 +18,9 @@ impl Direction {
   /// magnitude (by default, `rsqrtps` is used with a single Newton-Raphson
   /// refinement iteration)
   pub fn normalized(&self)->Direction { Direction(&self.0 * rsqrt_nr1(&hi_dp_bc(&self.0, &self.0))) }
+  pub fn x(&self)->f32 { self.0[1] }
+  pub fn y(&self)->f32 { self.0[2] }
+  pub fn z(&self)->f32 { self.0[3] }
 }
 
 impl Into<[f32;3]> for Direction { fn into(self) -> [f32; 3] { [self.x(), self.y(), self.z()] } }

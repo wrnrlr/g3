@@ -17,21 +17,21 @@ mod direction;
 mod translator;
 
 /// π
-pub use std::f32::consts::PI;
-/// τ
-pub const TAU:f32 = PI*2.0;
+pub const pi:f32 =  std::f32::consts::PI;
+/// τ = 2π
+pub const tau:f32 = pi*2.0;
 
 pub use dual::{Dual,dual};
-pub use point::{Point,point,Origin,E012,E023,E032,ORIGIN};
+pub use point::*;
 pub use line::{Line,line};
 pub use branch::{Branch,branch};
 pub use horizon::{Horizon,horizon};
-pub use plane::{Plane,plane,E0,E1,E2,E3};
+pub use plane::*;
 pub use motor::{Motor,motor};
 pub use rotor::{EulerAngles,Rotor,rotor};
 pub use direction::{Direction};
 pub use translator::{Translator,translator};
-pub mod maths;
+pub(crate) mod maths;
 
 #[cfg(feature = "glam")]
 pub use {matrix::*};

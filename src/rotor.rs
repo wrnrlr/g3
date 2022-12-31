@@ -1,5 +1,5 @@
 use std::{simd::{f32x4,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
-use crate::{Motor, Translator, Point, Line, Plane, Branch, Direction, PI, maths::*};
+use crate::{*, maths::*};
 pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)
 }
@@ -283,7 +283,7 @@ pub struct EulerAngles {
   pub yaw:f32
 }
 
-const PI2:f32 = PI/2.0;
+const PI2:f32 = pi/2.0;
 impl From<Rotor> for EulerAngles {
   fn from(r:Rotor)->Self {
     let buf:[f32;4] = r.into();
@@ -310,7 +310,7 @@ impl From<EulerAngles> for Rotor { fn from(ea:EulerAngles)->Self { Rotor::from_e
 
 #[cfg(test)]
 mod tests {
-  use super::{Rotor,PI};
+  use super::{*};
 
   #[test] fn rotor_constrained() {
     let r1 = Rotor::new(1.0, 2.0, 3.0, 4.0);
@@ -322,11 +322,11 @@ mod tests {
   }
 
   #[test] fn rotor_into_mat4() {
-    let r = Rotor::new(PI, 1.0, 0.0, 0.0);
+    let r = Rotor::new(pi, 1.0, 0.0, 0.0);
     let m = [
       1.0, 0.0, 0.0, 0.0,
-      0.0, PI.cos(), -PI.sin(), 0.0,
-      0.0, PI.sin(), PI.cos(), 0.0,
+      0.0, pi.cos(), -pi.sin(), 0.0,
+      0.0, pi.sin(), pi.cos(), 0.0,
       0.0, 0.0, 0.0, 1.0];
     assert_eq!(<[f32;16]>::from(r), m);
   }

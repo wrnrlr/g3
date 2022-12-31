@@ -9,14 +9,6 @@ pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
 pub struct Translator { pub p2:f32x4 }
 
 impl Translator {
-  #[inline] pub fn scalar(&self)->f32 { 1.0 }
-  #[inline] pub fn e01(&self)->f32 { self.p2[1] }
-  #[inline] pub fn e10(&self)->f32 { -self.e01() }
-  #[inline] pub fn e02(&self)->f32 { self.p2[2] }
-  #[inline] pub fn e20(&self)->f32 { -self.e02() }
-  #[inline] pub fn e03(&self)->f32 { self.p2[3] }
-  #[inline] pub fn e30(&self)->f32 { -self.e03() }
-
   pub fn new(delta:f32,x:f32,y:f32,z:f32)->Translator {
     let norm:f32 = (x * x + y * y + z * z).sqrt();
     let inv_norm:f32 = 1.0 / norm;
@@ -52,13 +44,21 @@ impl Translator {
   // (without the scalar $1$).f
   // pub fn log(&self)->IdealLine { IdealLine{p2: self.p2} } TODO
 
-  // Compute the square root of the provided translator $t$.
+  /// Compute the square root of the provided translator $t$.
   #[inline] pub fn sqrt(&self)->Translator { *self * 0.5 }
 
-  // Compute the logarithm of the translator, producing an horizon axis.
-  // In practice, the logarithm of a translator is simply the horizon partition
-  // (without the scalar $1$).
+  /// Compute the logarithm of the translator, producing an horizon axis.
+  /// In practice, the logarithm of a translator is simply the horizon partition
+  /// (without the scalar $1$).
   pub fn log(&self)-> Horizon { Horizon {p2: self.p2} }
+
+  #[inline] pub fn scalar(&self)->f32 { 1.0 }
+  #[inline] pub fn e01(&self)->f32 { self.p2[1] }
+  #[inline] pub fn e10(&self)->f32 { -self.e01() }
+  #[inline] pub fn e02(&self)->f32 { self.p2[2] }
+  #[inline] pub fn e20(&self)->f32 { -self.e02() }
+  #[inline] pub fn e03(&self)->f32 { self.p2[3] }
+  #[inline] pub fn e30(&self)->f32 { -self.e03() }
 }
 
 impl Display for Translator {
@@ -218,7 +218,8 @@ impl Div<Translator> for Translator {
 
 #[cfg(test)]
 mod tests {
-  use crate::{Translator, point, Point, ORIGIN};
+  use crate::{Translator, point, Point, Origin};
+  const ORIGIN:Point = point(0.0,0.0,0.0);
 
   fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
     const EPSILON: f32 = 0.02;

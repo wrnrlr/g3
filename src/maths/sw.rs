@@ -443,3 +443,17 @@ pub fn swo12(b:&f32x4, c:&f32x4)->f32x4 {
   // Set the low component to unity
   tmp * <f32x4>::from([0.0, 2.0, 2.0, 2.0]) + <f32x4>::from([1.0, 0.0, 0.0, 0.0])
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use std::{simd::{f32x4}};
+
+  #[test]
+  fn simd_sandwich() {
+    let a = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+    let b = f32x4::from_array([-4.0, -3.0, -2.0, -1.0]);
+    let c = sw02(&a, &b);
+    assert_eq!([c[0], c[1], c[2], c[3]], [9.0, 2.0, 3.0, 4.0]);
+  }
+}

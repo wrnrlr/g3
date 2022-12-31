@@ -13,21 +13,21 @@ mod tests {
   }
 
   #[test] fn rotor_log_exp() {
-    let r = rotor(PI * 0.5, 0.3, -3.0, 1.0);
+    let r = rotor(pi * 0.5, 0.3, -3.0, 1.0);
     let b = r.log();
     let s = b.exp();
     approx_eq([r.scalar(), r.e12(), r.e31(), r.e23()], [s.scalar(), s.e12(), s.e31(), s.e23()]);
   }
 
   #[test] fn rotor_sqrt() {
-    let r = rotor(PI/2.0, 0.3, -3.0, 1.0);
+    let r = rotor(pi/2.0, 0.3, -3.0, 1.0);
     let s = r.sqrt();
     let n = s * s;
     approx_eq([r.scalar(), r.e12(), r.e31(), r.e23()], [n.scalar(), n.e12(), n.e31(), n.e23()]);
   }
 
   #[test] fn motor_exp_log_sqrt() {
-    let r = rotor(PI/2.0, 0.3, -3.0, 1.0);
+    let r = rotor(pi/2.0, 0.3, -3.0, 1.0);
     let t = translator(12.0, -2.0, 0.4, 1.0);
     let m1 = r * t;
     let l = m1.log();
@@ -41,7 +41,7 @@ mod tests {
 
   #[test] fn motor_slerp() {
     // Construct a motor from a translator and rotor
-    let r = rotor(PI/2.0, 0.3, -3.0, 1.0);
+    let r = rotor(pi/2.0, 0.3, -3.0, 1.0);
     let t = translator(12.0, -2.0, 0.4, 1.0);
     let m1 = r * t;
     let l = m1.log();
@@ -54,11 +54,11 @@ mod tests {
   }
 
   #[test] fn motor_blend() {
-    let r1 = rotor(PI/2.0, 0.0, 0.0, 1.0);
+    let r1 = rotor(pi/2.0, 0.0, 0.0, 1.0);
     let t1 = translator(1.0, 0.0, 0.0, 1.0);
     let m1 = r1 * t1;
 
-    let r2 = rotor(PI/2.0, 0.3, -3.0, 1.0);
+    let r2 = rotor(pi/2.0, 0.3, -3.0, 1.0);
     let t2 = translator(12.0, -2.0, 0.4, 1.0);
     let m2 = r2 * t2;
 

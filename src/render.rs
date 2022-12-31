@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 use glow::{HasContext, NativeBuffer, NativeVertexArray};
-use crate::{Plane, Point, Line, E1, E2, E3, point, plane, Rotor};
+use crate::{Plane, Point, Line, e1, e2, e3, point, plane, Rotor};
 
 pub struct Renderer {
   world: hecs::World,
@@ -42,7 +42,7 @@ impl Renderer {
     //
     // }
     for (_id, (p,color)) in self.world.query_mut::<(&Plane, &Color)>() {
-      let m = (p.normalized()*E2).sqrt();
+      let m = (p.normalized()* e2).sqrt();
       let a = m(point(-1.0,0.0,-1.0));
       let b = m(point(-1.0,0.0,1.0));
       let c = m(point(1.0,0.0,1.0));
