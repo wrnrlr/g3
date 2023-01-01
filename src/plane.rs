@@ -178,6 +178,124 @@ fn extpb(a:&f32x4, b:&f32x4)->f32x4 {
   return add_ss(p3_out, &hi_dp(a,b));
 }
 
+// reflect point through plane
+fn sw30(a:&f32x4, b:&f32x4) ->f32x4 {
+  //                                b0(a1^2 + a2^2 + a3^2)  e123 +
+  // (-2a1(a0 b0 + a3 b3 + a2 b2) + b1(a2^2 + a3^2 - a1^2)) e032 +
+  // (-2a2(a0 b0 + a1 b1 + a3 b3) + b2(a3^2 + a1^2 - a2^2)) e013 +
+  // (-2a3(a0 b0 + a2 b2 + a1 b1) + b3(a1^2 + a2^2 - a3^2)) e021
+
+  let a_zwyz = a.zwyz(); // a2, a3, a1, a2
+  let a_yzwy = a.yzwy(); // a1, a2, a3, a1
+  let a_wyzw = a.wyzw(); // a3, a1, a2, a3
+
+  //     a0 b0              |      a0 b0              |      a0 b0              |      a0 b0
+  let mut p3_out = a.xxxx() * b.xxxx();
+  //     a0 b0+a2 b0        |      a0 b0+a3 b3        |      a0 b0+a1 b1        |      a0 b0+a3 b2
+  p3_out += a_zwyz * b.xwyz();
+  //     a0 b0+a2 b0+a1 b0  |      a0 b0+a3 b3+a2 b2  |      a0 b0+a1 b0+a3 b3  |      a0 b0+a3 b2+a1 b1
+  p3_out += a_yzwy * b.xzwy();
+  // 0b0(a0 b0+a2 b0+a1 b0) | -2a1(a0 b0+a3 b3+a2 b2) | -2a2(a0 b0+a1 b0+a3 b3) | -2a3(a0 b0+a3 b2+a1 b1)
+  p3_out *= a * f32x4::from_array([0.0,-2.0,-2.0,-2.0]);
+  //                        | -2a1(a0 b0+a3 b3+a2 b2) | -2a2(a0 b0+a1 b0+a3 b3) | -2a3(a0 b0+a3 b2+a1 b1)
+
+  // a1^2           | a2^2           | a3^2           | a1^2
+  let mut tmp = a_yzwy * a_yzwy;
+  // a1^2+a2^2      | a2^2+a3^2      | a3^2+a1^2      | a1^2+a2^2
+  tmp += a_zwyz * a_zwyz;
+  // a1^2+a2^2+a3^2 | a2^2+a3^2-a1^2 | a3^2+a1^2-a2^2 | a1^2+a2^2-a3^2
+  tmp -= f32x4_xor(&(a_wyzw * a_wyzw), &f32x4::from_array([-0.0,0.0,0.0,0.0]));
+
+  p3_out = p3_out + b * tmp;
+
+  p3_out
+}
+
+// Reflect a plane through another plane
+// b * a * b
+fn sw00(a:&f32x4,b:&f32x4)->f32x4 {
+  // (2a0(a2 b2 + a3 b3 + a1 b1) - b0(a1^2 + a2^2 + a3^2)) e0 +
+  // (2a1(a2 b2 + a3 b3)         + b1(a1^2 - a2^2 - a3^2)) e1 +
+  // (2a2(a3 b3 + a1 b1)         + b2(a2^2 - a3^2 - a1^2)) e2 +
+  // (2a3(a1 b1 + a2 b2)         + b3(a3^2 - a1^2 - a2^2)) e3
+  let a_zzwy = a.zzwy();
+  let a_wwyz = a.wwyz();
+
+  // Left block
+  let mut tmp = a_zzwy * b.zzwy();
+  tmp += a_wwyz * b.wwyz();
+
+  let a1 = &a.yyww();
+  let b1 = &b.yyww();
+  tmp = add_ss(&tmp, &mul_ss(a1, b1));
+  tmp *= a + a;
+
+  // Right block
+  let a_yyzw = &a.yyzw();
+  let mut tmp2 = f32x4_xor(&(a_yyzw * a_yyzw), &[-0.0, 0.0, 0.0, 0.0].into());
+  tmp2 -= a_zzwy * a_zzwy;
+  tmp2 -= a_wwyz * a_wwyz;
+  tmp2 *= b;
+
+  tmp + tmp2
+}
+
+fn sw10(a:&f32x4,b:&f32x4)->(f32x4,f32x4) {
+  //                       b0(a1^2 + a2^2 + a3^2) +
+  // (2a3(a1 b1 + a2 b2) + b3(a3^2 - a1^2 - a2^2)) e12 +
+  // (2a1(a2 b2 + a3 b3) + b1(a1^2 - a2^2 - a3^2)) e23 +
+  // (2a2(a3 b3 + a1 b1) + b2(a2^2 - a3^2 - a1^2)) e31 +
+  //
+  // 2a0(a1 b2 - a2 b1) e03
+  // 2a0(a2 b3 - a3 b2) e01 +
+  // 2a0(a3 b1 - a1 b3) e02
+
+  let a_zyzw = &a.zyzw();
+  let a_ywyz = &a.ywyz();
+  let a_wzwy = &a.wzwy();
+  let b_xzwy = &b.xzwy();
+
+  let two_zero:f32x4 = [0.0, 2.0, 2.0, 2.0].into(); // TODO is this right?
+  let mut p1 = a * b;
+  p1 += a_wzwy * b_xzwy;
+  p1 *= a_ywyz * two_zero;
+
+  let mut tmp = a_zyzw * a_zyzw;
+  tmp += a_wzwy * a_wzwy;
+  tmp = f32x4_xor(&tmp, &[-0.0, 0.0, 0.0, 0.0].into());
+  tmp = (a_ywyz * a_ywyz) - tmp;
+  tmp = b.xwyz() * tmp;
+
+  let p1 = (p1 + tmp).xzwy();
+
+  let mut p2 = a_zyzw * b_xzwy;
+  p2 = p2 - a_wzwy * b;
+  p2 = p2 * a.xxxx() * two_zero;
+  p2 = p2.xzwy();
+
+  (p1,p2)
+}
+
+fn sw20(a:&f32x4,b:&f32x4)->f32x4 {
+  //                       -b0(a1^2 + a2^2 + a3^2) e0123 +
+  // (-2a3(a1 b1 + a2 b2) + b3(a1^2 + a2^2 - a3^2)) e03
+  // (-2a1(a2 b2 + a3 b3) + b1(a2^2 + a3^2 - a1^2)) e01 +
+  // (-2a2(a3 b3 + a1 b1) + b2(a3^2 + a1^2 - a2^2)) e02 +
+  let a_zzwy = a.zzwy();
+  let a_wwyz = a.wwyz();
+
+  let mut p2 = a * b;
+  p2 += a_zzwy * b.xzwy();
+  p2 *= a_wwyz * &[0.0, -2.0, -2.0, -2.0].into();
+
+  let a_yyzw = a.yyzw();
+  let mut tmp = a_yyzw * a_yyzw;
+  tmp = f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(tmp + a_zzwy * a_zzwy));
+  tmp -= a_wwyz * a_wwyz;
+  p2 += tmp * b.xwyz();
+  p2.xzwy()
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

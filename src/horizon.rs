@@ -1,12 +1,10 @@
 use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
 use crate::{Dual, Plane, Point, Line, Branch, Translator,maths::*};
 
-/// $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
+/// e₀₁ + e₀₂ + e₀₃
 pub const fn horizon(a:f32, b:f32, c:f32) -> Horizon { Horizon::new(a, b, c) }
 
-/// A horizon represents a line at infinity and corresponds to the multivector:
-///
-/// $$a\mathbf{e}_{01} + b\mathbf{e}_{02} + c\mathbf{e}_{03}$$
+/// A horizon represents a line at infinity and corresponds to the multivector: e₀₁ + e₀₂ + e₀₃
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Horizon { pub(crate) p2:f32x4 }
 

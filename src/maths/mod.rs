@@ -1,11 +1,9 @@
 mod util;
 mod gp;
-mod sw;
 mod mat;
 
 pub use self::util::*;
 pub use self::gp::*;
-pub use self::sw::*;
 pub use self::mat::*;
 
 use std::simd::{f32x4};

@@ -1,8 +1,10 @@
 use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
 use crate::{Dual, Plane, Point, Motor, Branch, Horizon,maths::*};
 
+/// ae₂₃ + be₃₁ + ce₁₂ + de₀₁ + ee₀₂ + fe₀₃
 pub const fn line(a:f32,b:f32,c:f32,d:f32,e:f32,f:f32)->Line { Line::new(a,b,c,d,e,f) }
 
+/// A Line
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Line {pub(crate) p1:f32x4, pub(crate) p2:f32x4}
 

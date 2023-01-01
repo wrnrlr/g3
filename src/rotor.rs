@@ -1,4 +1,4 @@
-use std::{simd::{f32x4,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
+use std::{simd::{mask32x4,f32x4,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
 use crate::{*, maths::*};
 pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)
@@ -275,6 +275,90 @@ impl Div<Motor> for Rotor {
 }
 
 impl From<Rotor> for [f32;16] { fn from(r:Rotor)->Self { let m = mat4x4_12(&r.0);unsafe { std::mem::transmute::<[f32x4; 4], [f32; 16]>([m.0, m.1, m.2, m.3]) } } }
+
+fn swrl(a1:&f32x4, a2:&f32x4, b:&f32x4)->(f32x4,f32x4) {
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
+  let b_yxxx = b.yxxx();
+  let b_xxxx = b.xxxx();
+  let mut tmp = b * b;
+  tmp = tmp + b_yxxx * b_yxxx;
+  let b_tmp = b.zwyz();
+  let mut tmp2 = b_tmp * b_tmp;
+  let b_tmp = b.wzwy();
+  tmp2 += b_tmp * b_tmp;
+  tmp -= flip_signs(&tmp2, [true, false, false, false].into());
+  let scale = &[0.0, 2.0, 2.0, 2.0].into();
+  let tmp2 = (b_xxxx * b_xwyz + b * b_xzwy) * scale;
+  let tmp3 = (b * b_xwyz - b_xxxx * b_xzwy) * scale;
+  (tmp * a1 + tmp2 * a1.xzwy() + tmp3 * a1.xwyz(),
+   tmp * a2 + tmp2 * a2.xzwy() + tmp3 * a2.xwyz())
+}
+
+// swmm<false, false, false>
+fn swrb(a:&f32x4,b:&f32x4)->f32x4 {
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
+  let b_yxxx = b.yxxx();
+  let b_yxxx_2 = b_yxxx * b_yxxx;
+
+  let mut tmp = b * b;
+  tmp += b_yxxx_2;
+  let b_tmp = b.zwyz();
+  let mut tmp2 = b_tmp * b_tmp;
+  let b_tmp = b.wzwy();
+  tmp2 += b_tmp * b_tmp;
+  tmp -= f32x4_xor(&tmp2, &[-0.0, 0.0, 0.0, 0.0].into());
+
+  let b_xxxx = b.xxxx();
+  let scale:f32x4 = [0.0, 2.0, 2.0, 2.0].into();
+  let mut tmp2 = b_xxxx * b_xwyz;
+  tmp2 += b * b_xzwy;
+  tmp2 *= scale;
+
+  let mut tmp3 = b * b_xwyz;
+  tmp3 -= b_xxxx * b_xzwy;
+  tmp3 *= &scale;
+
+  let a_xzwy = a.xzwy();
+  let a_xwyz = a.xwyz();
+
+  let mut out = tmp * a;
+  out += tmp2 * a_xzwy;
+  out += tmp3 * a_xwyz;
+
+  out
+}
+
+// rotor(point), rotor(plane), rotor(direction): false, false
+pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
+  let dc_scale = f32x4::from_array([1.0,2.0,2.0,2.0]);
+  let b_xwyz = b.xwyz();
+  let b_xzwy = b.xzwy();
+  let b_xxxx = b.xxxx();
+
+  let mut tmp1 = b.zxxx() * b.zwyz();
+  tmp1 += b.yzwy() * b.yyzw();
+  tmp1 *= dc_scale;
+
+  let mut tmp2 = b * b_xwyz;
+  let true_falses:mask32x4 = [true,false,false,false].into();
+  tmp2 -= flip_signs(&(b.wxxx() * b.wzwy()), true_falses);
+  tmp2 *= dc_scale;
+
+  let mut tmp3 = b * b;
+  tmp3 -= b_xwyz * b_xwyz;
+  tmp3 += b_xxxx * b_xxxx;
+  tmp3 -= b_xzwy * b_xzwy;
+
+  let mut out:f32x4;
+
+  out = tmp1 * a.xzwy();
+  out += tmp2 * a.xwyz();
+  out += tmp3 * a;
+
+  out
+}
 
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct EulerAngles {

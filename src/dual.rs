@@ -4,14 +4,16 @@ pub const e0123:Dual = dual(0.0,1.0);
 
 /// p + qe₀₁₂₃
 pub const fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
-/// scalar + e₀₁₂₃
+/// Dual Number
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Dual { pub(crate) p:f32x2 }
 
 impl Dual {
+  pub const fn new(p:f32,q:f32)->Dual { Dual{p:f32x2::from_array([p,q])} }
   #[inline] pub fn scalar(&self)->f32 { self.p[0] }
   #[inline] pub fn e0123(&self)->f32 { self.p[1] }
-  pub const fn new(p:f32,q:f32)->Dual { Dual{p:f32x2::from_array([p,q])} }
+  #[inline] pub fn p(&self)->f32 { self.p[0] }
+  #[inline] pub fn q(&self)->f32 { self.p[1] }
 }
 
 impl Add<Dual> for Dual { type Output = Dual;fn add(self, other: Dual) -> Dual { Dual { p:self.p+other.p } } }

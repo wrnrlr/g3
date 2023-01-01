@@ -1,4 +1,4 @@
-use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn}};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle as swizzle,Which::{First,Second}},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn}};
 use crate::{Plane, Line, Point, Motor, Rotor, Horizon,maths::*};
 
 pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
@@ -211,6 +211,74 @@ impl Div<Translator> for Translator {
   }
 }
 
+// Apply a translator to a line
+// a := p1 input
+// d := p2 input
+// c := p2 translator
+// out points to the start address of a line (p1, p2)
+fn swl2(a:&f32x4, d:&f32x4, c:&f32x4)->(f32x4, f32x4) {
+  // a0 + a1 e23 + a2 e31 + a3 e12 +
+  //
+  // (2a0 c0 + d0) e0123 +
+  // (2(a2 c3 - a3 c2 - a1 c0) + d1) e01 +
+  // (2(a3 c1 - a1 c3 - a2 c0) + d2) e02 +
+  // (2(a1 c2 - a2 c1 - a3 c0) + d3) e03
+  let mut p2_out = a.xzwy() * c.xwyz();
+  // Add and subtract the same quantity in the low component to produce a cancellation
+  p2_out -= a.xwyz() * c.xzwy();
+  p2_out -= flip_signs(&(a * c.xxxx()), mask32x4::from_array([true, false, false, false]));
+  (a.clone(), p2_out + p2_out + d)
+}
+
+// Apply a translator to a point.
+// Assumes e0123 component of p2 is exactly 0
+// p2: (e0123, e01, e02, e03)
+// p3: (e123, e032, e013, e021)
+// b * a * ~b
+pub fn sw32(a:&f32x4, b:&f32x4)->f32x4 {
+  // a0 e123 +
+  // (a1 - 2 a0 b1) e032 +
+  // (a2 - 2 a0 b2) e013 +
+  // (a3 - 2 a0 b3) e021
+  a + a.xxxx() * b * f32x4::from_array([0.0, -2.0, -2.0, -2.0])
+}
+
+
+// Apply a translator to a plane.
+// Assumes e0123 component of p2 is exactly 0
+// p0: (e0, e1, e2, e3)
+// p2: (e0123, e01, e02, e03)
+// b * a * ~b
+// The low component of p2 is expected to be the scalar component instead
+ fn sw02(a:&f32x4, b:&f32x4)->f32x4 {
+  // (a0 b0^2 + 2a1 b0 b1 + 2a2 b0 b2 + 2a3 b0 b3) e0 +
+  // (a1 b0^2) e1 +
+  // (a2 b0^2) e2 +
+  // (a3 b0^2) e3
+  //
+  // Because the plane is projectively equivalent on multiplication by a
+  // scalar, we can divide the result through by b0^2
+  //
+  // (a0 + 2a1 b1 / b0 + 2a2 b2 / b0 + 2a3 b3 / b0) e0 +
+  // a1 e1 +
+  // a2 e2 +
+  // a3 e3
+  //
+  // The additive term clearly contains a dot product between the plane's
+  // normal and the translation axis, demonstrating that the plane
+  // "doesn't care" about translations along its span. More precisely, the
+  // plane translates by the projection of the translator on the plane's
+  // normal.
+
+  // a1*b1 + a2*b2 + a3*b3 stored in the low component of tmp
+  let tmp = hi_dp(a, b);
+  let mut inv_b = rcp_nr1(b);
+  // 2 / b0
+  inv_b = add_ss(&inv_b, &inv_b);
+  inv_b = swizzle!(inv_b.clone(), f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]); // TODO faster?
+  a + mul_ss(&tmp, &inv_b)
+}
+
 // Two translations are additive
 // (1-t2e/2) (1-t1e/2)       =
 // 1 - (t2+t1)e/2 + t2et1e/4 = , because e^2 = 0
@@ -218,8 +286,18 @@ impl Div<Translator> for Translator {
 
 #[cfg(test)]
 mod tests {
+  use std::simd::f32x4;
+  use super::*;
   use crate::*;
   const ORIGIN:Point = point(0.0,0.0,0.0);
+
+  #[test]
+  fn simd_sandwich() {
+    let a = f32x4::from_array([1.0, 2.0, 3.0, 4.0]);
+    let b = f32x4::from_array([-4.0, -3.0, -2.0, -1.0]);
+    let c = sw02(&a, &b);
+    assert_eq!([c[0], c[1], c[2], c[3]], [9.0, 2.0, 3.0, 4.0]);
+  }
 
   fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
     const EPSILON: f32 = 0.02;

@@ -1,15 +1,15 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle},mem::transmute,ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
 use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::*};
 
-/// e₀₃₂
-pub const e032:Point = point(1.0, 0.0, 0.0); // ???
-/// e₀₁₂
-pub const e012:Point = point(1.0, 0.0, 0.0); // ???
-/// e₀₂₃
-pub const e023:Point = point(0.0, 1.0, 0.0); // ???
-/// e₁₂₃
-pub const e123:Origin = Origin{};
-/// e₁₂₃
+/// e₀₃₂ + e₁₂₃
+pub const X:Point = point(1.0, 0.0, 0.0);
+/// e₀₁₃ + e₁₂₃
+pub const Y:Point = point(0.0, 1.0, 0.0);
+/// e₀₂₃ + e₁₂₃
+pub const Z:Point = point(0.0, 0.0, 1.0);
+/// Origin
+pub const O:Point = point(0.0, 0.0, 0.0);
+/// Origin
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Origin {} impl Into<Point> for Origin { fn into(self)->Point { Point::new(0.0,0.0,0.0) } }
 

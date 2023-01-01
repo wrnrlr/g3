@@ -65,7 +65,12 @@ a & b = !(!a ^ !b)
 ab = a|b + a^b
 
 ### Sandwich Product `a(b)`
+// G3 is an oriented algebra where a plane has two sides,
+// and reflecting a plane with itself result in switching those sides.
+// a(a) = -1
 
+// A plane `b` perpendicular to a mirror a reflects to itself:
+// -ab^(-a) = b
 a(b) = aba⁻¹
 
 ### Dual Operator `!`
