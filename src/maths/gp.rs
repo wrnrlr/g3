@@ -145,10 +145,7 @@ pub fn gpmm(a:&f32x4, b:&f32x4, c:&f32x4, d:&f32x4)->(f32x4,f32x4) {
   e = e + t;
   e = e - a_wzwy * c_wwyz;
 
-  let mut f = a_xxxx * d;
-  f += b * c.xxxx();
-  f += a_ywyz * d.yzwy();
-  f += b.ywyz() * c_yzwy;
+  let f = a_xxxx * d + b * c.xxxx() + a_ywyz * d.yzwy() + b.ywyz() * c_yzwy;
 
   let mut t = a_zyzw * d.zxxx();
   t += a_wzwy * d.wwyz();
@@ -156,9 +153,7 @@ pub fn gpmm(a:&f32x4, b:&f32x4, c:&f32x4, d:&f32x4)->(f32x4,f32x4) {
   t += b.wzwy() * c_wwyz;
   t = f32x4_xor(&t, &[-0.0,0.0,0.0,0.0].into());
 
-  f = f - t;
-
-  return (e, f);
+  return (e, f-t);
 }
 
 pub fn gpdl(u:f32, v:f32, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {

@@ -43,9 +43,19 @@ This library exports the following basic elements:
 
 ### Meet Operation `^` (Exterior/Outer/Wedge Product)
 Grade increasing
+// The wedge product ^ (also known as the meet, exterior or outer) is
+// bilinear, anti-symmetric, and extended to be associative.
+// TODO
+// * meet_plane_branch
+// * meet_point_line
+// anti_commute, a^b = -b^a
+// associative (a^b)^c = a^(b^c)
+// outer product with itself is 0, squares_to_zero, a ^ a = 0
+
 
 ### Join Operator `&` (Regressive Product)
 Grade decreasing
+a & b = !(!a ^ !b)
 
 ### Contraction Operator `|` (Inner/Dot Product)
 (De)similarity measure 

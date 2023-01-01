@@ -257,10 +257,9 @@ fn dotlp(a:&f32x4, b:&f32x4, c:&f32x4)->f32x4 {
   add_ss(&(p0.xzwy()), &hi_dp_ss(a, c))
 }
 
-
 #[cfg(test)]
 mod tests {
-  use super::{line};
+  use crate::*;
 
   #[test] fn line_constructor() {
     let l = line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
@@ -288,5 +287,38 @@ mod tests {
   }
   #[test] fn line_reverse() {
     assert_eq!(line(1.0, 2.0, 3.0, 4.0, 5.0, 6.0).reverse(), line(-1.0, -2.0, -3.0, -4.0, -5.0, -6.0))
+  }
+  #[test] fn meet_line_plane() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let l = line(0.0, 0.0, 1.0, 4.0, 1.0, -2.0);
+    let a = l ^ p;
+    assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [8.0, -5.0, -14.0, 0.0]);
+  }
+
+  #[test] fn meet_line_line() {
+    let l = line(1.0, 0.0, 0.0, 3.0, 2.0, 1.0);
+    let k = line(0.0, 1.0, 0.0, 4.0, 1.0, -2.0);
+    let a = l ^ k;
+    assert_eq!(a.e0123(), 6.0);
+  }
+
+  #[test] fn meet_line_horizon() {
+    let l = line(0.0, 0.0, 1.0, 3.0, 2.0, 1.0);
+    let i = horizon(-2.0, 1.0, 4.0);
+    let a = l ^ i;
+    assert_eq!([a.e0123(), a.scalar()], [0.0, 0.0]);
+  }
+
+  const EPSILON: f32 = 0.02;
+
+  fn approx_eq(a: f32, b: f32) {
+    assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}", a, b);
+  }
+
+  #[test] fn measure_point_to_line() {
+    let l = line(0.0, 1.0, 0.0, 1.0, 0.0, 0.0);
+    let a = point(0.0, 1.0, 2.0);
+    let d = (l & a).norm();
+    approx_eq(d, 2f32.sqrt());
   }
 }

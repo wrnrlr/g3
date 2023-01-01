@@ -330,4 +330,70 @@ mod tests {
       0.0, 0.0, 0.0, 1.0];
     assert_eq!(<[f32;16]>::from(r), m);
   }
+
+  const EPSILON: f32 = 0.02;
+  fn approx_eq1(a: f32, b: f32) {
+    assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}", a, b);
+  }
+
+  #[test] fn euler_angles() {
+    let r1 = rotor(1.0, 1.0, 0.0, 0.0) * rotor(1.0, 0.0, 1.0, 0.0) * rotor(1.0, 0.0, 0.0, 1.0);
+    let ea = EulerAngles::from(r1);
+    approx_eq1(ea.roll, 1.0);
+    approx_eq1(ea.pitch, 1.0);
+    approx_eq1(ea.yaw, 1.0);
+    let r2:Rotor = ea.into();
+    approx_eq1(r1.scalar(), r2.scalar());
+    approx_eq1(r1.e12(), r2.e12());
+    approx_eq1(r1.e31(), r2.e31());
+    approx_eq1(r1.e23(), r2.e23());
+  }
+
+  #[test] fn euler_angles_precision() {
+    let ea1 = EulerAngles{roll: 0.2*pi, pitch: 0.2*pi, yaw: 0.0};
+    let r:Rotor = ea1.into();
+    let ea2:EulerAngles = r.into();
+    approx_eq1(ea1.roll, ea2.roll);
+    approx_eq1(ea1.pitch, ea2.pitch);
+    approx_eq1(ea1.yaw, ea2.yaw);
+  }
+
+  #[test] fn rotor_line() {
+    let r = Rotor::load_normalized([1.0, 4.0, -3.0, 2.0]);
+    let l = line(-1.0, 2.0, -3.0, -6.0, 5.0, 4.0);
+    let k = r(l);
+    approx_eq4([k.e01(), k.e02(), k.e03(), 0.0], [-110.0, 20.0, 10.0, 0.0]);
+    approx_eq4([k.e12(), k.e31(), k.e23(), 0.0], [-240.0, 102.0, -36.0, 0.0]);
+  }
+
+  #[test] fn rotor_point() {
+    let r = rotor(pi*0.5, 0.0, 0.0, 1.0);
+    let a = point(1.0, 0.0, 0.0);
+    let b:Point = r(a);
+    approx_eq4([b.x(), b.y(), b.z(), 0.0], [0f32, -1.0, 0.0, 0.0]);
+  }
+
+  fn approx_eq4(result:[f32; 4], expected:[f32; 4]) {
+    const EPSILON:f32 = 0.02;
+    assert_eq!(result.len(), expected.len());
+    for (i, a) in result.iter().enumerate() {
+      let b = expected[i];
+      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+    }
+  }
+
+  #[test] fn rotor_sqrt() {
+    let r = rotor(pi * 0.5, 1.0, 2.0, 3.0);
+    let s = r.sqrt();
+    let s = s * s;
+    approx_eq4([s.scalar(), s.e23(), s.e31(), s.e12()], [r.scalar(), r.e23(), r.e31(), r.e12()]);
+  }
+
+  #[test] fn normalize_rotor() {
+    let r:Rotor = [4.0, -3.0, 3.0, 28.0].into();
+    r.normalized();
+    let norm = r * r.inverse();
+    approx_eq4([norm.scalar(), 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]);
+    approx_eq4([norm.e12(), norm.e31(), norm.e23(), 0.0], [0.0, 0.0, 0.0, 0.0]);
+  }
 }

@@ -59,3 +59,16 @@ impl BitXor<Branch> for Horizon { type Output = Dual;fn bitxor(self, b:Branch)->
 impl BitAnd<Point> for Horizon { type Output = Plane;fn bitand(self, a:Point)->Plane{ a & self } }
 // Inner Product, |
 impl BitOr<Plane> for Horizon { type Output = Plane;fn bitor(self, p:Plane)->Plane { Plane(hi_dp(&p.0, &self.p2)) } }
+
+#[cfg(test)]
+mod tests {
+  use crate::*;
+
+  #[test]
+  fn meet_horizon_plane() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let i = horizon(-2.0, 1.0, 4.0);
+    let a = i ^ p;
+    assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [5.0, -10.0, 5.0, 0.0]);
+  }
+}

@@ -218,7 +218,7 @@ impl Div<Translator> for Translator {
 
 #[cfg(test)]
 mod tests {
-  use crate::{Translator, point, Point, Origin};
+  use crate::*;
   const ORIGIN:Point = point(0.0,0.0,0.0);
 
   fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
@@ -248,5 +248,21 @@ mod tests {
     let e:Point = t(ORIGIN);
     let f = point(8f32.sqrt(), 0.0, 8f32.sqrt());
     approx_eq([e.e013(), e.e021(), e.e032(), e.e123()], [f.e013(), f.e021(), f.e032(), f.e123()]);
+  }
+
+  #[test] fn translator_point() {
+    let t = translator(1.0, 0.0, 0.0, 1.0);
+    let a = point(1.0, 0.0, 0.0);
+    let b = t(a);
+    assert_eq!([b.x(), b.y(), b.z()], [1.0, 0.0, 1.0]);
+  }
+
+  #[test] fn translator_line() {
+    let data = [0.0, -5.0, -2.0, 2.0];
+    let t = Translator::load_normalized(data);
+    let l = line(-1.0, 2.0, -3.0, -6.0, 5.0, 4.0);
+    let k = t(l);
+    assert_eq!([k.e01(),k.e02(),k.e03(),k.e12(),k.e31(),k.e23()],
+               [35.0, -14.0, 71.0, 4.0, 5.0, -6.0])
   }
 }

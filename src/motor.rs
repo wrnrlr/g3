@@ -372,7 +372,7 @@ impl Div<Motor> for Motor {
 
 #[cfg(test)]
 mod tests {
-  use crate::{Motor, Rotor, Translator, point, pi};
+  use crate::*;
 
   #[test] fn motor_normalized() {
     let m = Motor::new(0.1,0.2,0.3,0.4,0.1,0.2,0.3,0.4).normalized();
@@ -404,5 +404,100 @@ mod tests {
     let m3 = -m1;
     let m4 = m1.constrained();
     assert_eq!(m3, -m4);
+  }
+
+  fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
+    const EPSILON:f32 = 0.02;
+    assert_eq!(result.len(), expected.len());
+    for (i, a) in result.iter().enumerate() {
+      let b = expected[i];
+      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+    }
+  }
+
+  fn approx_eq4(result:[f32; 4], expected:[f32; 4]) {
+    const EPSILON:f32 = 0.02;
+    assert_eq!(result.len(), expected.len());
+    for (i, a) in result.iter().enumerate() {
+      let b = expected[i];
+      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+    }
+  }
+
+  #[test] fn construct_motor() {
+    let r = rotor(pi * 0.5, 0.0, 0.0, 1.0);
+    let t = translator(1.0, 0.0, 0.0, 1.0);
+    let m = r * t;
+    let a = point(1.0, 0.0, 0.0);
+    let b = m(a);
+    approx_eq([b.x(), b.y(), b.z()], [0.0, -1.0, 1.0]);
+
+    let m = t * r;
+    let b = m(a);
+    approx_eq([b.x(), b.y(), b.z()], [0.0, -1.0, 1.0]);
+
+    let l = m.log();
+    approx_eq([l.e23(), l.e12(), l.e31()], [0f32, 0.7854, 0.0]);
+    approx_eq([l.e01(), l.e02(), l.e03()], [0f32, 0.0, -0.5]);
+  }
+
+  #[test] fn construct_motor_via_screw_axis() {
+    let m = Motor::from_screw_axis(pi*0.5, 1.0, line(0.0,0.0,0.0,0.0,0.0,1.0));
+    let a = point(1.0, 0.0, 0.0);
+    let b = m(a);
+    approx_eq([b.x(), b.y(), b.z()], [0.0, 1.0, 1.0]);
+  }
+
+  #[test] fn motor_plane() {
+    let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
+    let a = plane(3.0, 2.0, 1.0, -1.0);
+    let b:Plane = m(a);
+    assert_eq!([b.a(), b.b(), b.c(), b.d()], [78.0, 60.0, 54.0, 358.0]);
+  }
+
+  // #[test] fn motor_plane_variadic() {todo!()}
+
+  #[test] fn motor_point() {
+    let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
+    let a = point(-1.0, 1.0, 2.0);
+    let b = m(a);
+    assert_eq!([b.x(), b.y(), b.z(), b.w()], [-12.0, -86.0, -86.0, 30.0]);
+  }
+
+  // #[test] fn motor_point_variadic() {todo!()}
+
+  #[test] fn motor_line() {
+    let m = motor(2.0, 4.0, 3.0, -1.0, -5.0, -2.0, 2.0, -3.0);
+    let l = line(-1.0, 2.0, -3.0, -6.0, 5.0, 4.0);
+    let k = m(l);
+    approx_eq([k.e01(), k.e02(), k.e03()], [6.0, 522.0, 96.0]);
+    approx_eq([k.e12(), k.e31(), k.e23()], [-214.0, -148.0, -40.0]);
+  }
+
+  // #[test] fn motor_line_variadic() {todo!()}
+
+  #[test] fn motor_origin() {
+    let r = rotor(pi * 0.5, 0.0, 0.0, 1.0);
+    let t = translator(1.0, 0.0, 0.0, 1.0);
+    let m = r * t;
+    let p1:Point = m(point(0.0,0.0,0.0));
+    let p2:Point = m(Origin{});
+    approx_eq([p1.x(), p1.y(), p1.z()], [0.0, 0.0, 1.0]);
+    approx_eq([p2.x(), p2.y(), p2.z()], [0.0, 0.0, 1.0]);
+  }
+
+  #[test] fn normalize_motor() {
+    let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0).normalized();
+    let norm = m * m.reverse();
+    approx_eq([norm.scalar(), norm.e0123(), 0.0], [1.0, 0.0, 0.0]);
+  }
+
+  #[test] fn motor_sqrt() {
+    let m = Motor::from_screw_axis(pi/2.0, 3.0, line(3.0, 1.0, 3.0, 4.0, -2.0, 1.0).normalized());
+    let s = m.sqrt();
+    let n = s * s;
+    approx_eq([m.scalar(), m.e01(), m.e02()], [n.scalar(), n.e01(), n.e02()]);
+    approx_eq([m.e03(), m.e23(), m.e31()], [n.e03(), n.e23(), n.e31()]);
+    approx_eq([m.e12(), m.e0123(), 0.0], [n.e12(), n.e0123(), 0.0]);
   }
 }

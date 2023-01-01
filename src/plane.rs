@@ -270,8 +270,74 @@ mod tests {
     assert_eq!(p.d(), d);
   }
 
+  #[test] fn meet_plane_plane() {
+    let p1 = plane(1.0, 2.0, 3.0, 4.0);
+    let p2 = plane(2.0, 3.0, -1.0, -2.0);
+    let l = p1 ^ p2;
+    assert_eq!([l.e01(), l.e02(), l.e03()], [10.0, 16.0, 2.0]);
+    assert_eq!([l.e12(), l.e31(), l.e23()], [-1.0, 7.0, -11.0]);
+  }
+
+  #[test] fn meet_plane_line() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let l = line(0.0, 0.0, 1.0, 4.0, 1.0, -2.0);
+    let a = p ^ l;
+    assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [8.0, -5.0, -14.0, 0.0]);
+  }
+
+  #[test] fn meet_plane_horizon() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let l = horizon(-2.0, 1.0, 4.0);
+    let a = p ^ l;
+    assert_eq!([a.e021(), a.e013(), a.e032(), a.e123()], [5.0, -10.0, 5.0, 0.0]);
+  }
+
+  #[test] fn meet_plane_point() {
+    let p = plane(1.0, 2.0, 3.0, 4.0);
+    let a = point(-2.0, 1.0, 4.0);
+    let d =  p ^ a;
+    assert_eq!([d.scalar(), d.e0123()], [0.0, 16.0]);
+  }
+
   const EPSILON: f32 = 0.02;
   fn approx_eq1(a: f32, b: f32) {
     assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}", a, b);
+  }
+
+  #[test] fn measure_point_to_plane() {
+    //    Plane p2
+    //    /
+    //   / \ line perpendicular to
+    //  /   \ p2 through p1
+    // 0------x--------->
+    //        p1
+    let a = point(2.0, 0.0, 0.0);
+    let p = plane(1.0, -1.0, 0.0, 0.0).normalized();
+    // Distance from point p1 to plane p2
+    let root_two = 2f32.sqrt();
+    approx_eq1((a & p).scalar().abs(), root_two);
+    approx_eq1((a ^ p).e0123().abs(), root_two);
+  }
+
+  #[test] fn reflect_pane() {
+    let p1 = plane(3.0, 2.0, 1.0, -1.0);
+    let p2 = plane(1.0, 2.0, -1.0, -3.0);
+    let p3 = p1(p2);
+    assert_eq!([p3.e0(), p3.e1(), p3.e2(), p3.e3()], [30.0, 22.0, -4.0, 26.0]);
+  }
+
+  #[test] fn reflect_line() {
+    let p1 = plane(3.0, 2.0, 1.0, -1.0);
+    let l1 = line(1.0, -2.0, 3.0, 6.0, 5.0, -4.0);
+    let l2 = p1(l1);
+    assert_eq!([l2.e01(), l2.e02(), l2.e03(), l2.e12(), l2.e31(), l2.e23()],
+               [28.0, -72.0, 32.0, 104.0, 26.0, 60.0]);
+  }
+
+  #[test] fn reflect_point() {
+    let p = plane(3.0, 2.0, 1.0, -1.0);
+    let a = point(4.0, -2.0, -1.0);
+    let b = p(a);
+    assert_eq!([b.e021(), b.e013(), b.e032(), b.e123()], [-26.0, -52.0, 20.0, 14.0]);
   }
 }
