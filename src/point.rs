@@ -43,18 +43,21 @@ impl Point {
   #[inline] pub fn e123(&self)->f32 { self.w() }
 }
 
-/// let p:Plane = !point(1.0,0.0,0.0);
+/// Dual operator
 impl Not for Point {type Output = Plane;fn not(self)->Plane {Plane(self.0)}}
+/// Unary minus (leaves homogeneous coordinate untouched)
+impl Neg for Point {type Output = Self;fn neg(self)->Point{Point(self.0 * <f32x4>::from([1.0, -1.0, -1.0, -1.0]))}}
 impl Add for Point {type Output=Self;fn add(self,p:Self)->Self{Self(self.0+p.0)}}
 impl Sub for Point {type Output=Self;fn sub(self,p:Self)->Self{Self(self.0-p.0)}}
 impl AddAssign for Point {fn add_assign(&mut self,p:Self){self.0+=p.0}}
 impl SubAssign for Point {fn sub_assign(&mut self,p:Self){self.0-=p.0}}
+/// Point uniform scale
 impl Mul<f32> for Point {type Output=Self;fn mul(self, s:f32) -> Self { Point(self.0*f32x4::splat(s)) } }
+/// Point uniform inverse scale
+impl Div<f32> for Point {type Output=Self;fn div(self, s:f32) -> Self { Point(self.0 / f32x4::splat(s)) } }
+impl MulAssign<f32> for Point {fn mul_assign(&mut self, s: f32) { self.0 = self.0 * f32x4::splat(s) }}
+impl DivAssign<f32> for Point {fn div_assign(&mut self, s: f32) { self.0 = self.0 / f32x4::splat(s) }}
 impl Mul<Point> for f32 {type Output=Point;fn mul(self, p:Point) -> Point { p*self } }
-impl Div<f32> for Point {type Output=Self;fn div(self, s:f32) -> Self { Point(self.0/f32x4::splat(s)) } }
-impl MulAssign<f32> for Point {fn mul_assign(&mut self, s: f32) { self.0 = self.0*f32x4::splat(s) }}
-impl DivAssign<f32> for Point {fn div_assign(&mut self, s: f32) { self.0 = self.0/f32x4::splat(s) }}
-impl Neg for Point {type Output = Self;fn neg(self)->Point{Point(-self.0)}}
 impl Mul<Point> for Point {type Output=Translator;fn mul(self,p:Point)->Translator{Translator{p2:gp33(&self.0, &p.0)}}}
 impl Mul<Plane> for Point {type Output=Motor;fn mul(self,p:Plane)->Motor{let(p1,p2)=gp30(&p.0,&self.0);Motor{p1,p2}}}
 impl Div<Point> for Point {type Output=Translator;fn div(self,p:Point)->Translator{self*p.inverse()}}
@@ -160,8 +163,7 @@ mod tests {
     assert_point(p, 1.0, 2.0, 3.0, 0.5);
   }
   #[test] fn point_negative() {
-    let p = point(1.0, 2.0, 3.0);
-    assert_point(-p, -1.0, -2.0, -3.0, -1.0);
+    assert_point(-point(1.0, 2.0, 3.0), -1.0, -2.0, -3.0, 1.0);
   }
   #[test] fn point_reverse() {
     let p = point(1.0, 2.0, 3.0);
@@ -179,26 +181,11 @@ mod tests {
     assert_eq!(&<[f32;4]>::from(&point(4.0,3.0,2.0)), &[4f32,3.0,2.0,1.0]);
     assert_eq!(<[f32;4]>::from(point(4.0,3.0,2.0)), [4f32,3.0,2.0,1.0]);
   }
-  #[test] fn z_line() {
-    let p1 = point(0.0, 0.0, 0.0);
-    let p2 = point(0.0, 0.0, 1.0);
-    let p3 = p1 & p2;
-    assert_eq!(p3.e12(), 1.0);
-  }
+  #[test] fn z_line() { assert_eq!((O & Z).e12(), 1.0); }
 
-  #[test] fn y_line() {
-    let p1 = point(0.0, -1.0, 0.0);
-    let p2 = point(0.0, 0.0, 0.0);
-    let p3 = p1 & p2;
-    assert_eq!(p3.e31(), 1.0);
-  }
+  #[test] fn y_line() { assert_eq!((-Y & O).e31(), 1.0); }
 
-  #[test] fn x_line() {
-    let p1 = point(-2.0, 0.0, 0.0);
-    let p2 = point(-1.0, 0.0, 0.0);
-    let p3 = p1 & p2;
-    assert_eq!(p3.e23(), 1.0);
-  }
+  #[test] fn x_line() { assert_eq!((-2.0*X & -X).normalized().e23(), 1.0); }
 
   #[test] fn plane_construction() {
     let a = point(1.0, 3.0, 2.0);
@@ -216,9 +203,6 @@ mod tests {
   // * join_plane_point
 
   #[test] fn measure_point_to_point() {
-    let a = point(1.0, 0.0, 0.0);
-    let b = point(0.0, 1.0, 0.0);
-    let l = a & b;
-    assert_eq!(l.squared_norm(), 2.0);
+    assert_eq!((X & Y).squared_norm(), 2.0);
   }
 }
