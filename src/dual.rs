@@ -2,7 +2,7 @@ use std::{simd::{f32x2},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Di
 
 pub const e0123:Dual = dual(0.0,1.0);
 
-/// p + qe₀₁₂₃
+/// scalar + pseudoscalar
 pub const fn dual(p:f32,q:f32)->Dual { Dual::new(p,q) }
 /// Dual Number
 #[derive(Default,Debug,Clone,Copy,PartialEq)]

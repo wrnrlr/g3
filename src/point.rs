@@ -1,5 +1,5 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle},mem::transmute,ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
-use crate::{Dual, Plane, Line, Horizon, Branch, Motor, Translator,maths::*};
+use crate::{*,maths::*};
 
 /// e₀₃₂ + e₁₂₃
 pub const X:Point = point(1.0, 0.0, 0.0);
@@ -43,6 +43,7 @@ impl Point {
   #[inline] pub fn e123(&self)->f32 { self.w() }
 }
 
+impl GeometricProduct for Point {} impl JoinProduct for Point {} impl MeetProduct for Point {}
 /// Dual operator
 impl Not for Point {type Output = Plane;fn not(self)->Plane {Plane(self.0)}}
 /// Unary minus (leaves homogeneous coordinate untouched)

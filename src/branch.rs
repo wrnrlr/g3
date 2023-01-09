@@ -1,7 +1,7 @@
 use std::{simd::{f32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd}};
 use crate::{Dual, Plane, Point, Rotor, Line, Horizon,maths::*};
 
-/// ae23 + be31 + ce12
+/// ae₂₃ + be₃₁ + ce₁₂
 pub const fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 
 /// The `Branch` both a line through the origin and also the principal branch of

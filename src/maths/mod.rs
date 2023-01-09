@@ -1,10 +1,10 @@
 mod util;
 mod gp;
-mod mat;
 
+use std::ops::Not;
+use std::process::Output;
 pub use self::util::*;
 pub use self::gp::*;
-pub use self::mat::*;
 
 use std::simd::{f32x4};
 

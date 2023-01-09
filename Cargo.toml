@@ -22,6 +22,7 @@ glow = { version = "0.11.2", optional = true }
 bytemuck = { version = "1.12.3", optional = true, features = ["derive", "nightly_portable_simd"] }
 egui = { version = "0.19", features = ["mint"], optional = true }
 eframe = { version = "0.19", features = ["persistence"], optional = true }
+winit = { version = "0.27.5", optional = true }
 
 [features]
 renderer = ["glam", "hecs", "glow", "bytemuck"]

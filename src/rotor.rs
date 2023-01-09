@@ -1,24 +1,16 @@
 use std::{simd::{mask32x4,f32x4,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
 use crate::{*, maths::*};
+
+/// angle x y z
 pub fn rotor(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
   Rotor::new(ang_rad, x, y, z)
 }
 
-// The rotor is an entity that represents a rigid rotation about an axis.
-// To apply the rotor to a supported entity, the call operator is available.
-// p1: scalar, e12, e31, e23
+/// The rotor is an entity that represents a rigid rotation about an axis.
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct Rotor(pub f32x4);
 
 impl Rotor {
-  #[inline] pub fn scalar(&self)->f32 { self.0[0] }
-  #[inline] pub fn e12(&self)->f32 { self.0[3] }
-  #[inline] pub fn e21(&self)->f32 { -self.e12() }
-  #[inline] pub fn e31(&self)->f32 { self.0[2] }
-  #[inline] pub fn e13(&self)->f32 { -self.e31() }
-  #[inline] pub fn e23(&self)->f32 { self.0[1] }
-  #[inline] pub fn e32(&self)->f32 { -self.e23() }
-
   pub fn new(ang_rad:f32,x:f32,y:f32,z:f32)->Rotor {
     let norm  = (x*x + y*y + z*z).sqrt();
     let inv_norm = 1.0 / norm;
@@ -102,6 +94,14 @@ impl Rotor {
     let p1 = add_ss(&self.0, &[1.0, 0.0, 0.0, 0.0].into());
     Rotor(p1).normalized() // TODO avoid extra copy...
   }
+
+  #[inline] pub fn scalar(&self)->f32 { self.0[0] }
+  #[inline] pub fn e12(&self)->f32 { self.0[3] }
+  #[inline] pub fn e21(&self)->f32 { -self.e12() }
+  #[inline] pub fn e31(&self)->f32 { self.0[2] }
+  #[inline] pub fn e13(&self)->f32 { -self.e31() }
+  #[inline] pub fn e23(&self)->f32 { self.0[1] }
+  #[inline] pub fn e32(&self)->f32 { -self.e23() }
 }
 
 impl From<Rotor> for [f32;4] {
@@ -360,6 +360,39 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   out
 }
 
+fn mat4x4_12(b:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {
+  let buf = *(b * b).as_array();
+  let b0_2 = buf[0];
+  let b1_2 = buf[1];
+  let b2_2 = buf[2];
+  let b3_2 = buf[3];
+
+  let mut c0 = b * b.xzxx();
+  let mut tmp = b.ywyx() * b.yxwx();
+  tmp = f32x4_xor(&[0.0, -0.0, 0.0, 0.0].into(), &tmp); // TODO why reference?
+  let one_twos:f32x4 = [1f32, 2.0, 2.0, 0.0].into();
+  c0 =  one_twos * (c0 + tmp);
+  c0 = c0 - f32x4::splat(b3_2 + b2_2);
+
+  let c1 = b * b.wywx();
+  let mut tmp = b.zwxx() * b.ywyx();
+  tmp = f32x4_xor(&[0.0, 0.0, -0.0, 0.0].into(), &tmp); // TODO why reference?
+  let tmp1 = f32x4::from_array([2.0, -1.0, 2.0, 0.0]);
+  let mut c1:f32x4 = tmp1 * (c1 + tmp);
+  let duno:f32x4 = [0.0, b0_2+b2_2, 0.0, 0.0].into();
+  c1 = c1 + duno;
+
+  let mut c2:f32x4 = f32x4_xor(&[-0.0, 0.0, -0.0, 0.0].into(), &(b * b.zxzx()));
+  c2 = c2 + (b.yzxx() * b.wwxx());
+  c2 *= <[f32;4]as Into<f32x4>>::into([2.0, 2.0, 1.0, 0.0]);
+  c2 += <[f32;4]as Into<f32x4>>::into([0.0, 0.0, b3_2 - b1_2, 0.0]);
+
+  // TODO why is c3 here
+  // c3 = _mm_add_ps(c3, _mm_set_ps(b0_2 + b1_2 + b2_2 + b3_2, 0.f, 0.f, 0.f));
+  let c3 = [0.0, 0.0, 0.0, b0_2 + b1_2 + b2_2 + b3_2].into();
+  (c0,c1,c2,c3)
+}
+/// Euler Angles
 #[derive(Default,Debug,Clone,Copy,PartialEq)]
 pub struct EulerAngles {
   pub roll:f32,

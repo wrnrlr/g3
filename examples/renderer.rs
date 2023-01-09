@@ -61,9 +61,9 @@ fn main() {
   world.spawn((e3 ^ e1, Color::RED));
 
   world.spawn_batch([
-    (e1, Color(0xff000088)),
-    (e2, Color(0x00ff0088)),
-    (e3, Color(0x0000ff88)),
+    (e1+e2, Color(0xff000088)),
+    // (e2, Color(0x00ff0088)),
+    // (e3, Color(0x0000ff88)),
     // (plane(0.0,1.0,0.0,0.0), Color::GREEN),
     // (plane(0.0,0.0,1.0,0.0), Color::BLUE)
   ]);

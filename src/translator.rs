@@ -1,6 +1,7 @@
 use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle as swizzle,Which::{First,Second}},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn}};
 use crate::{Plane, Line, Point, Motor, Rotor, Horizon,maths::*};
 
+/// ae₀₁ + be₀₂ + ce₀₃
 pub fn translator(delta:f32,x:f32,y:f32,z:f32)->Translator {
   Translator::new(delta,x,y,z)
 }
