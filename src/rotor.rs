@@ -271,7 +271,41 @@ impl Div<Motor> for Rotor {
   }
 }
 
-impl From<Rotor> for [f32;16] { fn from(r:Rotor)->Self { let m = mat4x4_12(&r.0);unsafe { std::mem::transmute::<[f32x4; 4], [f32; 16]>([m.0, m.1, m.2, m.3]) } } }
+impl From<Rotor> for [f32;16] { fn from(r:Rotor)->Self { let m = mat_r(&r.0);unsafe { std::mem::transmute::<[f32x4; 4], [f32; 16]>([m.0, m.1, m.2, m.3]) } } }
+
+/// Euler Angles
+#[derive(Default,Debug,Clone,Copy,PartialEq)]
+pub struct EulerAngles {
+  pub roll:f32,
+  pub pitch:f32,
+  pub yaw:f32
+}
+
+const PI2:f32 = pi/2.0;
+impl From<Rotor> for EulerAngles {
+  fn from(r:Rotor)->Self {
+    let buf:[f32;4] = r.into();
+    let test = buf[1] * buf[2] * buf[3] * buf[0];
+    if test > 0.4999 {
+      return EulerAngles{roll: 2.0 * buf[1].atan2(buf[0]), pitch: PI2, yaw: 0.0};
+    } else if test < -0.4999 {
+      return EulerAngles{roll: -2.0 * buf[1].atan2(buf[0]), pitch: -PI2, yaw: 0.0};
+    }
+    let buf1_2 = buf[1] * buf[1];
+    let buf2_2 = buf[2] * buf[2];
+    let buf3_2 = buf[3] * buf[3];
+
+    let roll = (2.0 * (buf[0] * buf[1] + buf[2] * buf[3])).atan2(1.0 - 2.0 * (buf1_2 + buf2_2));
+    let sinp = 2.0 * (buf[0] * buf[2] - buf[1] * buf[3]);
+    let pitch = if sinp.abs() > 1.0 { PI2.copysign(sinp) } else { sinp.asin() };
+    let yaw = (2.0 * (buf[0] * buf[3] + buf[1] * buf[2])).atan2(1.0 - 2.0 * (buf2_2 + buf3_2));
+
+    EulerAngles{roll, pitch, yaw}
+  }
+}
+
+impl From<EulerAngles> for Rotor { fn from(ea:EulerAngles)->Self { Rotor::from_euler_angles(ea.roll,ea.pitch,ea.yaw) } }
+
 
 fn swrl(a1:&f32x4, a2:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   let b_xwyz = b.xwyz();
@@ -357,7 +391,7 @@ pub fn sw01(a:&f32x4, b:&f32x4)->f32x4 {
   out
 }
 
-fn mat4x4_12(b:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {
+pub fn mat_r(b:&f32x4) ->(f32x4, f32x4, f32x4, f32x4) {
   let buf = *(b * b).as_array();
   let b0_2 = buf[0];
   let b1_2 = buf[1];
@@ -389,38 +423,7 @@ fn mat4x4_12(b:&f32x4)->(f32x4,f32x4,f32x4,f32x4) {
   let c3 = [0.0, 0.0, 0.0, b0_2 + b1_2 + b2_2 + b3_2].into();
   (c0,c1,c2,c3)
 }
-/// Euler Angles
-#[derive(Default,Debug,Clone,Copy,PartialEq)]
-pub struct EulerAngles {
-  pub roll:f32,
-  pub pitch:f32,
-  pub yaw:f32
-}
 
-const PI2:f32 = pi/2.0;
-impl From<Rotor> for EulerAngles {
-  fn from(r:Rotor)->Self {
-    let buf:[f32;4] = r.into();
-    let test = buf[1] * buf[2] * buf[3] * buf[0];
-    if test > 0.4999 {
-      return EulerAngles{roll: 2.0 * buf[1].atan2(buf[0]), pitch: PI2, yaw: 0.0};
-    } else if test < -0.4999 {
-      return EulerAngles{roll: -2.0 * buf[1].atan2(buf[0]), pitch: -PI2, yaw: 0.0};
-    }
-    let buf1_2 = buf[1] * buf[1];
-    let buf2_2 = buf[2] * buf[2];
-    let buf3_2 = buf[3] * buf[3];
-
-    let roll = (2.0 * (buf[0] * buf[1] + buf[2] * buf[3])).atan2(1.0 - 2.0 * (buf1_2 + buf2_2));
-    let sinp = 2.0 * (buf[0] * buf[2] - buf[1] * buf[3]);
-    let pitch = if sinp.abs() > 1.0 { PI2.copysign(sinp) } else { sinp.asin() };
-    let yaw = (2.0 * (buf[0] * buf[3] + buf[1] * buf[2])).atan2(1.0 - 2.0 * (buf2_2 + buf3_2));
-
-    EulerAngles{roll, pitch, yaw}
-  }
-}
-
-impl From<EulerAngles> for Rotor { fn from(ea:EulerAngles)->Self { Rotor::from_euler_angles(ea.roll,ea.pitch,ea.yaw) } }
 
 #[cfg(test)]
 mod tests {

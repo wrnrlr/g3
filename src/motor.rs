@@ -368,6 +368,8 @@ impl Div<Motor> for Motor {
 
 // TODO DivAssign ???
 
+impl From<Motor> for [f32;16] { fn from(r:Motor)->Self { let m = mat_m(&r.p1, &r.p2);unsafe { std::mem::transmute::<[f32x4; 4], [f32; 16]>([m.0, m.1, m.2, m.3]) } } }
+
 // Conjugate origin with motor. Unlike other operations the motor MUST be
 // normalized prior to usage, b is the rotor component (p1) c is the
 // translator component (p2)
@@ -529,6 +531,45 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
   (p1_out, p2_out)
 }
 
+fn mat_m(b:&f32x4, c:&f32x4) ->(f32x4, f32x4, f32x4, f32x4) {
+  let buf = *(b * b).as_array();
+  let b0_2 = buf[0];
+  let b1_2 = buf[1];
+  let b2_2 = buf[2];
+  let b3_2 = buf[3];
+
+  let mut c0:f32x4 = b * b.xzxx();
+  let mut tmp = b.ywyx() * b.yxwx();
+  tmp = f32x4_xor(&[0.0, -0.0, 0.0, 0.0].into(), &tmp);
+  let one_twos:f32x4 = [1f32, 2.0, 2.0, 0.0].into();
+  c0 = one_twos * (c0 + tmp);
+  let tmp2:f32x4 = [b3_2 + b2_2, 0.0, 0.0, 0.0].into();
+  c0 = c0 - tmp2;
+
+  let c1 = b * b.wywx();
+  let mut tmp = b.zwxx() * b.ywyx();
+  tmp = f32x4_xor(&[0.0, 0.0, -0.0, 0.0].into(), &tmp);
+  let mut c1 = &<[f32; 4] as Into<f32x4>>::into([2.0, -1.0, 2.0, 0.0]) * (c1 + tmp);
+  c1 = c1 + &[0.0, b0_2+b2_2, 0.0, 0.0].into();
+
+  let mut c2 = f32x4_xor(&[-0.0, 0.0, -0.0, 0.0].into(), &(b * b.zxzx()));
+  c2 = c2 + (b.yzxx() * b.wwxx());
+  c2 *= <[f32;4] as Into<f32x4>>::into([2.0, 2.0, 1.0, 0.0]);
+  c2 += <[f32; 4] as Into<f32x4>>::into([0.0, 0.0, b3_2 - b1_2, 0.0]);
+
+  let mut c3 = b * c.ywyx();
+  c3 = c3 + b.wxxx() * c.zzwx();
+  c3 = c3 + b.yzwx() * c.xxxx();
+  tmp = b.zwyx() * c.wyzx();
+  c3 = <[f32; 4] as Into<f32x4>>::into([2.0,2.0,2.0,0.0]) * (tmp - c3);
+
+  // c3 = _mm_add_ps(c3, _mm_set_ps(b0_2 + b1_2 + b2_2 + b3_2, 0.f, 0.f, 0.f));
+  c3 = c3 + <[f32; 4] as Into<f32x4>>::into([0.0, 0.0, 0.0, b0_2 + b1_2 + b2_2 + b3_2]);
+
+  (c0,c1,c2,c3)
+}
+
+
 #[cfg(test)]
 mod tests {
   use crate::*;
@@ -649,4 +690,15 @@ mod tests {
     let n = s * s;
     assert!(m.approx_eq(n, EPSILON));
   }
+
+  // http://projectivegeometricalgebra.org/wiki/index.php?title=Motor#Conversion_from_Motor_to_Matrix
+
+  #[ignore] #[test] fn motor_to_matrix() {
+    let m = motor(1.0, 4.0, 3.0, 2.0, 5.0, 6.0, 7.0, 8.0);
+    // let m4:Mat4 = m.into();
+    // let a = m4.call([-1.0,1.0,2.0,1.0].into());
+    // assert_eq!(a, f32x4::from([-12.0,-86.0,-86.0,30.0]));
+  }
+
+  #[ignore] #[test] fn motor_to_matrix_3x4() {}
 }

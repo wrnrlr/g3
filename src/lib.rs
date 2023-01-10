@@ -34,12 +34,6 @@ pub use direction::{Direction};
 pub use translator::{Translator,translator};
 pub(crate) mod maths;
 
-#[cfg(feature = "glam")]
-pub use {matrix::*};
-
-#[cfg(feature = "glam")]
-mod matrix;
-
 
 #[cfg(feature = "renderer")] mod render;
 mod shaders;
