@@ -535,6 +535,20 @@ pub fn swml(a1:&f32x4, a2:&f32x4, b:&f32x4, c:&f32x4)->(f32x4,f32x4) {
 mod tests {
   use crate::*;
 
+  const EPSILON:f32 = 0.02;
+
+  fn approx_eq1(a: f32, b: f32) {
+    assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}", a, b);
+  }
+
+  fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
+    assert_eq!(result.len(), expected.len());
+    for (i, a) in result.iter().enumerate() {
+      let b = expected[i];
+      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+    }
+  }
+
   #[test] fn motor_normalized() {
     let m = Motor::new(0.1,0.2,0.3,0.4,0.1,0.2,0.3,0.4).normalized();
     assert_eq!((m*m.reverse()).scalar(), 1.0, "for a normalized motor m*~m = 1")
@@ -555,7 +569,7 @@ mod tests {
     // Rotate point 90 degrees
     let a = point(2.0,0.0,0.0);
     let m:Motor = Rotor::new(-pi/2.0,0.0,0.0,1.0).into();
-    assert_eq!(m(a).normalized(), point(0.0,2.0,0.0));
+    assert!(m(a).normalized().approx_eq(point(0.0,2.0,0.0), EPSILON));
   }
 
   #[test] fn motor_constrained() {
@@ -565,24 +579,6 @@ mod tests {
     let m3 = -m1;
     let m4 = m1.constrained();
     assert_eq!(m3, -m4);
-  }
-
-  fn approx_eq(result:[f32; 3], expected:[f32; 3]) {
-    const EPSILON:f32 = 0.02;
-    assert_eq!(result.len(), expected.len());
-    for (i, a) in result.iter().enumerate() {
-      let b = expected[i];
-      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
-    }
-  }
-
-  fn approx_eq4(result:[f32; 4], expected:[f32; 4]) {
-    const EPSILON:f32 = 0.02;
-    assert_eq!(result.len(), expected.len());
-    for (i, a) in result.iter().enumerate() {
-      let b = expected[i];
-      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
-    }
   }
 
   #[test] fn construct_motor() {

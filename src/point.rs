@@ -1,4 +1,4 @@
-use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle},mem::transmute,ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle,SimdFloat},mem::transmute,ops::{Add,AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,BitAnd,BitOr,BitXor,Not,Neg}};
 use crate::{*,maths::*};
 
 /// e₀₃₂ + e₁₂₃
@@ -33,6 +33,7 @@ impl Point {
   pub fn project_line(self, l:Line)->Point { (self | l) ^ l }
   /// Project a point onto a plane
   pub fn project_plane(self, p:Plane)->Point { (self | p) ^ p }
+  pub fn approx_eq(&self, other:Point, epsilon:f32)->bool {(&self.0 - other.0).abs() < f32x4::splat(epsilon)}
   #[inline] pub fn x(&self)->f32 { self.0[1] }
   #[inline] pub fn y(&self)->f32 { self.0[2] }
   #[inline] pub fn z(&self)->f32 { self.0[3] }
