@@ -1,4 +1,4 @@
-use std::simd::{*, simd_swizzle as swizzle, Which::{First, Second}, StdFloat as _};
+use std::simd::{*, simd_swizzle as swizzle, Which::{First, Second}, StdFloat};
 
 // Workaround for to_bits issue, TODO remove if fixed
 pub fn to_bits(a:&f32x4)->u32x4 { unsafe { std::mem::transmute::<f32x4, u32x4>((*a).clone()) } }
@@ -37,7 +37,7 @@ pub fn rsqrt_nr1(a:&f32x4)->f32x4 {
 }
 
 pub fn hi_dp(a:&f32x4, b:&f32x4)->f32x4 {
-  let mut ab = a*b;
+  let ab = a*b;
   swizzle!((ab.yyww() + ab + ab.xxyy()).zwzw(), f32x4::splat(0.0), [First(0),Second(1),Second(2),Second(3)]) // TODO make faster???
 }
 
@@ -79,7 +79,6 @@ pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 
 #[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) } // TODO find a faster way
 #[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() & b.to_bits()) }
-#[inline] pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(!a.to_bits() & b.to_bits()) }
 #[inline] pub fn flip_signs(x:&f32x4, mask:mask32x4)->f32x4 { mask.select(-x.clone(), x.clone())}
 pub fn add_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a + b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
 #[inline] pub fn sub_ss(a:&f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }

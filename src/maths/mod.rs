@@ -1,8 +1,6 @@
 mod util;
 mod gp;
 
-use std::ops::Not;
-use std::process::Output;
 pub use self::util::*;
 pub use self::gp::*;
 

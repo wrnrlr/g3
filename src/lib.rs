@@ -4,6 +4,7 @@
 #![feature(portable_simd)]
 #![feature(associated_type_defaults)]
 #![allow(incomplete_features)]
+#![allow(non_upper_case_globals)]
 
 mod dual;
 mod point;
@@ -21,7 +22,7 @@ pub const pi:f32 =  std::f32::consts::PI;
 /// τ = 2π
 pub const tau:f32 = pi*2.0;
 
-use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Not, Sub};
+use std::ops::{Add, Div, Mul, Sub};
 pub use dual::{Dual, dual};
 pub use point::*;
 pub use line::{Line,line};

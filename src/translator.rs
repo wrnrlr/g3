@@ -14,7 +14,7 @@ impl Translator {
     let norm:f32 = (x * x + y * y + z * z).sqrt();
     let inv_norm:f32 = 1.0 / norm;
     let half_d = -0.5 * delta;
-    let mut p2 = f32x4::splat(half_d) * f32x4::from_array([0.0,x,y,z]) * f32x4::from_array([0.0,inv_norm,inv_norm,inv_norm]);
+    let p2 = f32x4::splat(half_d) * f32x4::from_array([0.0,x,y,z]) * f32x4::from_array([0.0,inv_norm,inv_norm,inv_norm]);
     Translator{p2}
   }
 
