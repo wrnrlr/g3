@@ -34,10 +34,6 @@ pub use direction::{Direction};
 pub use translator::{Translator,translator};
 pub(crate) mod maths;
 
-
-#[cfg(feature = "renderer")] mod render;
-mod shaders;
-
 /// !a
 pub trait PoincareDual {}
 /// a * b = a|b + a^b
