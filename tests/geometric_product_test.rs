@@ -4,7 +4,7 @@ mod tests {
   use std::simd::f32x4;
   use g3::*;
 
-  const EPSILON: f32 = 0.02;
+  const EPSILON: f32 = 0.000_001;
 
   fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
     assert_eq!(result.len(), expected.len());

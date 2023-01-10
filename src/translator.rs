@@ -1,4 +1,4 @@
-use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,simd_swizzle as swizzle,Which::{First,Second}},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn}};
+use std::{fmt::{Display, Formatter, Result},simd::{f32x4,mask32x4,SimdFloat,simd_swizzle as swizzle,Which::{First,Second}},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, Fn}};
 use crate::{Plane, Line, Point, Motor, Rotor, Horizon,maths::*};
 
 /// ae₀₁ + be₀₂ + ce₀₃
@@ -52,6 +52,8 @@ impl Translator {
   /// In practice, the logarithm of a translator is simply the horizon partition
   /// (without the scalar $1$).
   pub fn log(&self)-> Horizon { Horizon {p2: self.p2} }
+
+  pub fn approx_eq(&self, other:Translator, epsilon:f32)->bool {(&self.p2 - other.p2).abs() < f32x4::splat(epsilon)}
 
   #[inline] pub fn scalar(&self)->f32 { 1.0 }
   #[inline] pub fn e01(&self)->f32 { self.p2[1] }
@@ -291,6 +293,7 @@ mod tests {
   use super::*;
   use crate::*;
   const ORIGIN:Point = point(0.0,0.0,0.0);
+  const EPSILON: f32 = 0.02;
 
   #[test]
   fn simd_sandwich() {
@@ -298,15 +301,6 @@ mod tests {
     let b = f32x4::from_array([-4.0, -3.0, -2.0, -1.0]);
     let c = sw02(&a, &b);
     assert_eq!([c[0], c[1], c[2], c[3]], [9.0, 2.0, 3.0, 4.0]);
-  }
-
-  fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
-    const EPSILON: f32 = 0.02;
-    assert_eq!(result.len(), expected.len());
-    for (i, a) in result.iter().enumerate() {
-      let b = expected[i];
-      assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
-    }
   }
 
   #[test] fn translator_from_points() {
@@ -318,15 +312,15 @@ mod tests {
 
     // translate a to b
     let c:Point = a_to_b(a);
-    approx_eq([c.e013(), c.e021(), c.e032(), c.e123()], [b.e013(), b.e021(), b.e032(), b.e123()]);
+    assert!(c.approx_eq(b, EPSILON));
     //translate halfway between a and b (origin)
     let d:Point = (a_to_b*0.5)(a);
-    approx_eq([d.e013(), d.e021(), d.e032(), d.e123()], [ORIGIN.e013(), ORIGIN.e021(), ORIGIN.e032(), ORIGIN.e123()]);
+    assert!(d.approx_eq(ORIGIN, EPSILON));
 
     let t = Translator::new(4.0,1.0,0.0,1.0);
     let e:Point = t(ORIGIN);
     let f = point(8f32.sqrt(), 0.0, 8f32.sqrt());
-    approx_eq([e.e013(), e.e021(), e.e032(), e.e123()], [f.e013(), f.e021(), f.e032(), f.e123()]);
+    assert!(e.approx_eq(f, EPSILON));
   }
 
   #[test] fn translator_point() {

@@ -1,4 +1,4 @@
-use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
+use std::{simd::{f32x4,mask32x4,SimdFloat},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
 use crate::{Dual, Plane, Point, Motor, Branch, Horizon,maths::*};
 
 /// ae₂₃ + be₃₁ + ce₁₂ + de₀₁ + ee₀₂ + fe₀₃
@@ -61,11 +61,9 @@ impl Line {
     Line{p1,p2}
   }
 
-  pub fn approx_eq(&self, other:Line, epsilon:f32)->bool {
-    let esp = f32x4::splat(epsilon);
-    let cmp1 = f32x4_abs(&self.p1 - other.p1) < esp;
-    let cmp2 = f32x4_abs(&self.p2 - other.p2) < esp;
-    cmp1 && cmp2
+  pub fn approx_eq(&self, other: Line, epsilon: f32) -> bool {
+    let eps = f32x4::splat(epsilon);
+    (&self.p1 - other.p1).abs() < eps && (&self.p2 - other.p2).abs() < eps
   }
 
   /// Exponentiate a line to produce a motor that has this line

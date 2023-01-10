@@ -1,4 +1,4 @@
-use std::{simd::{f32x4,mask32x4},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
+use std::{simd::{f32x4,mask32x4,SimdFloat},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Not, Neg, BitXor, BitAnd, BitOr}};
 use crate::{Dual, Plane, Point, Line, Branch, Translator,maths::*};
 
 /// ae₀₁ + be₀₂ + ce₀₃
@@ -21,6 +21,7 @@ impl Horizon {
   /// exp(ae₀₁ + be₀₂ + ce₀₃) = 1 + ae₀₁ + be₀₂ + ce₀₃
   #[inline] pub fn exp(self)->Translator { Translator{p2: self.p2} }
   pub fn reverse(self)-> Horizon { Horizon {p2: flip_signs(&self.p2, mask32x4::from([false,true,true,true]))} }
+  pub fn approx_eq(&self, other:Translator, epsilon:f32)->bool {(&self.p2 - other.p2).abs() < f32x4::splat(epsilon)}
   #[inline] pub fn e01(&self)->f32 { self.p2[1] }
   #[inline] pub fn e10(&self)->f32 { -self.e01() }
   #[inline] pub fn e02(&self)->f32 { self.p2[2] }

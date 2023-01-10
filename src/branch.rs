@@ -32,16 +32,6 @@ pub const fn branch(a:f32,b:f32,c:f32)->Branch { Branch::new(a,b,c) }
 pub struct Branch(pub(crate) f32x4);
 
 impl Branch {
-  #[inline] pub fn e12(&self)->f32 { self.0[3] }
-  #[inline] pub fn e21(&self)->f32 { -self.e12() }
-  #[inline] pub fn z(&self)->f32 { self.e12() }
-  #[inline] pub fn e31(&self)->f32 { self.0[2] }
-  #[inline] pub fn e13(&self)->f32 { -self.e31() }
-  #[inline] pub fn y(&self)->f32 { self.e31() }
-  #[inline] pub fn e23(&self)->f32 { self.0[1] }
-  #[inline] pub fn e32(&self)->f32 { -self.e23() }
-  #[inline] pub fn x(&self)->f32 { self.e23() }
-
   /// Construct the branch as the following multivector:
   ///
   /// $$a \mathbf{e}_{23} + b\mathbf{e}_{31} + c\mathbf{e}_{12}$$
@@ -94,6 +84,16 @@ impl Branch {
   pub fn reverse(self)->Branch {
     Branch(flip_signs(&self.0, [false,true,true,true].into()))
   }
+
+  #[inline] pub fn e12(&self)->f32 { self.0[3] }
+  #[inline] pub fn e21(&self)->f32 { -self.e12() }
+  #[inline] pub fn z(&self)->f32 { self.e12() }
+  #[inline] pub fn e31(&self)->f32 { self.0[2] }
+  #[inline] pub fn e13(&self)->f32 { -self.e31() }
+  #[inline] pub fn y(&self)->f32 { self.e31() }
+  #[inline] pub fn e23(&self)->f32 { self.0[1] }
+  #[inline] pub fn e32(&self)->f32 { -self.e23() }
+  #[inline] pub fn x(&self)->f32 { self.e23() }
 }
 
 impl From<Line> for Branch { fn from(l:Line)->Self { Self(l.p1) } }

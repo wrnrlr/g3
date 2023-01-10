@@ -6,8 +6,8 @@
 mod tests {
   use g3::*;
 
+  const EPSILON: f32 = 0.000_001;
   fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
-    const EPSILON: f32 = 0.02;
     assert_eq!(result.len(), expected.len());
     for (i, a) in result.iter().enumerate() {
       let b = expected[i];
@@ -92,6 +92,6 @@ mod tests {
     let l = b & c;
     let mut d = (l | a) ^ l;
     d = d.normalized();
-    approx_eq([d.e123(), d.x(), d.y(), d.z()], [1.0, 2.0, 0.0, 0.0]);
+    approx_eq([d.w(), d.x(), d.y(), d.z()], [1.0, 2.0, 0.0, 0.0]);
   }
 }

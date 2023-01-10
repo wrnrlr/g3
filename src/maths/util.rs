@@ -80,8 +80,6 @@ pub fn dp_bc(a:&f32x4, b:&f32x4)->f32x4 {
 #[inline] pub fn zero_first(a:f32x4)->f32x4 { swizzle!(a, f32x4::splat(0.0), [Second(0), First(1), First(2), First(3)]) } // TODO find a faster way
 #[inline] pub fn f32x4_and(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(a.to_bits() & b.to_bits()) }
 #[inline] pub fn f32x4_andnot(a:f32x4,b:f32x4)->f32x4 { f32x4::from_bits(!a.to_bits() & b.to_bits()) }
-// Is this faster then f32x4::abs, which is implemented in rust?
-#[inline] pub fn f32x4_abs(a:f32x4)->f32x4 { f32x4_andnot(f32x4::splat(-0.0), a) }
 #[inline] pub fn flip_signs(x:&f32x4, mask:mask32x4)->f32x4 { mask.select(-x.clone(), x.clone())}
 pub fn add_ss(a:&f32x4,b:&f32x4)->f32x4 { swizzle!(a + b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
 #[inline] pub fn sub_ss(a:&f32x4,b:f32x4)->f32x4 { swizzle!(a - b, a.clone(), [First(0), Second(1), Second(2), Second(3)]) }
@@ -189,18 +187,19 @@ impl Shuffle for f32x4 {
 #[inline] pub fn bits_wwww(a:u32x4)->u32x4 { swizzle!(a, [0,0,0,0]) }
 
 #[cfg(test)]
+pub fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
+  const EPSILON: f32 = 0.02;
+  assert_eq!(result.len(), expected.len());
+  for (i, a) in result.iter().enumerate() {
+    let b = expected[i];
+    assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
+  }
+}
+
+#[cfg(test)]
 mod tests {
   use super::*;
   use std::{simd::{f32x4}};
-
-  fn approx_eq(result: [f32; 4], expected: [f32; 4]) {
-    const EPSILON: f32 = 0.02;
-    assert_eq!(result.len(), expected.len());
-    for (i, a) in result.iter().enumerate() {
-      let b = expected[i];
-      assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
-    }
-  }
 
   #[test] fn hi_dp_ss_test() {
     let a:f32x4 = [1.0, 2.0, 3.0, 5.0].into();
@@ -235,10 +234,6 @@ mod tests {
     approx_eq(*b.as_array(), [1.0, 0.5, 1.0/3.0, 0.25]);
   }
 
-  #[test] fn f32x4_abs_test() {
-    assert_eq!(f32x4_abs(<f32x4>::from([1.0, 0.0, -1.0, -0.0])), [1.0, 0.0, 1.0, 0.0].into());
-  }
-
   #[test] #[ignore] fn sqrt_nr1_test() {}
 
   #[test] #[ignore] fn rsqrt_nr1_test() {}
@@ -248,23 +243,5 @@ mod tests {
     let expected = f32x4::from_array([-1.0,-2.0,-3.0,4.0]);
     assert_eq!(f32x4_xor(&v1, &f32x4::from_array([-0.0,-0.0,-0.0,0.0])), expected);
     assert_eq!(flip_signs(&v1, [true,true,true,false].into()), expected);
-  }
-
-  #[test] fn test_f32x4_abs() {
-    assert_eq!(f32x4_abs(f32x4::from_array([1.0, -1.0, 0.0, -0.0])), f32x4::from_array([1.0, 1.0, 0.0, 0.0]));
-  }
-
-  #[test] fn test_approx_eq() {
-    let a = f32x4::from_array([1.0, -1.0, 2.0, 0.0]);
-    let b = f32x4::from_array([0.9, -0.9, 1.9, -0.1]);
-    let diff  = a - b;
-    println!("a: {:?}", a);
-    println!("b: {:?}", b);
-    println!("diff: {:?}", diff);
-    println!("and_not_diff: {:?}", f32x4_andnot(f32x4::splat(-0.0), a - b));
-    println!("approx_eq: {:?}", f32x4_abs(a - b) < f32x4::splat(0.2));
-    assert_eq!(f32x4_abs(a - b) < f32x4::splat(0.2), true);
-    assert_eq!(f32x4_abs(a - b) < f32x4::splat(0.11), true);
-    assert_eq!(f32x4_abs(a - b) < f32x4::splat(0.1), false);
   }
 }

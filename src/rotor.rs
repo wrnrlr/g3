@@ -1,4 +1,4 @@
-use std::{simd::{mask32x4,f32x4,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
+use std::{simd::{mask32x4,f32x4,SimdFloat,simd_swizzle as swizzle},ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Fn}};
 use crate::{*, maths::*};
 
 /// angle x y z
@@ -65,11 +65,6 @@ impl Rotor {
     Rotor(p1)
   }
 
-  pub fn approx_eq(&self, r:Rotor, epsilon:f32)->bool {
-    let eps = f32x4::splat(epsilon);
-    f32x4_abs(&self.0 - r.0) < eps
-  }
-
   // Returns the principal branch of this rotor's logarithm. Invoking
   // `exp` on the returned `Branch` maps back to this rotor.
   //
@@ -94,6 +89,8 @@ impl Rotor {
     let p1 = add_ss(&self.0, &[1.0, 0.0, 0.0, 0.0].into());
     Rotor(p1).normalized() // TODO avoid extra copy...
   }
+
+  pub fn approx_eq(&self, other:Rotor, epsilon:f32)->bool {(&self.0 - other.0).abs() < f32x4::splat(epsilon)}
 
   #[inline] pub fn scalar(&self)->f32 { self.0[0] }
   #[inline] pub fn e12(&self)->f32 { self.0[3] }
@@ -427,7 +424,7 @@ impl From<EulerAngles> for Rotor { fn from(ea:EulerAngles)->Self { Rotor::from_e
 
 #[cfg(test)]
 mod tests {
-  use super::{*};
+  use super::*;
 
   #[test] fn rotor_constrained() {
     let r1 = Rotor::new(1.0, 2.0, 3.0, 4.0);
@@ -448,7 +445,7 @@ mod tests {
     assert_eq!(<[f32;16]>::from(r), m);
   }
 
-  const EPSILON: f32 = 0.02;
+  const EPSILON: f32 = 0.000_001;
   fn approx_eq1(a: f32, b: f32) {
     assert!((a - b).abs() < EPSILON, "{:?} ≉ {:?}", a, b);
   }
@@ -479,38 +476,29 @@ mod tests {
     let r = Rotor::load_normalized([1.0, 4.0, -3.0, 2.0]);
     let l = line(-1.0, 2.0, -3.0, -6.0, 5.0, 4.0);
     let k = r(l);
-    approx_eq4([k.e01(), k.e02(), k.e03(), 0.0], [-110.0, 20.0, 10.0, 0.0]);
-    approx_eq4([k.e12(), k.e31(), k.e23(), 0.0], [-240.0, 102.0, -36.0, 0.0]);
+    approx_eq([k.e01(), k.e02(), k.e03(), 0.0], [-110.0, 20.0, 10.0, 0.0]);
+    approx_eq([k.e12(), k.e31(), k.e23(), 0.0], [-240.0, 102.0, -36.0, 0.0]);
   }
 
   #[test] fn rotor_point() {
     let r = rotor(pi*0.5, 0.0, 0.0, 1.0);
     let a = point(1.0, 0.0, 0.0);
     let b:Point = r(a);
-    approx_eq4([b.x(), b.y(), b.z(), 0.0], [0f32, -1.0, 0.0, 0.0]);
-  }
-
-  fn approx_eq4(result:[f32; 4], expected:[f32; 4]) {
-    const EPSILON:f32 = 0.02;
-    assert_eq!(result.len(), expected.len());
-    for (i, a) in result.iter().enumerate() {
-      let b = expected[i];
-      assert!((a-b).abs() < EPSILON, "{:?} ≉ {:?}, at index {:}", result, expected, i);
-    }
+    approx_eq([b.x(), b.y(), b.z(), 0.0], [0f32, -1.0, 0.0, 0.0]);
   }
 
   #[test] fn rotor_sqrt() {
     let r = rotor(pi * 0.5, 1.0, 2.0, 3.0);
     let s = r.sqrt();
     let s = s * s;
-    approx_eq4([s.scalar(), s.e23(), s.e31(), s.e12()], [r.scalar(), r.e23(), r.e31(), r.e12()]);
+    assert!(s.approx_eq(r, EPSILON));
   }
 
   #[test] fn normalize_rotor() {
     let r:Rotor = [4.0, -3.0, 3.0, 28.0].into();
     r.normalized();
     let norm = r * r.inverse();
-    approx_eq4([norm.scalar(), 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]);
-    approx_eq4([norm.e12(), norm.e31(), norm.e23(), 0.0], [0.0, 0.0, 0.0, 0.0]);
+    approx_eq([norm.scalar(), 0.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]);
+    approx_eq([norm.e12(), norm.e31(), norm.e23(), 0.0], [0.0, 0.0, 0.0, 0.0]);
   }
 }
