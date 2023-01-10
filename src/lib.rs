@@ -40,7 +40,6 @@ pub use {matrix::*};
 #[cfg(feature = "glam")]
 mod matrix;
 
-pub mod prelude;
 
 #[cfg(feature = "renderer")] mod render;
 mod shaders;
