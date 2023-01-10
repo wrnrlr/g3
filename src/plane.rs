@@ -135,6 +135,22 @@ impl Not for Plane {type Output = Point;fn not(self)->Point{Point(self.0)}}
 //   }
 // }
 
+// plane * plane
+pub fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
+  // (a1b1 + a2b2 + a3b3) + (a2b3 - a3b2)e23 + (a3b1 - a1b3)e31 + (a1b2 - a2b1)e12 +
+  // (a0b1 - a1b0)e01 + (a0b2 - a2b0)e02 + (a0b3 - a3b0)e03
+  let mut p1_out = a.yzwy() * b.ywyz();
+  p1_out = p1_out - (f32x4_xor(&[-0.0, 0.0, 0.0, 0.0].into(), &(a.zwyz() * b.zzwy())));
+  // Add a3 b3 to the lowest component
+  p1_out = add_ss(&p1_out, &(a.wxxx() * b.wxxx()));
+  // (a0 b0, a0 b1, a0 b2, a0 b3)
+  let mut p2_out = a.xxxx() * b;
+  // Sub (a0 b0, a1 b0, a2 b0, a3 b0)
+  // Note that the lowest component cancels
+  p2_out = p2_out - a * b.xxxx();
+  return (p1_out, p2_out);
+}
+
 // a1 b1 + a2 b2 + a3 b3
 fn dot00(a:&f32x4, b:&f32x4)->f32x4 {
   hi_dp(a,b)
