@@ -8,9 +8,10 @@ However, one will find it to be a more intuitive and powerful formalism to descr
 
 Let's break down what we mean by plane-based, projective and geometric-algebra in reverse order.
 
-### Geometric algebrapepperit where the Arabs or Indians that discovered the number zero.
+### Geometric algebra
+Of the history of mathematics it is often said that it where the Arabs or Indians that discovered the number zero.
 It might be hard for today's people with all their modern technology to fully appreciate the difficulties of solving
-quadratic equations using roman numerals. Harder still to fathom that 
+quadratic equations using roman numerals. What was life like before GPS and mobile phones? Harder still to fathom that
 like the mathematicians of old, without the number zero, one is missing some numbers that can make life easier,
 and one is to take this quite literally.
 
@@ -18,8 +19,7 @@ Most know about Complex numbers as the non-real solution of equation *x = √-1*
 Less known is the non-real solution for *x = √1* called the Hyperbolic numbers
 and the non-real solution for *x = √0* called the Dual numbers.
 
-Together the complex numbers *p*, the hyperbolic numbers *q*
-and the dual numbers *r* describe a space *R<sub>p,q,r</sub>*.
+Together the complex numbers *p*, the hyperbolic numbers *q* and the dual numbers *r* describe a space *R<sub>p,q,r</sub>*.
 
 ### (Hyper)planes
 
@@ -43,14 +43,14 @@ This library exports the following basic elements:
 
 ### Meet Operation `^` (Exterior/Outer/Wedge Product)
 Grade increasing
-// The wedge product ^ (also known as the meet, exterior or outer) is
-// bilinear, anti-symmetric, and extended to be associative.
-// TODO
-// * meet_plane_branch
-// * meet_point_line
-// anti_commute, a^b = -b^a
-// associative (a^b)^c = a^(b^c)
-// outer product with itself is 0, squares_to_zero, a ^ a = 0
+The wedge product ^ (also known as the meet, exterior or outer) is
+bilinear, anti-symmetric, and extended to be associative.
+TODO
+* meet_plane_branch
+* meet_point_line
+anti_commute, a^b = -b^a
+associative (a^b)^c = a^(b^c)
+outer product with itself is 0, squares_to_zero, a ^ a = 0
 
 
 ### Join Operator `&` (Regressive Product)
@@ -65,12 +65,12 @@ a & b = !(!a ^ !b)
 ab = a|b + a^b
 
 ### Sandwich Product `a(b)`
-// G3 is an oriented algebra where a plane has two sides,
-// and reflecting a plane with itself result in switching those sides.
-// a(a) = -1
+G3 is an oriented algebra where a plane has two sides,
+and reflecting a plane with itself result in switching those sides.
+a(a) = -1
 
-// A plane `b` perpendicular to a mirror a reflects to itself:
-// -ab^(-a) = b
+A plane `b` perpendicular to a mirror a reflects to itself:
+-ab^(-a) = b
 a(b) = aba⁻¹
 
 ### Dual Operator `!`
