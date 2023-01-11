@@ -1,7 +1,10 @@
-use eframe::egui_glow;
+use std::sync::Arc;
+use eframe::{egui_glow};
 use egui::CentralPanel;
 use egui::mutex::Mutex;
-use g3::prelude::*;
+use g3::{*};
+use hecs::World;
+
 
 struct Demo {
   renderer: Arc<Mutex<Renderer>>
