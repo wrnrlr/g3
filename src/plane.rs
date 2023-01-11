@@ -136,7 +136,7 @@ impl Not for Plane {type Output = Point;fn not(self)->Point{Point(self.0)}}
 // }
 
 // plane * plane
-pub fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
+fn gp00(a:&f32x4, b:&f32x4)->(f32x4,f32x4) {
   // (a1b1 + a2b2 + a3b3) + (a2b3 - a3b2)e23 + (a3b1 - a1b3)e31 + (a1b2 - a2b1)e12 +
   // (a0b1 - a1b0)e01 + (a0b2 - a2b0)e02 + (a0b3 - a3b0)e03
   let mut p1_out = a.yzwy() * b.ywyz();
