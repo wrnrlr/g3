@@ -43,22 +43,25 @@ impl Point {
   #[inline] pub fn e021(&self)->f32 { self.z() }
   #[inline] pub fn e123(&self)->f32 { self.w() }
 }
-
 impl GeometricProduct for Point {} impl JoinProduct for Point {} impl MeetProduct for Point {}
 /// Dual operator
 impl Not for Point {type Output = Plane;fn not(self)->Plane {Plane(self.0)}}
 /// Unary minus (leaves homogeneous coordinate untouched)
 impl Neg for Point {type Output = Self;fn neg(self)->Point{Point(self.0 * <f32x4>::from([1.0, -1.0, -1.0, -1.0]))}}
 impl Add for Point {type Output=Self;fn add(self,p:Self)->Self{Self(self.0+p.0)}}
+impl Add<f32> for Point {type Output = Point;fn add(self, s: f32) -> Point { self+point(s,s,s)}}
+impl Add<i32> for Point {type Output = Point;fn add(self, s: i32) -> Point { self+point(s as f32,s as f32,s as f32)}}
 impl Sub for Point {type Output=Self;fn sub(self,p:Self)->Self{Self(self.0-p.0)}}
 impl AddAssign for Point {fn add_assign(&mut self,p:Self){self.0+=p.0}}
 impl SubAssign for Point {fn sub_assign(&mut self,p:Self){self.0-=p.0}}
 /// Point uniform scale
 impl Mul<f32> for Point {type Output=Self;fn mul(self, s:f32) -> Self { Point(self.0*f32x4::splat(s)) } }
+impl Mul<i32> for Point {type Output=Self;fn mul(self, s:i32) -> Self { self * s as f32 } }
 /// Point uniform inverse scale
 impl Div<f32> for Point {type Output=Self;fn div(self, s:f32) -> Self { Point(self.0 / f32x4::splat(s)) } }
 impl MulAssign<f32> for Point {fn mul_assign(&mut self, s: f32) { self.0 = self.0 * f32x4::splat(s) }}
 impl DivAssign<f32> for Point {fn div_assign(&mut self, s: f32) { self.0 = self.0 / f32x4::splat(s) }}
+impl Mul<Point> for i32 {type Output=Point;fn mul(self, p:Point) -> Point { p*self as f32 } }
 impl Mul<Point> for f32 {type Output=Point;fn mul(self, p:Point) -> Point { p*self } }
 impl Mul<Point> for Point {type Output=Translator;fn mul(self,p:Point)->Translator{Translator{p2:gp33(&self.0, &p.0)}}}
 impl Mul<Plane> for Point {type Output=Motor;fn mul(self,p:Plane)->Motor{let(p1,p2)=gp30(&p.0,&self.0);Motor{p1,p2}}}
@@ -123,18 +126,12 @@ mod tests {
   #[test] fn point_constructor() {
     assert_eq!(Point::new(1.0,2.0,3.0), point(1.0, 2.0, 3.0))
   }
-  #[test] fn point_eq() {
-    assert_eq!(point(1.0, 2.0, 3.0), point(1.0, 2.0, 3.0));
-    assert_ne!(point(1.0, 2.0, 3.0), point(3.0, 2.0, 1.0));
-  }
+  #[test] fn point_eq() { assert_eq!(X, X*1);assert_eq!(X, X*1.0); }
   #[test] fn point_getters() {
-    let p = point(4.0, 2.0, 3.0);
-    assert_eq!([p.x(), p.y(), p.z(), p.w()], [4.0, 2.0, 3.0, 1.0]);
-    assert_eq!([p.e032(), p.e013(), p.e021(), p.e123()], [4.0,2.0,3.0,1.0]);
+    assert_eq!([X.x(), Y.y(), Z.z(), X.w()], [1.0, 1.0, 1.0, 1.0]);
+    assert_eq!([X.e032(), Y.e013(), Z.e021(), X.e123()], [1.0,1.0,1.0,1.0]);
   }
-  #[test] fn point_add() {
-    assert_point(point(1.0, 2.0, 3.0)+point(1.0, 2.0, 3.0), 2.0,4.0,6.0,2.0)
-  }
+  #[test] fn point_add() { assert_eq!(X + X, 2 * X) }
   #[test] fn point_add_assign() {
     let mut p = point(1.0, 2.0, 3.0);
     p += point(1.0, 2.0, 3.0);
