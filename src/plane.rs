@@ -98,11 +98,17 @@ impl FnMut<(Line,)> for Plane { extern "rust-call" fn call_mut(&mut self, args: 
 impl FnOnce<(Line,)> for Plane { type Output = Line; extern "rust-call" fn call_once(self, args: (Line,))->Line { self.call(args) }}
 impl Fn<(Line,)> for Plane { extern "rust-call" fn call(&self, args: (Line,)) -> Line { let (p1, p2) = sw10(&self.0, &args.0.p1);Line{p1,p2:p2 + sw20(&self.0, &args.0.p2)} } }
 
+impl Add<f32> for Plane {type Output = Plane;fn add(self, s: f32) -> Plane { self+plane(s,s,s,s)}}
+impl Add<i32> for Plane {type Output = Plane;fn add(self, s: i32) -> Plane { self+plane(s as f32,s as f32,s as f32,s as f32)}}
+
 impl Add<Plane> for Plane {type Output = Plane;fn add(self, p: Plane) -> Plane { Plane(self.0+p.0)}}
 impl AddAssign for Plane {fn add_assign(&mut self, p: Self) { self.0 += p.0}}
 impl Sub<Plane> for Plane {type Output = Plane;fn sub(self, p: Plane) -> Plane { Plane(self.0-p.0)}}
 impl SubAssign for Plane {fn sub_assign(&mut self, p: Self) { self.0 -= p.0}}
 impl Mul<f32> for Plane {type Output = Plane;fn mul(self, s: f32) -> Plane { Plane(self.0*f32x4::splat(s))}}
+impl Mul<i32> for Plane {type Output = Plane;fn mul(self, s: i32) -> Plane { Plane(self.0*f32x4::splat(s as f32))}}
+impl Mul<Plane> for f32 {type Output = Plane;fn mul(self, p: Plane) -> Plane { p*self }}
+impl Mul<Plane> for i32 {type Output = Plane;fn mul(self, p: Plane) -> Plane { p*self }}
 impl MulAssign<f32> for Plane {fn mul_assign(&mut self, s: f32) { self.0 *= f32x4::splat(s)}}
 impl Div<f32> for Plane {type Output = Plane;fn div(self, s: f32) -> Plane { Plane(self.0/f32x4::splat(s))}}
 impl DivAssign<f32> for Plane {fn div_assign(&mut self, s: f32) { self.0 /= f32x4::splat(s)}}
@@ -316,13 +322,8 @@ fn sw20(a:&f32x4,b:&f32x4)->f32x4 {
 mod tests {
   use super::*;
 
-  #[test] fn plane_constructor() {
-    assert_eq!(Plane::new(1.0,2.0,3.0,4.0), plane(1.0,2.0,3.0,4.0))
-  }
-  #[test] fn plane_eq() {
-    assert_eq!(plane(1.0,2.0,3.0,4.0), plane(1.0,2.0,3.0,4.0));
-    assert_ne!(plane(1.0,2.0,3.0,4.0), plane(4.0,3.0,2.0,1.0));
-  }
+  #[test] fn plane_new() { assert_eq!(e1, plane(1.0,0.0,0.0,0.0)) }
+  #[test] fn plane_eq() { assert_eq!(e1, e1); assert_eq!(e1, 1*e1); assert_eq!(e1, e1*1.0) }
   #[test] fn plane_approx_eq() {
     let a  = plane(1.0, 1.0, 1.0, 1.0);
     let b = plane(0.9, 0.9, 0.9, 0.9);
@@ -335,39 +336,20 @@ mod tests {
     let b1 = plane(0.9, 2.0, 3.0, 4.0);
     assert_eq!(a1.approx_eq(b1, 0.1001), true, "{:?} eq {:?} approx 0.1", a1.0, b1.0);
   }
-  #[test] fn plane_getters() {
-    let p = plane(4.0,2.0,3.0,1.0);
-    assert_eq!(p.a(), 4.0);
-    assert_eq!(p.b(), 2.0);
-    assert_eq!(p.c(), 3.0);
-    assert_eq!(p.d(), 1.0);
-    assert_eq!(p.e1(), 4.0);
-    assert_eq!(p.e2(), 2.0);
-    assert_eq!(p.e3(), 3.0);
-    assert_eq!(p.e0(), 1.0);
-  }
-  #[test] fn plane_add() {
-    assert_plane(plane(1.0,2.0,3.0,4.0)+plane(1.0,2.0,3.0,4.0), 2.0,4.0,6.0,8.0)
-  }
-  #[test] fn plane_add_assign() {
-    let mut p = plane(1.0,2.0,3.0,4.0);
-    p += plane(1.0,2.0,3.0,4.0);
-    assert_plane(p, 2.0,4.0,6.0,8.0)
-  }
-  #[test] fn plane_sub() {
-    assert_plane(plane(2.0,4.0,6.0,8.0)-plane(1.0,2.,3.,4.0), 1.0,2.0,3.0,4.0)
-  }
+  #[test] fn plane_getters() { assert_eq!([e1.e1(),e2.e2(),e3.e3(),e0.e0()], [1.0,1.0,1.0,1.0]) }
+  #[test] fn plane_abcd() { assert_eq!([e1.a(),e2.b(),e3.c(),e0.d()], [1.0,1.0,1.0,1.0]) }
+  #[test] fn plane_add() { assert_plane(e1+e2, 1.0,1.0,0.0,0.0) }
+  #[test] fn plane_add_assign() { let mut p = e1; p += e2; assert_plane(p, 1.0,1.0,0.0,0.0) }
+  #[test] fn plane_sub() { assert_plane(plane(2.0,4.0,6.0,8.0)-plane(1.0,2.,3.,4.0), 1.0,2.0,3.0,4.0) }
   #[test] fn plane_sub_assign() {
-    let mut p = plane(2.0,4.0,6.0,8.0);
-    p -= plane(1.0,2.0,3.0,4.0);
+    let mut p = plane(2.0,4.0,6.0,8.0);p -= plane(1.0,2.0,3.0,4.0);
     assert_plane(p, 1.0,2.0,3.0,4.0);
   }
   #[test] fn plane_mul_scalar() {
     assert_plane(plane(1.0,2.0,3.0,4.0)*2.0, 2.0,4.0,6.0,8.0);
   }
   #[test] fn plane_mul_assign_scalar() {
-    let mut p = plane(1.0,2.0,3.0,4.0);
-    p *= 2.0;
+    let mut p = plane(1.0,2.0,3.0,4.0); p *= 2.0;
     assert_plane(p, 2.0,4.0,6.0,8.0);
   }
   #[test] fn plane_div_scalar() {
