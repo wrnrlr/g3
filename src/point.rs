@@ -226,7 +226,7 @@ mod tests {
     assert_eq!(a, [1.0f32, 2.0, 3.0]);
   }
   #[test] fn to_tuple() {
-    let a: Point = (1.0, 2.0, 3.0).into();
-    assert_eq!(a, Point::new(1.0, 2.0, 3.0));
+    let a: (f32,f32,f32) = Point::new(1.0, 2.0, 3.0).into();
+    assert_eq!(a, (1.0f32, 2.0f32, 3.0f32));
   }
 }
