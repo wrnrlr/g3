@@ -78,7 +78,14 @@ impl BitAnd<Horizon> for Point {type Output=Plane;fn bitand(self, l: Horizon) ->
 impl BitAnd<Branch> for Point {type Output=Plane;fn bitand(self, b: Branch) -> Plane { !(!self ^ !b)}}
 impl BitAnd<Plane> for Point {type Output=Dual;fn bitand(self, p: Plane)->Dual { !(!self ^ !p)}}
 impl Display for Point { fn fmt(&self, f: &mut Formatter<'_>) -> Result { write!(f, "(x:{}, y:{}, z:{}, w:{})", self.x(), self.y(), self.z(), self.w()) } }
-impl Into<[f32;3]> for Point { fn into(self) -> [f32; 3] {[self.x(), self.y(), self.z()] } }
+/// Convert point to an array
+impl From<Point> for [f32;3] { fn from(p:Point) -> Self {[p.x(), p.y(), p.z()]} }
+/// Convert array to a point
+impl From<[f32;3]> for Point { fn from([x,y,z]:[f32;3]) -> Self {point(x, y, z)} }
+/// Convert point to a tuple
+impl From<Point> for (f32,f32,f32) { fn from(p:Point) -> Self {(p.x(), p.y(), p.z())} }
+/// Convert tuple to a point
+impl From<(f32,f32,f32)> for Point { fn from((x,y,z):(f32,f32,f32)) -> Self {point(x, y, z)} }
 /// Returns `&[x,y,z,w]`
 impl From<&Point> for [f32;4] { #[inline(always)] fn from(v: &Point) -> Self { unsafe { transmute::<f32x4,[f32;4]>(simd_swizzle!(v.0, [1,2,3,0])) } } }
 /// Returns `[x,y,z,w]`
@@ -203,5 +210,23 @@ mod tests {
 
   #[test] fn measure_point_to_point() {
     assert_eq!((X & Y).squared_norm(), 2.0);
+  }
+
+  #[test] fn from_array() {
+    let a: Point = [1.0, 2.0, 3.0].into();
+    assert_eq!(a, Point::new(1.0, 2.0, 3.0));
+  }
+  #[test] fn from_tuple() {
+    let a: Point = (1.0, 2.0, 3.0).into();
+    assert_eq!(a, Point::new(1.0, 2.0, 3.0));
+  }
+
+  #[test] fn to_array() {
+    let a: [f32; 3] = Point::new(1.0, 2.0, 3.0).into();
+    assert_eq!(a, [1.0f32, 2.0, 3.0]);
+  }
+  #[test] fn to_tuple() {
+    let a: (f32,f32,f32) = Point::new(1.0, 2.0, 3.0).into();
+    assert_eq!(a, (1.0f32, 2.0f32, 3.0f32));
   }
 }
